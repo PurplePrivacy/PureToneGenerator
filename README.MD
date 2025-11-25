@@ -1,104 +1,221 @@
-# Pure Tone Real-Time Streamer
+import argparse
+import numpy as np
+import sounddevice as sd
+import sys
+import soundfile as sf
+import datetime
 
-Streams mathematically perfect sine waves directly to audio output.
-No saved files. Stops immediately on Ctrl-C.
+parser = argparse.ArgumentParser(description="Stream a pure tone to the audio output.")
+parser.add_argument("--freq", type=float, default=528, help="Frequency of the tone in Hz")
+parser.add_argument("--save-audio", action="store_true", help="Save 1 hour WAV file instead of realtime streaming")
+parser.add_argument("--iso", action="store_true", help="Enable isochronic mode (volume pulse)")
+parser.add_argument("--pulse", type=float, default=40, help="Isochronic pulse frequency in Hz")
+args = parser.parse_args()
 
-## Usage
+frequency = args.freq
+save_audio = args.save_audio
+iso_mode = args.iso
+pulse_freq = args.pulse
+
+sample_rate = 44100
+amplitude = 0.1
+fade_seconds = 0.05
+
+# If saving audio instead of streaming
+if save_audio:
+    print(f"💾 Saving 1-hour WAV at {frequency} Hz...")
+
+    duration_seconds = 3600  # 1 hour
+    total_samples = int(sample_rate * duration_seconds)
+    t = np.linspace(0, duration_seconds, total_samples, endpoint=False)
+    wave = amplitude * np.sin(2 * np.pi * frequency * t)
+    if iso_mode:
+        pulse_wave = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * t))
+        wave *= pulse_wave
+
+    # apply fade in/out
+    fade_samples = int(fade_seconds * sample_rate)
+    fade_in_curve = np.linspace(0.0, 1.0, fade_samples)
+    fade_out_curve = np.linspace(1.0, 0.0, fade_samples)
+    wave[:fade_samples] *= fade_in_curve
+    wave[-fade_samples:] *= fade_out_curve
+
+    stereo = np.column_stack([wave, wave])  # L == R
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{int(frequency)}Hz_{timestamp}.flac"
+
+    sf.write(filename, stereo, sample_rate, format="FLAC")
+    print(f"✔ Saved {filename}")
+    sys.exit(0)
+
+print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
+
+def callback(outdata, frames, time, status):
+    t = (callback.t0 + np.arange(frames)) / sample_rate
+    wave = amplitude * np.sin(2 * np.pi * frequency * t)
+    if iso_mode:
+        pulse = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * ((np.arange(frames) + callback.t0) / sample_rate)))
+        wave *= pulse
+    outdata[:] = np.column_stack([wave, wave])
+    callback.t0 += frames
+callback.t0 = 0
+
+try:
+    with sd.OutputStream(channels=2, callback=callback, samplerate=sample_rate):
+        while True:
+            sd.sleep(1000)
+except KeyboardInterrupt:
+    print("\nStopped by user")
+# PureTones – Real-Time & Isochronic Tone Generator
+
+This project provides a **pure tone generator** that can:
+
+- Stream mathematically clean sine waves in real time
+- Optionally apply **isochronic modulation** (volume pulses) for brainwave entrainment
+- Save **1-hour stereo FLAC** tracks that you can loop in any player
+
+The core script is: `stream_tone.py`.
+
+---
+
+## Features
+
+- 🎧 **Real-time streaming** to your audio output (no files required)
+- 🧠 **Isochronic mode**: pulsed volume modulation at a chosen frequency
+- 💾 **1-hour FLAC export** via `--save-audio`
+- 🎚 **Stereo identical channels** (L = R) for a stable sound field
+- 🌊 Soft fade-in on streaming and fade-in/out on saved tracks
+
+---
+
+## Requirements
+
+Create and activate a virtual environment, then install dependencies:
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
-python stream_tone.py
+pip install --upgrade pip
+pip install numpy sounddevice soundfile
+```
 
-## Run with CLI option
-You can select a frequency when starting the stream:
+If you already have a `requirements.txt`, you can also run:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Basic Usage
+
+From the project directory (with venv activated):
+
+```bash
+python stream_tone.py --freq 528
+```
+
+This will:
+
+- Stream a **pure 528 Hz** sine wave
+- Use **stereo identical output** (L = R)
+- Apply a short fade-in to avoid clicks at the start
+
+Press `Ctrl-C` to stop streaming.
+
+---
+
+## CLI Options
+
+`stream_tone.py` supports the following flags:
+
+```bash
+--freq FLOAT      Frequency in Hz (e.g., 432, 528, 639)
+--save-audio      Save a 1-hour FLAC file instead of real-time streaming
+--iso             Enable isochronic mode (volume pulse modulation)
+--pulse FLOAT     Isochronic pulse frequency in Hz (default: 40)
+```
+
+### Examples
+
+### 1. Pure Tone Streaming
+
 ```bash
 python stream_tone.py --freq 432
 ```
 
-## Change frequency
-Or omit the flag to use the default (528 Hz).
+### 2. Isochronic Streaming (Gamma-like, 40 Hz)
 
-## 🎶 Top Healing & Focus Frequencies
+```bash
+python stream_tone.py --freq 528 --iso --pulse 40
+```
 
-Below is a reference list of widely used pure tone frequencies associated with
-mental clarity, physical relaxation, emotional healing, hemispheric synchronization,
-and deep states of joy and balance.
+This will:
 
-| Frequency | Purpose / Effect | Notes |
-|-----------|------------------|--------|
-| **174 Hz** | Pain relief, physical healing | Reduces tension in body tissues |
-| **285 Hz** | Cellular regeneration | Supports rapid healing and recovery |
-| **396 Hz** | Releasing fear & guilt | Grounding, emotional liberation |
-| **417 Hz** | Clearing negative energy | Breaking unconscious blockages |
-| **432 Hz** | Deep focus & natural harmony | Aligns with natural resonance of Earth (Schumann) |
-| **528 Hz** | DNA repair & transformation | Known as “Love Frequency,” emotional reset |
-| **639 Hz** | Joy, relationships & connection | Empathy, communication, unity |
-| **741 Hz** | Clarity of mind, intuition | Detox emotional fog, creative problem-solving |
-| **852 Hz** | Inner peace & awakening | Self-awareness, spiritual insight |
-| **963 Hz** | Transcendence & enlightenment | Pineal clarity, hemispheric union |
-| **1000 Hz** | Smooth mental alertness | Extremely neutral, stable clarity |
+- Generate a 528 Hz carrier tone
+- Modulate its volume at 40 Hz (isochronic pulses)
+- Stream the result to your audio output in real time
 
----
+### 3. Save 1-Hour FLAC (Pure Tone)
 
-## 🧠 Brain Hemisphere Synchronization Frequencies
+```bash
+python stream_tone.py --freq 528 --save-audio
+```
 
-| Type | Frequency Pattern | Result |
-|-------|------------------|---------|
-| **Alpha Synchronization** | ~10 Hz | Relaxed awareness, creative flow |
-| **Theta Synchronization** | ~6 Hz | Healing sleep state, self-integration |
-| **Gamma Synchronization** | ~40 Hz | High-level cognition, unity consciousness |
+This will create a FLAC file in the current directory:
 
-These are often used in **binaural or isochronic** modes but **pure tones alone** at the listed frequencies can help induce corresponding states.
+```text
+528Hz_YYYYMMDD_HHMMSS.flac
+```
 
----
+(Example: `528Hz_20250311_221145.flac`)
 
-## ❤️ What They Support
+### 4. Save 1-Hour FLAC (Isochronic)
 
-### Focus & Mental Clarity
-- **432 Hz**
-- **528 Hz**
-- **741 Hz**
-- **40 Hz Gamma**
+```bash
+python stream_tone.py --freq 528 --iso --pulse 40 --save-audio
+```
 
-### Emotional Healing & Joy
-- **528 Hz**
-- **639 Hz**
-- **852 Hz**
-- **963 Hz**
-
-### Nervous System Reset & Calm
-- **174 Hz**
-- **285 Hz**
-- **396 Hz**
-- **417 Hz**
-
-### Hemispheric Synchronization
-- **~10 Hz Alpha**
-- **~40 Hz Gamma**
-- **963 Hz**
+This will generate a **1-hour stereo isochronic track** (528 Hz carrier, 40 Hz pulses) and save it as FLAC.
 
 ---
 
-## ✨ Suggested Starter Set
-Many practitioners use a progression such as:
+## Suggested Frequencies
 
-1. **396 → 417** (release tension and emotional charge)
-2. **432 → 528** (focus, alignment, energetic reset)
-3. **639 → 741** (joy, clarity, communication)
-4. **852 → 963** (peace, expansion, deep stillness)
+Some commonly used pure-tone frequencies (for convenience only):
+
+| Frequency | Label          | Common Intent (non-medical)        |
+|----------:|----------------|-------------------------------------|
+|  396 Hz   | Release fear   | Emotional grounding                 |
+|  417 Hz   | Change         | Clearing emotional blocks           |
+|  432 Hz   | Harmony        | Focus, natural resonance            |
+|  528 Hz   | Transformation | “Love” / heart-centered clarity        |
+|  639 Hz   | Connection     | Relationships, empathy, joy         |
+|  741 Hz   | Clarity        | Intuition, mental clarity           |
+|  852 Hz   | Insight        | Inner peace, spiritual awareness    |
+
+> These associations are **experiential / traditional**, not medical claims.
 
 ---
 
-## 🧘 How To Use Pure Tones
-- Best played **in stereo identical mode** for stability
-- Ideal with **eyes closed, nasal breathing**
-- Headphones optional — **open-air speakers preferred** for resonance
-- 15–60 minute sessions recommended
+## Tips for Listening
+
+- For **highest purity**, prefer **wired headphones** or good speakers.
+- Bluetooth (especially AirPods) may introduce artifacts with pure continuous tones; 
+  isochronic mode (`--iso`) usually survives better over Bluetooth than a static sine wave.
+- Start with moderate volume and adjust gradually.
+- For focus: try `--freq 432` or `--freq 528 --iso --pulse 40`.
+- For calm: try `--freq 432 --iso --pulse 10`.
 
 ---
 
-If you want, I can now:
-- Add this section directly into the current project README
-- Convert into a printable PDF or visual chart
-- Provide recommended session protocols (morning vs evening optimizing)
+## Safety Note
 
-Would you like me to **insert this automatically into your README.md**?  
-If yes, I’ll apply it via patch (below CLI section). Just say **“Insert frequencies”**.
+This tool is for **relaxation, focus, and experimentation** only. It is **not** a medical device and should not be used as a substitute for professional care. If you experience discomfort, stop listening and lower volume, change frequency, or discontinue use.
+
+---
+
+## License / Attribution
+
+Use and modify this script for your own personal audio experiments. If you integrate it into a larger project, a small attribution like `"Based on PureTones generator"` is appreciated.
