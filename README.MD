@@ -135,6 +135,21 @@ Press `Ctrl-C` to stop streaming.
 --save-audio      Save a 1-hour FLAC file instead of real-time streaming
 --iso             Enable isochronic mode (volume pulse modulation)
 --pulse FLOAT     Isochronic pulse frequency in Hz (default: 40)
+--abs             Enable alternating bilateral stimulation (ABS)
+--abs-speed STR   ABS speed: slow | medium | fast (default: medium)
+```
+
+### 2b. Alternating Bilateral Stimulation
+
+```bash
+python stream_tone.py --freq 528 --abs
+```
+
+Medium ABS (1.5 Hz) is default.
+Slow example:
+
+```bash
+python stream_tone.py --freq 528 --abs --abs-speed slow
 ```
 
 ### Examples
@@ -219,3 +234,9 @@ This tool is for **relaxation, focus, and experimentation** only. It is **not** 
 ## License / Attribution
 
 Use and modify this script for your own personal audio experiments. If you integrate it into a larger project, a small attribution like `"Based on PureTones generator"` is appreciated.
+
+### Combined Isochronic + ABS
+
+```bash
+python stream_tone.py --freq 528 --iso --pulse 40 --abs --abs-speed medium
+```

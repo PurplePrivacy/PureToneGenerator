@@ -16,12 +16,25 @@ parser.add_argument("--freq", type=float, default=528, help="Frequency in Hz (e.
 parser.add_argument("--save-audio", action="store_true", help="Save 1 hour WAV file instead of realtime streaming")
 parser.add_argument("--iso", action="store_true", help="Enable isochronic mode (volume pulse)")
 parser.add_argument("--pulse", type=float, default=40, help="Isochronic pulse frequency in Hz")
+parser.add_argument("--abs", action="store_true", help="Enable alternating bilateral stimulation")
+parser.add_argument("--abs-speed", type=str, default="medium", choices=["slow", "medium", "fast"], help="ABS speed: slow, medium, fast")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
 save_audio = args.save_audio
 iso_mode = args.iso
 pulse_freq = args.pulse
+abs_mode = args.abs
+abs_speed = args.abs_speed
+
+# map speed keyword to Hz
+if abs_speed == "slow":
+    abs_rate = 0.5
+elif abs_speed == "fast":
+    abs_rate = 3.0
+else:
+    abs_rate = 1.5
+
 sample_rate = 44100        # CD quality
 amplitude = 0.25           # to avoid clipping
 fade_seconds = 1           # duration of fade-in
@@ -57,7 +70,14 @@ if save_audio:
     wave[:fade_samples] *= fade_in_curve
     wave[-fade_samples:] *= fade_out_curve
 
-    stereo = np.column_stack([wave, wave])  # L == R
+    if abs_mode:
+        left_env = 0.5 * (1 + np.sin(2 * np.pi * abs_rate * t))
+        right_env = 1 - left_env
+        left_wave = wave * left_env
+        right_wave = wave * right_env
+        stereo = np.column_stack([left_wave, right_wave])
+    else:
+        stereo = np.column_stack([wave, wave])  # L == R
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{int(frequency)}Hz_{timestamp}.flac"
@@ -94,8 +114,14 @@ def audio_callback(outdata, frames, time, status):
     current_sample += frames
     phase += frames
 
-    stereo = np.column_stack([wave, wave])  # L == R identical
-    outdata[:] = stereo
+    if abs_mode:
+        left_env = 0.5 * (1 + np.sin(2 * np.pi * abs_rate * t))
+        right_env = 1 - left_env
+        left_wave = wave * left_env
+        right_wave = wave * right_env
+        outdata[:] = np.column_stack([left_wave, right_wave])
+    else:
+        outdata[:] = np.column_stack([wave, wave])
 
 
 # ============================
