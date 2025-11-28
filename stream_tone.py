@@ -36,7 +36,7 @@ else:
     abs_rate = 1.5
 
 sample_rate = 44100        # CD quality
-amplitude = 0.25           # to avoid clipping
+amplitude = 0.35          # to avoid clipping
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
@@ -58,7 +58,9 @@ if save_audio:
     duration_seconds = 3600  # 1 hour
     total_samples = int(sample_rate * duration_seconds)
     t = np.linspace(0, duration_seconds, total_samples, endpoint=False)
-    wave = amplitude * np.sin(2 * np.pi * frequency * t)
+    wave = amplitude * (np.sin(2 * np.pi * frequency * t) +
+                    0.25 * np.sin(2 * np.pi * frequency * 2 * t) +
+                    0.1 * np.sin(2 * np.pi * frequency * 3 * t))
     if iso_mode:
         pulse_wave = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * t))
         wave *= pulse_wave
@@ -114,14 +116,16 @@ def audio_callback(outdata, frames, time, status):
     current_sample += frames
     phase += frames
 
+    gain = 2.0  # global output gain multiplier
+
     if abs_mode:
         left_env = 0.5 * (1 + np.sin(2 * np.pi * abs_rate * t))
         right_env = 1 - left_env
-        left_wave = wave * left_env
-        right_wave = wave * right_env
+        left_wave = wave * left_env * gain
+        right_wave = wave * right_env * gain
         outdata[:] = np.column_stack([left_wave, right_wave])
     else:
-        outdata[:] = np.column_stack([wave, wave])
+        outdata[:] = np.column_stack([wave * gain, wave * gain])
 
 
 # ============================
