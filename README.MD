@@ -1,242 +1,253 @@
-import argparse
-import numpy as np
-import sounddevice as sd
-import sys
-import soundfile as sf
-import datetime
+# PureTones – Real-Time Brainwave & Breath Tone Generator
 
-parser = argparse.ArgumentParser(description="Stream a pure tone to the audio output.")
-parser.add_argument("--freq", type=float, default=528, help="Frequency of the tone in Hz")
-parser.add_argument("--save-audio", action="store_true", help="Save 1 hour WAV file instead of realtime streaming")
-parser.add_argument("--iso", action="store_true", help="Enable isochronic mode (volume pulse)")
-parser.add_argument("--pulse", type=float, default=40, help="Isochronic pulse frequency in Hz")
-args = parser.parse_args()
+PureTones is a small Python tool that generates **pure tones for focus, healing, breath regulation, and relaxation**.
 
-frequency = args.freq
-save_audio = args.save_audio
-iso_mode = args.iso
-pulse_freq = args.pulse
-
-sample_rate = 44100
-amplitude = 0.1
-fade_seconds = 0.05
-
-# If saving audio instead of streaming
-if save_audio:
-    print(f"💾 Saving 1-hour WAV at {frequency} Hz...")
-
-    duration_seconds = 3600  # 1 hour
-    total_samples = int(sample_rate * duration_seconds)
-    t = np.linspace(0, duration_seconds, total_samples, endpoint=False)
-    wave = amplitude * np.sin(2 * np.pi * frequency * t)
-    if iso_mode:
-        pulse_wave = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * t))
-        wave *= pulse_wave
-
-    # apply fade in/out
-    fade_samples = int(fade_seconds * sample_rate)
-    fade_in_curve = np.linspace(0.0, 1.0, fade_samples)
-    fade_out_curve = np.linspace(1.0, 0.0, fade_samples)
-    wave[:fade_samples] *= fade_in_curve
-    wave[-fade_samples:] *= fade_out_curve
-
-    stereo = np.column_stack([wave, wave])  # L == R
-
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{int(frequency)}Hz_{timestamp}.flac"
-
-    sf.write(filename, stereo, sample_rate, format="FLAC")
-    print(f"✔ Saved {filename}")
-    sys.exit(0)
-
-print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
-
-def callback(outdata, frames, time, status):
-    t = (callback.t0 + np.arange(frames)) / sample_rate
-    wave = amplitude * np.sin(2 * np.pi * frequency * t)
-    if iso_mode:
-        pulse = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * ((np.arange(frames) + callback.t0) / sample_rate)))
-        wave *= pulse
-    outdata[:] = np.column_stack([wave, wave])
-    callback.t0 += frames
-callback.t0 = 0
-
-try:
-    with sd.OutputStream(channels=2, callback=callback, samplerate=sample_rate):
-        while True:
-            sd.sleep(1000)
-except KeyboardInterrupt:
-    print("\nStopped by user")
-# PureTones – Real-Time & Isochronic Tone Generator
-
-This project provides a **pure tone generator** that can:
-
-- Stream mathematically clean sine waves in real time
-- Optionally apply **isochronic modulation** (volume pulses) for brainwave entrainment
-- Save **1-hour stereo FLAC** tracks that you can loop in any player
-
-The core script is: `stream_tone.py`.
+It works entirely **offline**, generating audio mathematically in real time and sending it directly to your output device (e.g. AirPods Max).  
+No files are streamed, no microphone is used, and nothing external is mixed in.
 
 ---
 
 ## Features
 
-- 🎧 **Real-time streaming** to your audio output (no files required)
-- 🧠 **Isochronic mode**: pulsed volume modulation at a chosen frequency
-- 💾 **1-hour FLAC export** via `--save-audio`
-- 🎚 **Stereo identical channels** (L = R) for a stable sound field
-- 🌊 Soft fade-in on streaming and fade-in/out on saved tracks
+- 🔊 Real-time tone streaming (sine + gentle harmonics)
+- 🎧 Stereo output (L = R or ABS alternation)
+- 🧠 Isochronic modulation (`--iso --pulse`)
+- 🧬 ABS – Alternating Bilateral Stimulation (`--abs`)
+- 💓 HRV breathing pacing (`--hrv --hrv-style`)
+- 🌫 Long-term fade-to-silence cultivation (`--fade-long`)
+- 🧱 Full-stack preset (`--full`)
+- 💾 Optional 1-hour **FLAC** export (`--save-audio`)
 
 ---
 
-## Requirements
+## Installation
 
-Create and activate a virtual environment, then install dependencies:
+From the project root:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate          # on macOS / Linux
+# .venv\Scripts\activate           # on Windows (PowerShell or CMD)
+
 pip install --upgrade pip
 pip install numpy sounddevice soundfile
 ```
 
-If you already have a `requirements.txt`, you can also run:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Basic Usage
-
-From the project directory (with venv activated):
-
-```bash
-python stream_tone.py --freq 528
-```
-
-This will:
-
-- Stream a **pure 528 Hz** sine wave
-- Use **stereo identical output** (L = R)
-- Apply a short fade-in to avoid clicks at the start
-
-Press `Ctrl-C` to stop streaming.
+You may need to grant audio output permissions to your terminal / VS Code on macOS.
 
 ---
 
 ## CLI Options
 
-`stream_tone.py` supports the following flags:
-
 ```bash
---freq FLOAT      Frequency in Hz (e.g., 432, 528, 639)
---save-audio      Save a 1-hour FLAC file instead of real-time streaming
---iso             Enable isochronic mode (volume pulse modulation)
---pulse FLOAT     Isochronic pulse frequency in Hz (default: 40)
---abs             Enable alternating bilateral stimulation (ABS)
---abs-speed STR   ABS speed: slow | medium | fast (default: medium)
+--freq FLOAT         Frequency in Hz (e.g., 44, 174, 396, 432, 528)
+--save-audio         Save a 1-hour FLAC file instead of real-time streaming
+
+--iso                Enable isochronic mode (volume pulse modulation)
+--pulse FLOAT        Isochronic pulse frequency in Hz (default: 40)
+
+--abs                Enable alternating bilateral stimulation (ABS)
+--abs-speed STR      ABS speed: slow | medium | fast (default: medium)
+
+--hrv                Enable HRV (Heart-Rate Variability) breath pacing mode
+--hrv-style STR      HRV pacing style: A | B | C (default: A)
+
+--fade-long          Enable long-term fade-to-silence cultivation
+--full               Enable full stack: HRV + ISO + ABS + long fade
 ```
 
-### 2b. Alternating Bilateral Stimulation
+### HRV Styles
 
-```bash
-python stream_tone.py --freq 528 --abs
-```
+- **A** – Symmetric breathing (**default**)  
+  _In 5.5s / Out 5.5s_ → ~11s cycle (classic HRV coherence)
 
-Medium ABS (1.5 Hz) is default.
-Slow example:
+- **B** – Parasympathetic bias  
+  _In 4s / Out 6.5s_ → longer exhales for deeper relaxation
 
-```bash
-python stream_tone.py --freq 528 --abs --abs-speed slow
-```
+- **C** – Deep meditative  
+  _In 6s / Out 6s_ → very slow, suited for deep calm sessions
 
-### Examples
+---
 
-### 1. Pure Tone Streaming
+## Basic Usage
+
+### 1. Simple pure tone
 
 ```bash
 python stream_tone.py --freq 432
 ```
 
-### 2. Isochronic Streaming (Gamma-like, 40 Hz)
+### 2. Isochronic focus tone
 
 ```bash
 python stream_tone.py --freq 528 --iso --pulse 40
 ```
 
-This will:
-
-- Generate a 528 Hz carrier tone
-- Modulate its volume at 40 Hz (isochronic pulses)
-- Stream the result to your audio output in real time
-
-### 3. Save 1-Hour FLAC (Pure Tone)
+### 3. ABS Hemisphere Balancing
 
 ```bash
-python stream_tone.py --freq 528 --save-audio
+python stream_tone.py --freq 432 --abs --abs-speed medium
 ```
 
-This will create a FLAC file in the current directory:
+### 4. Iso + ABS combined
+
+```bash
+python stream_tone.py --freq 396 --iso --pulse 10 --abs --abs-speed slow
+```
+
+---
+
+## HRV Breath Pacing
+
+### Default HRV Mode (Style A)
+
+```bash
+python stream_tone.py --freq 432 --hrv
+```
+
+This applies a smooth 0.1 Hz–ish envelope (about 11 second cycles) to gently guide your breathing without thinking about it.
+
+### Change HRV mode
+
+```bash
+# Parasympathetic bias (longer exhale)
+python stream_tone.py --freq 432 --hrv --hrv-style B
+
+# Deep meditative
+python stream_tone.py --freq 528 --hrv --hrv-style C
+```
+
+### HRV + Iso + ABS
+
+```bash
+python stream_tone.py --freq 432 --hrv --iso --pulse 30 --abs --abs-speed slow
+```
+
+---
+
+## Long-Term Silence Cultivation
+
+The `--fade-long` flag smoothly fades the stream toward silence over ~30 minutes (1800 seconds).  
+This is useful if you want to:
+
+- train being at peace with silence  
+- let the nervous system unhook slowly from sound  
+- end a session gently without a hard stop
+
+### Example
+
+```bash
+python stream_tone.py --freq 528 --hrv --hrv-style A --fade-long
+```
+
+You’ll feel the tone gradually recede while breath pacing remains coherent.
+
+---
+
+## Full Stack Mode
+
+`--full` enables:
+
+- Isochronic mode (`--iso`)
+- ABS (`--abs`)
+- HRV (`--hrv`)
+- Long fade (`--fade-long`)
+
+in a single flag.
+
+### Example
+
+```bash
+python stream_tone.py --freq 528 --full
+```
+
+This is a very rich stimulation stack:
+- breathing guided,
+- hemispheres alternating,
+- tone pulsed,
+- slowly fading into silence.
+
+---
+
+## Personal Favorites
+
+Some curated presets that feel especially good:
+
+### 1. Deep Body Resonance + Iso + ABS  *(personal favorite)*
+
+```bash
+python stream_tone.py --freq 44 --iso --pulse 528 --abs --abs-speed medium
+```
+
+Very low carrier with a high-rate iso pulse & ABS – strong, physical, and intense.
+
+---
+
+### 2. HRV Breath Pacing + Iso + ABS
+
+```bash
+python stream_tone.py --freq 432 --hrv --iso --pulse 30 --abs --abs-speed slow
+```
+
+Great for calming the system while still feeling “awake.”
+
+---
+
+### 3. Silence Cultivation + Smooth HRV
+
+```bash
+python stream_tone.py --freq 528 --hrv --hrv-style A --fade-long
+```
+
+Starts as a clear, coherent tone and slowly dissolves into silence.  
+Ideal for closing the day or decompressing after stress.
+
+---
+
+### 4. Full Stack Session
+
+```bash
+python stream_tone.py --freq 528 --full
+```
+
+Everything enabled:
+- HRV breath pacing
+- Isochronic pulsing
+- ABS hemisphere alternation
+- Long-term fade-out
+
+Use at comfortable volumes and give yourself time to feel the shift.
+
+---
+
+## Saving a 1-Hour FLAC
+
+To generate a 1-hour file you can loop later (e.g., on an offline player):
+
+```bash
+python stream_tone.py --freq 528 --iso --pulse 40 --abs --abs-speed medium --hrv --save-audio
+```
+
+This will create:
 
 ```text
 528Hz_YYYYMMDD_HHMMSS.flac
 ```
 
-(Example: `528Hz_20250311_221145.flac`)
-
-### 4. Save 1-Hour FLAC (Isochronic)
-
-```bash
-python stream_tone.py --freq 528 --iso --pulse 40 --save-audio
-```
-
-This will generate a **1-hour stereo isochronic track** (528 Hz carrier, 40 Hz pulses) and save it as FLAC.
+in the current directory.
 
 ---
 
-## Suggested Frequencies
+## Safety Notes
 
-Some commonly used pure-tone frequencies (for convenience only):
+- Always keep volume at a **comfortable** level.
+- If you feel dizzy, anxious, or overloaded, stop the stream and rest.
+- For trauma history or strong sensitivity, start with:
+  ```bash
+  python stream_tone.py --freq 432 --hrv --hrv-style A
+  ```
+  at low volume and gradually adjust.
 
-| Frequency | Label          | Common Intent (non-medical)        |
-|----------:|----------------|-------------------------------------|
-|  396 Hz   | Release fear   | Emotional grounding                 |
-|  417 Hz   | Change         | Clearing emotional blocks           |
-|  432 Hz   | Harmony        | Focus, natural resonance            |
-|  528 Hz   | Transformation | “Love” / heart-centered clarity        |
-|  639 Hz   | Connection     | Relationships, empathy, joy         |
-|  741 Hz   | Clarity        | Intuition, mental clarity           |
-|  852 Hz   | Insight        | Inner peace, spiritual awareness    |
-
-> These associations are **experiential / traditional**, not medical claims.
+This tool is here to help you **take sound back** as something that serves you, not something used against you.
 
 ---
-
-## Tips for Listening
-
-- For **highest purity**, prefer **wired headphones** or good speakers.
-- Bluetooth (especially AirPods) may introduce artifacts with pure continuous tones; 
-  isochronic mode (`--iso`) usually survives better over Bluetooth than a static sine wave.
-- Start with moderate volume and adjust gradually.
-- For focus: try `--freq 432` or `--freq 528 --iso --pulse 40`.
-- For calm: try `--freq 432 --iso --pulse 10`.
-
----
-
-## Safety Note
-
-This tool is for **relaxation, focus, and experimentation** only. It is **not** a medical device and should not be used as a substitute for professional care. If you experience discomfort, stop listening and lower volume, change frequency, or discontinue use.
-
----
-
-## License / Attribution
-
-Use and modify this script for your own personal audio experiments. If you integrate it into a larger project, a small attribution like `"Based on PureTones generator"` is appreciated.
-
-### Combined Isochronic + ABS
-
-```bash
-python stream_tone.py --freq 528 --iso --pulse 40 --abs --abs-speed medium
-```
