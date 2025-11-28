@@ -13,11 +13,15 @@ import datetime
 # Argument parser
 parser = argparse.ArgumentParser(description="Pure tone streaming generator")
 parser.add_argument("--freq", type=float, default=528, help="Frequency in Hz (e.g., 432, 528, 639)")
-parser.add_argument("--save-audio", action="store_true", help="Save 1 hour WAV file instead of realtime streaming")
+parser.add_argument("--save-audio", action="store_true", help="Save 1 hour FLAC file instead of realtime streaming")
 parser.add_argument("--iso", action="store_true", help="Enable isochronic mode (volume pulse)")
 parser.add_argument("--pulse", type=float, default=40, help="Isochronic pulse frequency in Hz")
 parser.add_argument("--abs", action="store_true", help="Enable alternating bilateral stimulation")
 parser.add_argument("--abs-speed", type=str, default="medium", choices=["slow", "medium", "fast"], help="ABS speed: slow, medium, fast")
+parser.add_argument("--hrv", action="store_true", help="Enable HRV (Heart-Rate Variability) breath pacing")
+parser.add_argument("--hrv-style", type=str, default="A", choices=["A", "B", "C"], help="HRV pacing style: A, B, or C")
+parser.add_argument("--fade-long", action="store_true", help="Enable long-term fade-to-silence cultivation (~30min)")
+parser.add_argument("--full", action="store_true", help="Enable full stack: HRV + ISO + ABS + long fade")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -26,6 +30,17 @@ iso_mode = args.iso
 pulse_freq = args.pulse
 abs_mode = args.abs
 abs_speed = args.abs_speed
+hrv_mode = args.hrv
+hrv_style = args.hrv_style
+fade_long = args.fade_long
+full_mode = args.full
+
+# full-mode auto enables all major features
+if full_mode:
+    iso_mode = True
+    abs_mode = True
+    hrv_mode = True
+    fade_long = True
 
 # map speed keyword to Hz
 if abs_speed == "slow":
@@ -35,8 +50,19 @@ elif abs_speed == "fast":
 else:
     abs_rate = 1.5
 
+# HRV style mapping
+if hrv_style == "A":    # ~11s cycle
+    hrv_rate = 1.0 / 11.0
+elif hrv_style == "B":  # ~10.5s cycle
+    hrv_rate = 1.0 / 10.5
+else:                   # ~12s cycle
+    hrv_rate = 1.0 / 12.0
+
+# long-term fade duration
+long_fade_seconds = 1800.0  # 30 minutes
+
 sample_rate = 44100        # CD quality
-amplitude = 0.35          # to avoid clipping
+amplitude = 0.20          # to avoid clipping
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
@@ -64,6 +90,14 @@ if save_audio:
     if iso_mode:
         pulse_wave = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * t))
         wave *= pulse_wave
+
+    if hrv_mode:
+        hrv_env = 0.5 * (1.0 + np.sin(2 * np.pi * hrv_rate * t))
+        wave *= hrv_env
+
+    if fade_long:
+        long_fade = 1.0 - np.clip(t / long_fade_seconds, 0.0, 1.0)
+        wave *= long_fade
 
     # apply fade in/out
     fade_samples = int(fade_seconds * sample_rate)
@@ -93,18 +127,27 @@ if save_audio:
 # ============================
 
 phase = 0.0
-fade_samples = fade_seconds * sample_rate
+fade_samples = int(fade_seconds * sample_rate)
 current_sample = 0
+hrv_phase = 0.0
 
 
 def audio_callback(outdata, frames, time, status):
     global phase, current_sample
+    global hrv_phase
 
     t = (np.arange(frames) + phase) / sample_rate
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
     if iso_mode:
         pulse = 0.5 * (1 + np.sin(2 * np.pi * pulse_freq * t))
         wave *= pulse
+
+    # HRV breath pacing
+    if hrv_mode:
+        t_hrv = (np.arange(frames) + hrv_phase) / sample_rate
+        hrv_env = 0.5 * (1.0 + np.sin(2 * np.pi * hrv_rate * t_hrv))
+        wave *= hrv_env
+        hrv_phase += frames
 
     # fade-in curve
     if current_sample < fade_samples:
@@ -113,10 +156,19 @@ def audio_callback(outdata, frames, time, status):
                                   frames)
         wave *= fade_factor
 
+    # long fade-to-silence
+    if fade_long:
+        elapsed_seconds = current_sample / sample_rate
+        if elapsed_seconds < long_fade_seconds:
+            long_factor = 1.0 - (elapsed_seconds / long_fade_seconds)
+        else:
+            long_factor = 0.0
+        wave *= long_factor
+
     current_sample += frames
     phase += frames
 
-    gain = 2.0  # global output gain multiplier
+    gain = 4.0  # global output gain multiplier
 
     if abs_mode:
         left_env = 0.5 * (1 + np.sin(2 * np.pi * abs_rate * t))
