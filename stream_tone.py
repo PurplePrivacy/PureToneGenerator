@@ -5,6 +5,9 @@ import sys
 import argparse
 import soundfile as sf
 import datetime
+import hashlib
+from queue import Queue, Full
+import threading
 
 # ============================
 # CONFIG
@@ -22,6 +25,8 @@ parser.add_argument("--hrv", action="store_true", help="Enable HRV (Heart-Rate V
 parser.add_argument("--hrv-style", type=str, default="A", choices=["A", "B", "C"], help="HRV pacing style: A, B, or C")
 parser.add_argument("--fade-long", action="store_true", help="Enable long-term fade-to-silence cultivation (~30min)")
 parser.add_argument("--full", action="store_true", help="Enable full stack: HRV + ISO + ABS + long fade")
+parser.add_argument("--integrity", action="store_true", help="Print a rolling SHA-256 hash of the internally generated audio stream (proof-of-generation)")
+parser.add_argument("--integrity-interval", type=float, default=1.0, help="Seconds between integrity hash updates (default: 1.0)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -34,6 +39,8 @@ hrv_mode = args.hrv
 hrv_style = args.hrv_style
 fade_long = args.fade_long
 full_mode = args.full
+integrity_mode = args.integrity
+integrity_interval = args.integrity_interval
 
 # full-mode auto enables all major features
 if full_mode:
@@ -73,13 +80,46 @@ channels = 2               # stereo identical
 def handle_interrupt(sig, frame):
     print("\n🛑 Stopping cleanly...")
     sd.stop()
+    try:
+        integrity_queue.put_nowait(None)
+    except Exception:
+        pass
     sys.exit(0)
 
 signal.signal(signal.SIGINT, handle_interrupt)
 
+# ============================
+# INTEGRITY (PROOF-OF-GENERATION) LOGGER
+# ============================
+
+integrity_queue = Queue(maxsize=8)
+_integrity_last_emit = 0.0
+
+def integrity_worker():
+    """
+    Consumes audio chunks (float32 mono) and prints a rolling SHA-256 digest.
+    This helps verify the stream is generated internally and remains consistent.
+    """
+    hasher = hashlib.sha256()
+    counter = 0
+    while True:
+        item = integrity_queue.get()
+        if item is None:
+            break
+        hasher.update(item)
+        counter += 1
+        # Print every chunk (already rate-limited by interval)
+        digest = hasher.hexdigest()[:16]
+        print(f"[integrity] rolling_sha256={digest} chunks={counter}")
+
+integrity_thread = None
+if 'integrity_mode' in globals() and integrity_mode:
+    integrity_thread = threading.Thread(target=integrity_worker, daemon=True)
+    integrity_thread.start()
+
 # If saving audio instead of streaming
 if save_audio:
-    print(f"💾 Saving 1-hour WAV at {frequency} Hz...")
+    print(f"💾 Saving 1-hour FLAC at {frequency} Hz...")
 
     duration_seconds = 3600  # 1 hour
     total_samples = int(sample_rate * duration_seconds)
@@ -167,6 +207,22 @@ def audio_callback(outdata, frames, time, status):
 
     current_sample += frames
     phase += frames
+
+    # Integrity: periodically hash the internally generated audio (pre-gain, pre-stereo)
+    if integrity_mode:
+        now_sec = current_sample / sample_rate
+        global _integrity_last_emit
+        if (now_sec - _integrity_last_emit) >= integrity_interval:
+            _integrity_last_emit = now_sec
+            # Use a mono float32 view of the internal wave; convert to bytes for hashing
+            try:
+                chunk_bytes = np.asarray(wave, dtype=np.float32).tobytes()
+                integrity_queue.put_nowait(chunk_bytes)
+            except Full:
+                # If the logger lags, drop chunks rather than blocking audio
+                pass
+            except Exception:
+                pass
 
     gain = 4.0  # global output gain multiplier
 
