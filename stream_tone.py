@@ -27,6 +27,12 @@ parser.add_argument("--fade-long", action="store_true", help="Enable long-term f
 parser.add_argument("--full", action="store_true", help="Enable full stack: HRV + ISO + ABS + long fade")
 parser.add_argument("--integrity", action="store_true", help="Print a rolling SHA-256 hash of the internally generated audio stream (proof-of-generation)")
 parser.add_argument("--integrity-interval", type=float, default=1.0, help="Seconds between integrity hash updates (default: 1.0)")
+parser.add_argument("--disable-inputs", action="store_true",
+                    help="Force output-only operation (no audio input paths)")
+parser.add_argument("--pure", action="store_true",
+                    help="Pure sine safe mode (no modulation, no noise, no bursts)")
+parser.add_argument("--lockdown", action="store_true",
+                    help="Maximum safety preset: pure + disable-inputs + integrity")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -42,12 +48,29 @@ full_mode = args.full
 integrity_mode = args.integrity
 integrity_interval = args.integrity_interval
 
+disable_inputs = args.disable_inputs
+pure_mode = args.pure
+lockdown_mode = args.lockdown
+
 # full-mode auto enables all major features
 if full_mode:
     iso_mode = True
     abs_mode = True
     hrv_mode = True
     fade_long = True
+
+# LOCKDOWN MODE: maximum safety preset
+if lockdown_mode:
+    pure_mode = True
+    disable_inputs = True
+    integrity_mode = True
+
+# PURE SAFE MODE: absolute minimal signal path
+if pure_mode:
+    iso_mode = False
+    abs_mode = False
+    hrv_mode = False
+    fade_long = False
 
 # map speed keyword to Hz
 if abs_speed == "slow":
@@ -72,6 +95,21 @@ sample_rate = 44100        # CD quality
 amplitude = 0.20          # to avoid clipping
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
+
+# ============================
+# AUDIO HARDENING (SAFE)
+# ============================
+
+if disable_inputs:
+    # OutputStream is output-only by design.
+    # We intentionally do NOT touch sd.default.device to avoid CoreAudio crashes.
+    print("🔒 Audio hardening: output-only stream (no input paths).")
+
+if pure_mode:
+    print("🛡 Pure mode enabled: single sine wave, no modulation, no noise.")
+
+if lockdown_mode:
+    print("🔐 LOCKDOWN active: pure + output-only + integrity proof.")
 
 # ============================
 # STOP HANDLER
@@ -247,6 +285,8 @@ with sd.OutputStream(
     samplerate=sample_rate,
     channels=channels,
     callback=audio_callback,
-    dtype="float32"
+    dtype="float32",
+    blocksize=0,
+    latency="low"
 ):
     signal.pause()  # wait forever until interrupted
