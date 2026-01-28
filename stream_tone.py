@@ -8,6 +8,7 @@ import datetime
 import hashlib
 from queue import Queue, Full
 import threading
+import time
 
 # ============================
 # CONFIG
@@ -37,6 +38,8 @@ parser.add_argument("--latency", type=str, default="high", choices=["low", "high
                     help="Audio latency mode (default: high). Use high to reduce crackling.")
 parser.add_argument("--blocksize", type=int, default=1024,
                     help="Audio blocksize in frames (default: 1024). Increase to reduce crackling.")
+parser.add_argument("--breath-bar", action="store_true",
+                    help="Show a live breathing bar in the terminal (HRV mode only)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -57,6 +60,7 @@ pure_mode = args.pure
 lockdown_mode = args.lockdown
 latency_mode = args.latency
 blocksize = args.blocksize
+breath_bar = args.breath_bar
 
 # full-mode auto enables all major features
 if full_mode:
@@ -103,6 +107,15 @@ fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
 # ============================
+# STREAM STATE (shared by callback + UI)
+# ============================
+
+phase = 0.0
+fade_samples = int(fade_seconds * sample_rate)
+current_sample = 0
+hrv_phase = 0.0
+
+# ============================
 # AUDIO HARDENING (SAFE)
 # ============================
 
@@ -128,6 +141,7 @@ def handle_interrupt(sig, frame):
         integrity_queue.put_nowait(None)
     except Exception:
         pass
+    print("")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, handle_interrupt)
@@ -160,6 +174,48 @@ integrity_thread = None
 if 'integrity_mode' in globals() and integrity_mode:
     integrity_thread = threading.Thread(target=integrity_worker, daemon=True)
     integrity_thread.start()
+
+# ============================
+# BREATHING BAR (TERMINAL UI)
+# ============================
+
+def breathing_bar_worker():
+    """
+    Simple terminal UI to visualize HRV inhale/exhale pacing.
+    Runs in a background thread and never touches the audio callback.
+    """
+    global hrv_phase
+    if not hrv_mode:
+        return
+
+    bar_width = 28
+    update_hz = 10.0
+    sleep_s = 1.0 / update_hz
+
+    cycle = 1.0 / hrv_rate
+    half = cycle / 2.0
+
+    while True:
+        # Derive current position in HRV cycle from hrv_phase (frames)
+        pos = (hrv_phase / sample_rate) % cycle
+        if pos < half:
+            phase_name = "INHALE"
+            frac = pos / half
+        else:
+            phase_name = "EXHALE"
+            frac = (pos - half) / half
+
+        filled = int(frac * bar_width)
+        bar = "█" * filled + "░" * (bar_width - filled)
+        sys.stdout.write(f"\r🫁 {phase_name} |{bar}| {int(frac*100):3d}%   ")
+        sys.stdout.flush()
+
+        time.sleep(sleep_s)
+
+breath_thread = None
+if breath_bar:
+    breath_thread = threading.Thread(target=breathing_bar_worker, daemon=True)
+    breath_thread.start()
 
 # If saving audio instead of streaming
 if save_audio:
@@ -205,16 +261,6 @@ if save_audio:
     sf.write(filename, stereo, sample_rate, format="FLAC")
     print(f"✔ Saved {filename}")
     sys.exit(0)
-
-# ============================
-# STREAM GENERATOR
-# ============================
-
-phase = 0.0
-fade_samples = int(fade_seconds * sample_rate)
-current_sample = 0
-hrv_phase = 0.0
-
 
 def audio_callback(outdata, frames, time, status):
     global phase, current_sample
@@ -287,6 +333,10 @@ def audio_callback(outdata, frames, time, status):
 print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
 print("Press Ctrl-C to stop.\n")
 print(f"Audio settings: latency={latency_mode}, blocksize={blocksize}\n")
+if breath_bar and hrv_mode:
+    print("Breathing bar: enabled (HRV)\n")
+elif breath_bar and not hrv_mode:
+    print("Breathing bar: requested, but HRV is disabled (no-op)\n")
 
 with sd.OutputStream(
     samplerate=sample_rate,
