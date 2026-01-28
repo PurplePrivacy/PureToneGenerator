@@ -33,6 +33,10 @@ parser.add_argument("--pure", action="store_true",
                     help="Pure sine safe mode (no modulation, no noise, no bursts)")
 parser.add_argument("--lockdown", action="store_true",
                     help="Maximum safety preset: pure + disable-inputs + integrity")
+parser.add_argument("--latency", type=str, default="high", choices=["low", "high"],
+                    help="Audio latency mode (default: high). Use high to reduce crackling.")
+parser.add_argument("--blocksize", type=int, default=1024,
+                    help="Audio blocksize in frames (default: 1024). Increase to reduce crackling.")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -51,6 +55,8 @@ integrity_interval = args.integrity_interval
 disable_inputs = args.disable_inputs
 pure_mode = args.pure
 lockdown_mode = args.lockdown
+latency_mode = args.latency
+blocksize = args.blocksize
 
 # full-mode auto enables all major features
 if full_mode:
@@ -280,13 +286,14 @@ def audio_callback(outdata, frames, time, status):
 
 print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
 print("Press Ctrl-C to stop.\n")
+print(f"Audio settings: latency={latency_mode}, blocksize={blocksize}\n")
 
 with sd.OutputStream(
     samplerate=sample_rate,
     channels=channels,
     callback=audio_callback,
     dtype="float32",
-    blocksize=0,
-    latency="low"
+    blocksize=blocksize,
+    latency=latency_mode
 ):
     signal.pause()  # wait forever until interrupted
