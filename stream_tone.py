@@ -40,6 +40,10 @@ parser.add_argument("--blocksize", type=int, default=1024,
                     help="Audio blocksize in frames (default: 1024). Increase to reduce crackling.")
 parser.add_argument("--breath-bar", action="store_true",
                     help="Show a live breathing bar in the terminal (HRV mode only)")
+parser.add_argument("--breath-cue", type=str, default="none", choices=["none", "bell", "drum", "tick"],
+                    help="Play a cue at HRV inhale/exhale transitions: none|bell|drum|tick (default: none)")
+parser.add_argument("--breath-cue-vol", type=float, default=0.25,
+                    help="Breath cue volume multiplier (default: 0.25)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -61,6 +65,8 @@ lockdown_mode = args.lockdown
 latency_mode = args.latency
 blocksize = args.blocksize
 breath_bar = args.breath_bar
+breath_cue = args.breath_cue
+breath_cue_vol = args.breath_cue_vol
 
 # full-mode auto enables all major features
 if full_mode:
@@ -114,6 +120,38 @@ phase = 0.0
 fade_samples = int(fade_seconds * sample_rate)
 current_sample = 0
 hrv_phase = 0.0
+
+# ============================
+# HRV BREATH CUE (SYNTH)
+# ============================
+
+hrv_last_phase_name = None  # "INHALE" or "EXHALE"
+
+# Precompute cue waveforms (mono) at sample_rate
+_cue_tick_len = int(0.03 * sample_rate)   # 30ms
+_cue_bell_len = int(0.18 * sample_rate)   # 180ms
+_cue_drum_len = int(0.12 * sample_rate)   # 120ms
+
+# Tick: short click with fast decay (high frequency)
+_tick_t = np.arange(_cue_tick_len) / sample_rate
+tick_cue = np.sin(2 * np.pi * 1800 * _tick_t) * np.exp(-_tick_t * 80)
+
+# Bell: two partials with exponential decay (soft buddhist-like ding)
+_bell_t = np.arange(_cue_bell_len) / sample_rate
+bell_cue = (0.7 * np.sin(2 * np.pi * 880 * _bell_t) + 0.3 * np.sin(2 * np.pi * 1320 * _bell_t)) * np.exp(-_bell_t * 18)
+
+# Drum: low thump + a touch of noise, fast decay
+_drum_t = np.arange(_cue_drum_len) / sample_rate
+drum_cue = (np.sin(2 * np.pi * 110 * _drum_t) * np.exp(-_drum_t * 28)) + (0.15 * np.random.uniform(-1, 1, _cue_drum_len) * np.exp(-_drum_t * 40))
+
+def _select_cue():
+    if breath_cue == "tick":
+        return tick_cue
+    if breath_cue == "bell":
+        return bell_cue
+    if breath_cue == "drum":
+        return drum_cue
+    return None
 
 # ============================
 # AUDIO HARDENING (SAFE)
@@ -279,6 +317,25 @@ def audio_callback(outdata, frames, time, status):
         wave *= hrv_env
         hrv_phase += frames
 
+        # Breath cue: play a short sound on phase transitions (inhale<->exhale)
+        global hrv_last_phase_name
+        if breath_cue != "none":
+            cycle = 1.0 / hrv_rate
+            half = cycle / 2.0
+
+            # Determine current phase name based on hrv_phase AFTER increment
+            pos = (hrv_phase / sample_rate) % cycle
+            phase_name = "INHALE" if pos < half else "EXHALE"
+
+            if hrv_last_phase_name is None:
+                hrv_last_phase_name = phase_name
+            elif phase_name != hrv_last_phase_name:
+                cue = _select_cue()
+                if cue is not None:
+                    L = min(frames, len(cue))
+                    wave[:L] += (cue[:L] * breath_cue_vol)
+                hrv_last_phase_name = phase_name
+
     # fade-in curve
     if current_sample < fade_samples:
         fade_factor = np.linspace(current_sample / fade_samples,
@@ -314,7 +371,7 @@ def audio_callback(outdata, frames, time, status):
             except Exception:
                 pass
 
-    gain = 4.0  # global output gain multiplier
+    gain = 5.0  # global output gain multiplier
 
     if abs_mode:
         left_env = 0.5 * (1 + np.sin(2 * np.pi * abs_rate * t))
@@ -337,6 +394,8 @@ if breath_bar and hrv_mode:
     print("Breathing bar: enabled (HRV)\n")
 elif breath_bar and not hrv_mode:
     print("Breathing bar: requested, but HRV is disabled (no-op)\n")
+if hrv_mode and breath_cue != "none":
+    print(f"Breath cue: {breath_cue} (vol={breath_cue_vol})\n")
 
 with sd.OutputStream(
     samplerate=sample_rate,
