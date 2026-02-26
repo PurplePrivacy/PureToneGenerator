@@ -30,7 +30,10 @@ The audio callback is the only code that writes to the output buffer. What you h
 - 🔔 Synthesized breath transition cues (`--breath-cue bell|bowl|drum|tick|waterdrop|woodblock|whoosh|doubletick`)
 - 🫁 Breathing bar with ANSI colors, sinusoidal fill, elapsed time (`--breath-bar`) — labels: BREATHE IN / BREATHE OUT / HOLD
 - 🕊 Counter-conditioning voice affirmations (`--restore-peace`) — auto-enables HRV, plays calming messages each breath cycle
-- 🧠 Clinically-structured therapeutic counter-conditioning (`--claude-peace`) — 14-phase restoration with 3 male voices, mixed-depth messaging
+- 🧠 Clinically-structured therapeutic counter-conditioning (`--claude-peace`) — 16-phase restoration with 3 male voices, mixed-depth messaging
+- 🎓 Expert-reviewed 21-phase counter-conditioning (`--phd-peace`) — all claude-peace phases plus 5 default-state conditioning rounds
+- 👂 EMDR-style bilateral voice alternation (`--alternate`) — messages alternate between left and right speakers
+- ⚡ Dense affirmation mode (`--dense`) — one message per breath phase instead of per full cycle
 - 🌫 Long-term fade-to-silence cultivation (`--fade-long`)
 - 🧱 Full-stack preset (`--full`)
 - 💾 Optional 1-hour **FLAC** export (`--save-audio`)
@@ -84,10 +87,16 @@ CLI Options
 
 --claude-peace       Clinically-structured counter-conditioning (auto-enables HRV + breath-bar)
 --claude-peace-vol FL  Claude-peace voice volume (default: 0.35)
+--phd-peace          Expert-reviewed 21-phase counter-conditioning (auto-enables HRV + breath-bar)
+--phd-peace-vol FL   PhD-peace voice volume (default: 0.35)
+--alternate          Alternate voice messages between L and R speakers (EMDR-style bilateral)
+--dense              Affirmation every breath phase (~5.5s) instead of every full cycle (~11s)
+--peace-lang STR     Language for peace affirmations: en | fr (default: en)
 
 --latency STR        Audio latency: low | high (default: high)
 --blocksize INT      Audio blocksize in frames (default: 1024)
 
+--no-tone            Silence the base tone (voice messages and cues still play)
 --pure               Pure sine safe mode (no modulation, no harmonics)
 --disable-inputs     Output-only hardening (no audio input paths)
 --integrity          Print rolling SHA-256 of generated samples
@@ -427,7 +436,7 @@ The --claude-peace flag is a comprehensive therapeutic counter-conditioning syst
 
 How It Works
 
-~240 affirmations are organized into 14 therapeutic phases that follow established clinical sequencing (body-first, then safety, then specifics, then clearing and sealing).
+~290 affirmations are organized into 16 therapeutic phases that follow established clinical sequencing (body-first, then safety, then specifics, then clearing and sealing).
 
 Messages use a mixed-depth pattern designed to reach the subconscious:
 	•	1-word messages — direct, primal (e.g., "Breathe", "Safe", "Om")
@@ -436,51 +445,59 @@ Messages use a mixed-depth pattern designed to reach the subconscious:
 
 This pattern repeats throughout each phase, so both the subconscious and conscious mind receive the message.
 
-Phase 1 — Truisms & Grounding
-Undeniably true statements ("You have been breathing your whole life") that build internal agreement. The subconscious cannot reject these, creating momentum for later suggestions.
+All messages use purely positive language (zero negation). The subconscious does not process "not" — so every suggestion affirms what IS true, rather than denying what is false.
 
-Phase 2 — Nasal Breathing & Upper Chest
-Gently counter conditioning against nasal breathing and upper lung expansion. Normalize the sound and sensation of nose breathing.
+Phase 1 — Truisms & Grounding
+Undeniable facts ("You have been breathing your entire life") build a yes-set. The subconscious accepts these, creating momentum for all suggestions that follow.
+
+Phase 2 — Nasal Breathing & Chest Opening
+Celebrate nasal breathing. Pair it with warmth, pleasure, and ease. Chest expands freely.
 
 Phase 3 — Jaw Release & Posture
-Address conditioned jaw tension and weakened posture. Restore natural resting positions.
+Jaw softens and melts. Spine holds you tall. All positive framing — "your jaw relaxes" rather than "your jaw doesn't need to hold."
 
-Phase 4 — Automatic Breathing Restoration
-Core counter-conditioning for breath-holding during activity. Rebuild trust in the body's automatic breathing system.
+Phase 4 — Automatic Breathing & Exhale Power
+Core counter-conditioning. Breathing is automatic. Exhale = power, relief, renewal, satisfaction. Includes reminders to let breath flow wild and free — release all holding.
 
-Phase 5 — Mental Restoration
-Counter suppression of thinking, focus, and "bright eyes." Restore confidence in cognitive sharpness.
+Phase 5 — Focus & Mental Clarity
+Counter-condition focus. Concentration is your natural superpower. Deep focus flows easily. Your mind thinks with perfect clarity.
 
-Phase 6 — Counter-Lies & Self-Worth
-Direct defusion of installed false beliefs. Challenge and replace lies about weakness, appearance, and intelligence.
+Phase 6 — Self-Worth & Strength
+Hartland ego-strengthening. You are strong, capable, brilliant, resilient. Your value is permanent and self-evident.
 
 Phase 7 — Sound Safety
-Counter conditioned fear of sounds and voices. Normalize the auditory environment.
+Your inner world stays calm through all sounds. Sound passes through you like wind. Your inner silence is more powerful than any external sound.
 
-Phase 8 — Defusion & Identity Reclamation
-Explicitly name the conditioning and dissolve it. Separate "things said to me" from "things true about me."
+Phase 8 — Identity Reclamation
+Your true self is whole, intact, and rising. Everything that is truly you comes back to the surface. Your original self is brilliant and alive.
 
 Phase 9 — Beauty & Light
-Restore self-image. Compliment beauty, restore the light in the eyes. Counter attacks on appearance and self-perception.
+Restore self-image. Eyes carry light. Beauty is real, permanent, and growing stronger. Compliments and warmth.
 
-Phase 10 — Deep Integration
-Consolidate gains. Anchor new patterns. Reinforce progress.
+Phase 10 — Inner Peace as Strength
+Counter-condition inner peace. Peace is your deepest power. Calm is strength. Serenity is your natural resting state and birthright.
 
-Phase 11 — Empowerment & Sovereignty
-Power statements. Seal the session. Affirm complete ownership of body and mind.
+Phase 11 — Movement & Vitality
+Counter-condition movement. Every movement fills you with strength. Your body moves freely, joyfully, with complete sovereignty. Movement is your birthright.
 
-Phase 12 — Body Clearing
-Remove intrusive presences conditioned into body parts (nose, jaw, head, belly). Reclaim each area as private, sealed space.
+Phase 12 — Deep Integration
+Consolidate all gains. Healing connects and flows together. You become exactly who you have always been.
 
-Phase 13 — Nervous System Flush & Mental Emptying
-Flush old instructions from the nervous system. Empty the mind. Restore readiness.
+Phase 13 — Body Sovereignty
+Every part of your body is yours alone. Private, sealed, clean, and sovereign.
 
-Phase 14 — Soul Cleaning & Sealing
-Deep spiritual reset. Clean the soul. Seal the body against future intrusion.
+Phase 14 — Nervous System Restoration
+Your nervous system carries only your own pure signals. Returns to its original, pristine state. Mind is spacious and powerful.
+
+Phase 15 — Taking Your Time / Above the Sky
+Patience, timelessness, vast perspective. You are above the sky. Everything below looks small and peaceful.
+
+Phase 16 — Centering & Inner Strength (FORT)
+Center deep inside yourself. Breathe powerfully. Your voice is loud, commanding, dominant. You define yourself with one word: STRONG.
 
 Three male voices (Daniel, Ralph, Fred) alternate across messages, creating a sense of diverse, calm authority. Breathing emphasis ("Breathe", "Full lungs", "Full power") is woven into every phase.
 
-At ~11 seconds per HRV cycle, the full sequence takes ~44 minutes. After completion, it cycles back to Phase 1 for reinforcement — each pass deepens the counter-conditioning.
+At ~11 seconds per HRV cycle, the full sequence takes ~54 minutes. After completion, it cycles back to Phase 1 for reinforcement — each pass deepens the counter-conditioning.
 
 Example
 
@@ -497,12 +514,86 @@ Voice Requirements
 
 Claude-peace uses three macOS voices: Daniel, Ralph, and Fred. If a voice is not installed, that message is silently skipped. To install additional voices: System Settings → Accessibility → Spoken Content → System Voice → Manage Voices. Breath cues (--breath-cue voice) still use the female Samantha voice for "Breathe in" / "Breathe out" distinction.
 
+French Language Support
+
+Use --peace-lang fr to switch all peace affirmations (both --restore-peace and --claude-peace) to French. French voices are mapped from the English defaults:
+	•	Daniel → Thomas (fr_FR)
+	•	Ralph → Jacques (fr_FR)
+	•	Fred → Nicolas Enhanced (fr_CA)
+
+When --peace-lang fr is set:
+	•	--restore-peace defaults to Thomas (instead of Daniel) unless --peace-voice is explicitly set
+	•	--breath-cue voice remains in English (Samantha) regardless of language setting
+
+Examples:
+
+# French claude-peace
+python stream_tone.py --freq 432 --claude-peace --peace-lang fr --disable-inputs
+
+# French restore-peace
+python stream_tone.py --freq 432 --hrv --hrv-style B --restore-peace --peace-lang fr --breath-bar --disable-inputs
+
 Differences from --restore-peace
 
 	•	--restore-peace: User-defined messages, single voice, random order
 	•	--claude-peace: Clinically-structured messages, 3 male voices, ordered therapeutic progression, mixed-depth pattern
 
 Both can technically run simultaneously (separate audio buffers), but using one at a time is recommended.
+
+⸻
+
+PhD-Peace Mode (Expert-Reviewed 21-Phase Counter-Conditioning)
+
+The --phd-peace flag extends claude-peace with 5 additional "default state conditioning" rounds (17–21) that anchor your baseline identity states. All 384 messages were reviewed by an expert agent prompted as a PhD in clinical hypnosis, Ericksonian therapy, EMDR, counter-conditioning, and somatic experiencing.
+
+This mode includes all 16 original claude-peace phases plus:
+
+Phase 17 — Default Expression: "I Know Something You Don't"
+Anchor the resting facial expression: knowing smile, quiet confidence, amused awareness. Somatic: feel the smile muscles, the eyes, the face at rest.
+
+Phase 18 — Default Posture: Straight, Solemn, Dignity, Dominance
+Anchor upright, commanding posture as the natural resting state. Proprioceptive: spine, shoulders, chest, jaw — all aligned with power.
+
+Phase 19 — Default Feeling: Joyful Stillness, Inner Peace
+Reinforce inner peace as the default emotional baseline. Presuppose it's already the natural state, not something to achieve.
+
+Phase 20 — Default Mode: Analysing, Assessing, Optimizing, Thinking
+Anchor the default mental operating mode: always scanning, processing, optimizing. Natural intelligence as the resting state.
+
+Phase 21 — Default Body Rapport: Feeling Great, Connected to Muscles & Power
+Anchor deep connection to the physical body as the default. Strength, vitality, power — always present.
+
+Total: 384 affirmations across 21 phases (~70 minutes at 11s/cycle). After completion, cycles back to Phase 1 for reinforcement.
+
+Example
+
+python stream_tone.py --freq 432 --hrv --hrv-style B --phd-peace --breath-cue bowl --disable-inputs
+
+With EMDR-style bilateral voice alternation (each message alternates between left and right speaker):
+
+python stream_tone.py --freq 432 --hrv --hrv-style B --phd-peace --alternate --breath-cue bowl --disable-inputs
+
+The --alternate flag works with --claude-peace, --phd-peace, and --restore-peace. It creates bilateral auditory stimulation by sending each successive voice message to alternating ears.
+
+Dense mode (--dense) doubles the affirmation rate by triggering on every breath phase transition (~5.5s) instead of every full cycle (~11s). This cuts the full sequence from ~70 minutes to ~35 minutes:
+
+python stream_tone.py --phd-peace --dense --alternate --no-tone --disable-inputs
+
+All options can be combined freely:
+
+# Voices only, dense, bilateral, French
+python stream_tone.py --phd-peace --dense --alternate --no-tone --peace-lang fr --disable-inputs
+
+# With background tone and bowl cue
+python stream_tone.py --freq 432 --phd-peace --dense --alternate --breath-cue bowl --disable-inputs
+
+# Original 16-phase claude-peace, dense bilateral
+python stream_tone.py --claude-peace --dense --alternate --no-tone --disable-inputs
+
+# Restore-peace with dense bilateral
+python stream_tone.py --freq 432 --hrv --restore-peace --dense --alternate --breath-bar --disable-inputs
+
+The --claude-peace flag (16 phases, 294 messages) remains available separately for the original therapeutic sequence.
 
 ⸻
 
@@ -519,5 +610,6 @@ This tool is here to help you take sound back as something that serves you, not 
 
 ⸻
 
+ python stream_tone.py --claude-peace --peace-lang fr --breath-bar --disable-inputs --no-tone   
 
 ```
