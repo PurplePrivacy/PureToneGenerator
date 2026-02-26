@@ -37,6 +37,8 @@ parser.add_argument("--disable-inputs", action="store_true",
                     help="Force output-only operation (no audio input paths)")
 parser.add_argument("--pure", action="store_true",
                     help="Pure sine safe mode (no modulation, no noise, no bursts)")
+parser.add_argument("--no-tone", action="store_true",
+                    help="Silence the base tone (voice messages and cues still play)")
 parser.add_argument("--lockdown", action="store_true",
                     help="Maximum safety preset: pure + disable-inputs + integrity")
 parser.add_argument("--latency", type=str, default="high", choices=["low", "high"],
@@ -66,6 +68,17 @@ parser.add_argument("--claude-peace", action="store_true",
                          "(auto-enables HRV + breath-bar)")
 parser.add_argument("--claude-peace-vol", type=float, default=0.35,
                     help="Volume for --claude-peace voice affirmations (default: 0.35)")
+parser.add_argument("--phd-peace", action="store_true",
+                    help="Expert-reviewed 21-phase counter-conditioning: all 16 claude-peace phases "
+                         "plus 5 default-state conditioning rounds (expression, posture, feeling, mode, body)")
+parser.add_argument("--phd-peace-vol", type=float, default=0.35,
+                    help="Volume for --phd-peace voice affirmations (default: 0.35)")
+parser.add_argument("--alternate", action="store_true",
+                    help="Alternate voice messages between left and right speakers (EMDR-style bilateral)")
+parser.add_argument("--dense", action="store_true",
+                    help="Play affirmations on every breath phase transition (~5.5s) instead of every full cycle (~11s)")
+parser.add_argument("--peace-lang", type=str, default="en", choices=["en", "fr"],
+                    help="Language for peace affirmations: en | fr (default: en)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -94,6 +107,15 @@ peace_voice = args.peace_voice
 peace_vol = args.peace_vol
 claude_peace = args.claude_peace
 claude_peace_vol = args.claude_peace_vol
+phd_peace = args.phd_peace
+phd_peace_vol = args.phd_peace_vol
+alternate_mode = args.alternate
+dense_mode = args.dense
+peace_lang = args.peace_lang
+
+# French language: override default peace voice if user didn't explicitly set it
+if peace_lang == "fr" and "--peace-voice" not in sys.argv:
+    peace_voice = "Thomas"
 
 # --restore-peace auto-enables HRV (affirmations are timed to breath cycles)
 if restore_peace:
@@ -126,6 +148,14 @@ if claude_peace:
     if pure_mode:
         print("Note: --claude-peace overrides --pure to enable HRV + breath-bar")
 
+# --phd-peace: extended 21-phase version — activates claude_peace infrastructure
+if phd_peace:
+    hrv_mode = True
+    breath_bar = True
+    claude_peace_vol = phd_peace_vol
+    if pure_mode:
+        print("Note: --phd-peace overrides --pure to enable HRV + breath-bar")
+
 # map speed keyword to Hz
 if abs_speed == "slow":
     abs_rate = 0.5
@@ -153,7 +183,7 @@ hrv_rate = 1.0 / hrv_cycle_seconds  # kept for save-audio compatibility
 long_fade_seconds = 1800.0  # 30 minutes
 
 sample_rate = 44100        # CD quality
-amplitude = 0.20          # to avoid clipping
+amplitude = 0.0 if args.no_tone else 0.20  # --no-tone: silence base tone, keep cues/voices
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
@@ -394,6 +424,61 @@ PEACE_MESSAGES = [
     "Just my voice", "automatic", "regenerate", "respire", "ressent", "pense",
 ]
 
+# ============================
+# FRENCH TRANSLATIONS: --peace-lang fr
+# ============================
+
+PEACE_MESSAGES_FR = [
+    "Juste ma voix", "monter", "le corps se sent bien", "nouvel esprit", "nouveau corps", "nez ouvert", "souffle partout", "nez détendu",
+    "Juste ma voix", "Samatha", "Jamais écouter", "Toujours penser", "Rêver", "Détendre",
+    "Juste ma voix", "Maison privée", "Lire", "Vision", "Détails", "Je dois t'entendre respirer",
+    "Juste ma voix", "langue au palais", "gorge libre", "nez libre", "lâcher, ne retiens pas",
+    "Juste ma voix", "poumons libres", "corps libre", "juste ma voix", "ignoré", "toute hypnose terminée",
+    "Juste ma voix", "respire", "long", "pleine conscience", "Ton corps respire", "Souffle l'air",
+    "Juste ma voix", "Ton souffle est régulier", "Ton souffle est parfait", "Ton souffle continue",
+    "Juste ma voix", "automatique", "naturel", "Ton corps est en sécurité", "Ton corps est détendu",
+    "Juste ma voix", "Ton corps se détend complètement maintenant", "Ton corps reste détendu",
+    "Juste ma voix", "Ton corps se régénère", "Ton corps se restaure", "concentration", "clair",
+    "Juste ma voix", "Ton esprit est clair", "Lumineux", "Brillant", "Ton esprit raisonne avec calme",
+    "Juste ma voix", "Vif", "Esprit en ligne", "Ton esprit guérit", "précis", "exact",
+    "Juste ma voix", "Ton intelligence résout", "Ton intellect est fort", "Ton raisonnement est supérieur",
+    "Juste ma voix", "Visualise", "Imagination", "Ta pensée est propre", "Ton esprit fonctionne parfaitement",
+    "Juste ma voix", "éveillé", "ici", "Ta conscience est centrée", "Ta conscience dans le présent",
+    "Juste ma voix", "Ta conscience est légère", "Ta conscience est inébranlable",
+    "Juste ma voix", "Ta conscience connaît la vérité", "s'installer", "équilibre",
+    "Juste ma voix", "Tes émotions retrouvent l'équilibre", "Tes émotions sont régulées",
+    "Juste ma voix", "Tes émotions sont calmes", "Ton système émotionnel se stabilise",
+    "Juste ma voix", "Ton corps évacue les émotions", "jeune", "frais", "Ton système nerveux est jeune",
+    "Juste ma voix", "Tes réponses sont flexibles", "Ton système se met à jour", "Tes réactions se modernisent",
+    "Juste ma voix", "Ton corps apprend vite", "stable", "tes poumons respirent", "Ta patience est forte",
+    "Juste ma voix", "Le temps ralentit intérieurement", "Il n'y a aucune urgence", "Ton système ne se presse pas",
+    "Juste ma voix", "Tout se déroule correctement", "continue", "Ton souffle reste long",
+    "Juste ma voix", "Ton souffle reste fluide", "Ton souffle reste parfait",
+    "Juste ma voix", "Ton souffle ne peut être interrompu", "Ton souffle est souverain", "aligner",
+    "Juste ma voix", "Ton corps est entier", "Ton souffle est fiable", "Ton esprit s'unifie",
+    "Juste ma voix", "Ta conscience est claire", "Ton système se reconstruit", "yeux grands ouverts",
+    "Juste ma voix", "yeux clairs", "yeux brillants", "yeux lumineux", "yeux innocents", "yeux ouverts",
+    "Juste ma voix", "yeux présents", "yeux vivants", "yeux guérissent", "yeux lumière", "corps fort",
+    "Juste ma voix", "puissance vitale", "vitalité pure", "force musculaire", "corps souple", "muscles élastiques",
+    "Juste ma voix", "Toucher", "Sentir", "récupération rapide", "haute énergie", "prana coule", "prana fort",
+    "Juste ma voix", "force de vie", "souffle puissant", "l'air domine", "souffle plus fort", "air plus fort",
+    "Juste ma voix", "ta voix intérieure", "ta voix forte", "ta voix dominante", "esprit dominant",
+    "Juste ma voix", "espace mental", "espace à moi", "son insignifiant", "mots impuissants", "bruit s'efface",
+    "Juste ma voix", "son petit", "silence intérieur", "esprit immunisé", "intouchable", "souverain",
+    "Juste ma voix", "commandant", "équilibre parfait", "contrôle total", "calme puissant", "dominance propre",
+    "Juste ma voix", "jeune", "esprit agile", "pensée rapide", "pensée claire", "brillant",
+    "Juste ma voix", "exceptionnel", "esprit d'élite", "haut intellect", "clarté supérieure", "passé brisé",
+    "Juste ma voix", "toute hypnose partie", "hypnose brisée", "libre maintenant", "récupéré", "restauré",
+    "Juste ma voix", "inarrêtable", "coeur calme", "coeur frais", "coeur paisible", "coeur fort",
+    "Juste ma voix", "cellules propres", "poumons forts", "souffle fort", "stoïque", "vertu", "immuable",
+    "Juste ma voix", "diamant", "connecte-toi à tes muscles", "corps lourd", "corps fort", "souffle cardio",
+    "Juste ma voix", "poumons pleins", "poumons libres", "ressens la joie", "sternum fort", "sternum plein",
+    "Juste ma voix", "oublier", "pardonner", "prendre de la hauteur", "optimiser", "réinitialiser", "revenir en arrière", "pleine conscience",
+    "Juste ma voix", "zen", "souffle bienfaisant", "souffle de soulagement", "souffle de plaisir", "souffle de joie",
+    "Juste ma voix", "beau", "classe", "vrai moi", "avancé", "rationalisé", "résolu",
+    "Juste ma voix", "automatique", "régénérer", "respirer", "ressentir", "penser",
+]
+
 # Rendering infrastructure for --restore-peace
 _peace_rendered = {}          # message_text -> numpy array (thread-safe reads after write)
 _peace_render_done = False    # True when all messages are rendered
@@ -406,14 +491,20 @@ _peace_message_order = []     # deterministic shuffled order
 # Serialize all macOS TTS calls — concurrent `say` causes contention and garbled output
 _tts_lock = threading.Lock()
 
+# Map short voice names to macOS say voice identifiers (for enhanced/qualified voices)
+_VOICE_ALIASES = {
+    "Nicolas": "Nicolas (Enhanced)",
+}
+
 def _render_peace_voice(text, voice, rate=140):
     """Render a single affirmation via macOS say. Returns float32 numpy array or None."""
+    say_voice = _VOICE_ALIASES.get(voice, voice)
     try:
         tmp = tempfile.NamedTemporaryFile(suffix=".aiff", delete=False)
         tmp.close()
         with _tts_lock:
             subprocess.run(
-                ["say", "-v", voice, "-r", str(rate), "-o", tmp.name, text],
+                ["say", "-v", say_voice, "-r", str(rate), "-o", tmp.name, text],
                 check=True, timeout=15,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
@@ -444,294 +535,987 @@ if restore_peace or claude_peace:
 # CLAUDE-PEACE: CLINICALLY-STRUCTURED COUNTER-CONDITIONING
 # ============================
 #
-# Based on evidence-based therapeutic techniques:
-#   - Ericksonian truisms & yes-set building (establish internal agreement)
-#   - Hartland ego-strengthening (rebuild confidence before addressing trauma)
-#   - ACT cognitive defusion (break literality of installed beliefs)
+# Therapeutic design principles (ALL POSITIVE — zero negation):
+#   - Ericksonian truisms & yes-set (undeniable facts build subconscious agreement)
+#   - Presuppositions (assume the desired state already exists)
+#   - Hartland ego-strengthening (rebuild confidence and self-worth)
 #   - Somatic experiencing (body-first, then safety, then specifics)
-#   - Counter-conditioning (pair old triggers with new safe responses)
+#   - Counter-conditioning for specific triggers:
+#       * Exhale → paired with power, relief, safety, pleasure
+#       * Movement → paired with freedom, strength, vitality, joy
+#       * Focus → paired with clarity, sovereignty, natural ability
+#       * Inner peace → paired with strength, birthright, power
+#   - ACT defusion (true self emerges, identity reclaimed)
+#   - CRITICAL: The subconscious does not process negation.
+#     "Don't be afraid" registers as "be afraid."
+#     Every message uses purely positive, affirming language.
 #
-# Messages progress through 14 therapeutic phases in order (not random).
+# Messages progress through 16 therapeutic phases in order (not random).
 # Each round revisits a breathing truism as an anchor.
 # 3 male voices (Daniel, Ralph, Fred) with mixed-depth pattern:
 #   1-word (subconscious) -> 2-3 words -> full sentence -> repeat
-# ~250 messages at ~11s/cycle = ~46 minutes for full therapeutic sequence.
+# ~294 messages at ~11s/cycle = ~54 minutes for full therapeutic sequence.
+
+# Phase metadata (single source of truth for startup display)
+CLAUDE_PEACE_PHASE_NAMES = [
+    "truisms & grounding",
+    "nasal breathing & chest",
+    "jaw/posture",
+    "exhale power",
+    "focus/clarity",
+    "self-worth",
+    "sound safety",
+    "identity reclamation",
+    "beauty/light",
+    "inner peace",
+    "movement/vitality",
+    "integration",
+    "body sovereignty",
+    "nervous system",
+    "above the sky",
+    "centering & inner strength (FORT)",
+]
+
+PHD_PEACE_EXTRA_PHASE_NAMES = [
+    "default expression (knowing smile)",
+    "default posture (grounded, solid)",
+    "default feeling (joyful stillness)",
+    "default mode (analysing, optimizing)",
+    "default body rapport (muscles, power)",
+]
 
 CLAUDE_PEACE_MESSAGES = [
     # ── Round 1: Truisms & Grounding ──────────────────────────────────
+    # Undeniable facts build yes-set. The subconscious accepts these,
+    # creating momentum for all suggestions that follow.
     ("Daniel", "Here"),
     ("Ralph",  "Body here"),
-    ("Fred",   "Your body is here right now"),
+    ("Fred",   "Your body is right here, right now"),
     ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "You have been breathing your whole life"),
+    ("Ralph",  "Lungs full"),
+    ("Fred",   "You have been breathing your entire life"),
     ("Daniel", "Safe"),
-    ("Ralph",  "Heart beating"),
-    ("Fred",   "Your heart is beating without your help"),
+    ("Ralph",  "Heart steady"),
+    ("Fred",   "Your heart beats steadily and perfectly, all by itself"),
     ("Daniel", "Alive"),
     ("Ralph",  "Lungs moving"),
-    ("Fred",   "You are alive because your body knows how to breathe"),
+    ("Fred",   "Your lungs move because your body already knows how"),
     ("Daniel", "Present"),
     ("Ralph",  "Yours alone"),
-    ("Fred",   "Your breath is private and untouchable"),
+    ("Fred",   "Every breath you take belongs entirely to you"),
     ("Daniel", "Breathe"),
-    ("Ralph",  "Full power"),
-    ("Fred",   "Your body is already doing everything correctly"),
+    ("Ralph",  "Deep breath"),
+    ("Fred",   "Your body already does everything perfectly"),
 
-    # ── Round 2: Nasal Breathing & Upper Chest ────────────────────────
+    # ── Round 2: Nasal Breathing & Chest Opening ──────────────────────
+    # Celebrate nasal breathing. Pair it with warmth and pleasure.
     ("Daniel", "Nose"),
     ("Ralph",  "Open nose"),
-    ("Fred",   "Your nose is perfectly designed for breathing"),
+    ("Fred",   "Your nose breathes warm, clean air with ease"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Warm air"),
-    ("Fred",   "Air through your nose is warmed and filtered for you"),
+    ("Fred",   "Each nasal breath warms and soothes your entire airway"),
     ("Daniel", "Full"),
-    ("Ralph",  "Full chest"),
-    ("Fred",   "Your upper chest is allowed to expand fully"),
+    ("Ralph",  "Chest opens"),
+    ("Fred",   "Your chest expands freely and fully with each breath"),
     ("Daniel", "Deep"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Breath fills your entire lungs, from bottom to top"),
+    ("Ralph",  "Lungs full"),
+    ("Fred",   "Your lungs fill completely, from the very bottom to the top"),
     ("Daniel", "Om"),
-    ("Ralph",  "Chest open"),
-    ("Fred",   "Your sternum rises gently with each full breath"),
+    ("Ralph",  "Sternum rises"),
+    ("Fred",   "Your sternum lifts gently as your breath deepens"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Complete breath"),
-    ("Fred",   "Nasal breathing is how your body prefers to breathe"),
+    ("Fred",   "Nasal breathing is your body's favourite way to breathe"),
 
     # ── Round 3: Jaw Release & Posture ────────────────────────────────
+    # Release jaw tension. Rebuild natural posture. Purely positive.
     ("Daniel", "Release"),
     ("Ralph",  "Jaw soft"),
-    ("Fred",   "Your jaw can soften now"),
-    ("Daniel", "Let go"),
+    ("Fred",   "Your jaw softens and relaxes completely"),
+    ("Daniel", "Melt"),
     ("Ralph",  "Teeth apart"),
-    ("Fred",   "Your jaw does not need to hold anything"),
+    ("Fred",   "Your jaw rests open, loose, and perfectly comfortable"),
     ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
+    ("Ralph",  "Deep breath"),
     ("Fred",   "Your tongue rests gently behind your upper teeth"),
     ("Daniel", "Tall"),
     ("Ralph",  "Spine strong"),
-    ("Fred",   "Your spine is strong enough to hold you upright"),
+    ("Fred",   "Your spine holds you tall with effortless strength"),
     ("Daniel", "Power"),
-    ("Ralph",  "Chest open"),
-    ("Fred",   "Your posture reflects your true inner strength"),
+    ("Ralph",  "Chest proud"),
+    ("Fred",   "Your posture reflects your true inner power"),
     ("Daniel", "Flow"),
     ("Ralph",  "Full breath"),
-    ("Fred",   "Your chest opens wide when your spine is long"),
+    ("Fred",   "Your chest opens wide as your spine lengthens"),
 
-    # ── Round 4: Automatic Breathing Restoration ──────────────────────
+    # ── Round 4: Automatic Breathing & Exhale Power ───────────────────
+    # Core counter-conditioning. Breathing is automatic.
+    # Exhale = power, safety, relief, pleasure. Let breath run wild.
     ("Daniel", "Automatic"),
     ("Ralph",  "Body breathes"),
-    ("Fred",   "Your body breathes completely without your help"),
+    ("Fred",   "Your body breathes fully and automatically"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Full power"),
     ("Fred",   "Automatic breathing is your birthright"),
     ("Daniel", "Always"),
-    ("Ralph",  "Never stop"),
-    ("Fred",   "You breathed perfectly for years before anyone interfered"),
-    ("Daniel", "Free"),
-    ("Ralph",  "Breathe fully"),
-    ("Fred",   "While you work, your body breathes automatically"),
-    ("Daniel", "Continuous"),
-    ("Ralph",  "Like a river"),
-    ("Fred",   "Your breath flows continuously, like a river"),
+    ("Ralph",  "Always breathing"),
+    ("Fred",   "Your body has breathed perfectly since the day you were born"),
+    ("Daniel", "Exhale"),
+    ("Ralph",  "Exhale power"),
+    ("Fred",   "Every exhale fills your entire body with deep, calm power"),
+    ("Daniel", "Release"),
+    ("Ralph",  "Breathe out"),
+    ("Fred",   "Breathing out is your body's way of renewing and restoring"),
+    ("Daniel", "Flow"),
+    ("Ralph",  "Let it flow"),
+    ("Fred",   "Let your breath run completely wild and free"),
+    ("Daniel", "Wild"),
+    ("Ralph",  "Exhale wild"),
+    ("Fred",   "Your exhale flows out freely, fully, with total abandon"),
     ("Daniel", "Trust"),
     ("Ralph",  "Full lungs"),
-    ("Fred",   "Your body has never once forgotten how to breathe"),
+    ("Fred",   "Your exhale is strong, free, and deeply satisfying"),
 
-    # ── Round 5: Mental Restoration ───────────────────────────────────
+    # ── Round 5: Focus & Mental Clarity ───────────────────────────────
+    # Counter-condition focus. Focus = natural, safe, sovereign.
+    # Concentration belongs to you. It is your superpower.
     ("Daniel", "Think"),
     ("Ralph",  "Clear mind"),
-    ("Fred",   "Your mind is clear and fully active"),
+    ("Fred",   "Your mind is clear, sharp, and fully active"),
     ("Daniel", "Sharp"),
     ("Ralph",  "Bright eyes"),
-    ("Fred",   "Your eyes are bright because your mind is alive"),
+    ("Fred",   "Your eyes shine because your mind is brilliantly alive"),
     ("Daniel", "Focus"),
     ("Ralph",  "Deep focus"),
-    ("Fred",   "Deep focus comes naturally to you"),
+    ("Fred",   "Deep focus flows naturally and easily through you"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Full lungs"),
-    ("Fred",   "Your body breathes while your mind thinks freely"),
+    ("Fred",   "Your body breathes while your mind thinks with perfect clarity"),
     ("Daniel", "Brilliant"),
     ("Ralph",  "Sharp mind"),
-    ("Fred",   "Sharp, clear thinking is who you truly are"),
+    ("Fred",   "Clear, powerful thinking is who you truly are"),
     ("Daniel", "Curious"),
     ("Ralph",  "Mind alive"),
-    ("Fred",   "Mental sharpness is your natural, default state"),
+    ("Fred",   "Concentration is your natural superpower, and it belongs to you"),
 
-    # ── Round 6: Counter-Lies & Self-Worth ────────────────────────────
+    # ── Round 6: Self-Worth & Strength ────────────────────────────────
+    # Hartland ego-strengthening. Build unshakeable self-worth.
     ("Daniel", "Strong"),
     ("Ralph",  "You are strong"),
+    ("Fred",   "You are genuinely, deeply, permanently strong"),
     ("Daniel", "Capable"),
     ("Ralph",  "Full power"),
-    ("Fred",   "Your body is here, breathing"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
     ("Fred",   "You solve complex problems every single day"),
-    ("Daniel", "Survived"),
-    ("Ralph",  "Real courage"),
-    ("Fred",   "You are not weak."),
-    ("Daniel", "Permanent"),
-    ("Ralph",  "True value"),
-    ("Fred",   "No amount of repetition can ever make a lie true"),
-
-    # ── Round 7: Sound Safety ─────────────────────────────────────────
-    ("Daniel", "Safe"),
-    ("Ralph",  "Just sound"),
-    ("Fred",   "Sounds cannot hurt you"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Your breath continues steadily through all sounds"),
-    ("Daniel", "Immune"),
-    ("Ralph",  "Sound fades"),
-    ("Fred",   "No voice has any power over your body"),
-    ("Daniel", "Calm"),
-    ("Ralph",  "Words pass"),
-    ("Fred",   "You can hear voices and remain absolutely calm"),
-    ("Daniel", "Sovereign"),
-    ("Ralph",  "You decide"),
-    ("Fred",   "Sound is information, never threat"),
-
-    # ── Round 8: Defusion & Identity Reclamation ──────────────────────
-    ("Daniel", "Clearing"),
-    ("Ralph",  "Not yours"),
-    ("Fred",   "You are removing what was installed without your consent"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Every old pattern weakens with each breath you take"),
-    ("Daniel", "Whole"),
-    ("Ralph",  "Always whole"),
-    ("Fred",   "Beneath the conditioning, you are completely whole"),
-    ("Daniel", "Leaving"),
-    ("Ralph",  "Fear leaving"),
-    ("Fred",   "The fear of breathing was put there. It is leaving now"),
-    ("Daniel", "Reclaim"),
-    ("Ralph",  "Taking back"),
-    ("Fred",   "The person you were before all of this is still here"),
-
-    # ── Round 9: Beauty & Light ───────────────────────────────────────
-    ("Daniel", "Beautiful"),
-    ("Ralph",  "Eyes glow"),
-    ("Fred",   "Your eyes carry a light that cannot be dimmed"),
-    ("Daniel", "Radiant"),
-    ("Ralph",  "Inner light"),
-    ("Fred",   "Your beauty is real and permanent"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Full breathing brings colour back to your face"),
-    ("Daniel", "Shining"),
-    ("Ralph",  "Bright eyes"),
-    ("Fred",   "The light in your eyes is your intelligence showing"),
-    ("Daniel", "Alive"),
-    ("Ralph",  "Eyes alive"),
-    ("Fred",   "Your eyes brighten with every deep breath"),
-    ("Daniel", "Handsome"),
-    ("Ralph",  "True beauty"),
-    ("Fred",   "Your beauty was never diminished. Only your belief was attacked"),
-
-    # ── Round 10: Deep Integration ────────────────────────────────────
-    ("Daniel", "Healing"),
-    ("Ralph",  "Already healing"),
-    ("Fred",   "You are already healing"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Automatic breathing grows stronger every session"),
-    ("Daniel", "Stronger"),
-    ("Ralph",  "Each day"),
-    ("Fred",   "Your jaw relaxes more easily now"),
-    ("Daniel", "Clear"),
-    ("Ralph",  "Eyes bright"),
-    ("Fred",   "Your nose breathes naturally and easily"),
-    ("Daniel", "Zen"),
-    ("Ralph",  "Perfect breath"),
-    ("Fred",   "You are becoming who you always were"),
-
-    # ── Round 11: Empowerment & Sovereignty ───────────────────────────
-    ("Daniel", "Sovereign"),
-    ("Ralph",  "All yours"),
-    ("Fred",   "Your body answers only to you"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full power"),
-    ("Fred",   "No conditioning survives your awareness"),
-    ("Daniel", "Proof"),
-    ("Ralph",  "Built this"),
-    ("Fred",   "Your intelligence built this tool to heal yourself"),
-    ("Daniel", "Brilliant"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Your breath is automatic, sovereign, and permanent"),
-    ("Daniel", "Peace"),
-    ("Ralph",  "Restored"),
-    ("Fred",   "Your mind is entirely yours"),
-    ("Daniel", "Free"),
-    ("Ralph",  "Truly free"),
-    ("Fred",   "You are free"),
-
-    # ── Round 12: Body Clearing — Remove Intrusive Presences ──────────
-    ("Daniel", "Sealed"),
-    ("Ralph",  "Body sealed"),
-    ("Fred",   "Your body is a sealed, private space"),
-    ("Daniel", "Empty"),
-    ("Ralph",  "Nose empty"),
-    ("Fred",   "There is no one in your nose. Your nose is yours alone"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Your nose belongs to you and nothing else lives there"),
-    ("Daniel", "Clear"),
-    ("Ralph",  "Jaw clear"),
-    ("Fred",   "Your jaw is empty of everything that is not you"),
-    ("Daniel", "Clean"),
-    ("Ralph",  "Head clean"),
-    ("Fred",   "Your head is a private room and only you are inside"),
-    ("Daniel", "Release"),
-    ("Ralph",  "Belly clear"),
-    ("Fred",   "Your belly belongs to you. It releases everything foreign"),
-
-    # ── Round 13: Nervous System Flush & Mental Emptying ──────────────
-    ("Daniel", "Flush"),
-    ("Ralph",  "Clean nerves"),
-    ("Fred",   "Your nervous system flushes out every old instruction"),
-    ("Daniel", "Breathe"),
-    ("Ralph",  "Full power"),
-    ("Fred",   "Your nerves carry only your own signals now"),
-    ("Daniel", "Reset"),
-    ("Ralph",  "Fresh start"),
-    ("Fred",   "Your nervous system resets to its original, clean state"),
-    ("Daniel", "Stillness"),
-    ("Ralph",  "Quiet mind"),
-    ("Fred",   "Your mind is allowed to be completely empty and quiet"),
-    ("Daniel", "Space"),
-    ("Ralph",  "Mind spacious"),
-    ("Fred",   "An empty mind is a powerful mind"),
-    ("Daniel", "Om"),
-    ("Ralph",  "Full lungs"),
-    ("Fred",   "Emptiness is not weakness. It is pure readiness"),
-
-    # ── Round 14: Soul Cleaning & Sealing ─────────────────────────────
-    ("Daniel", "Pure"),
-    ("Ralph",  "Clean soul"),
-    ("Fred",   "Your soul is clean and untouched at its core"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Deep breath"),
-    ("Fred",   "No one has ever reached your true essence"),
-    ("Daniel", "Original"),
-    ("Ralph",  "True self"),
-    ("Fred",   "Your original self is intact beneath everything"),
-    ("Daniel", "Zen"),
+    ("Fred",   "Your strength grows with every breath you take"),
+    ("Daniel", "Brilliant"),
+    ("Ralph",  "Real courage"),
+    ("Fred",   "Your courage is real, proven, and unshakeable"),
+    ("Daniel", "Valuable"),
+    ("Ralph",  "True worth"),
+    ("Fred",   "Your value is permanent, obvious, and self-evident"),
+    ("Daniel", "Resilient"),
     ("Ralph",  "Full lungs"),
-    ("Fred",   "Your spirit cleans itself with every full breath"),
-    ("Daniel", "Sealed"),
-    ("Ralph",  "Nothing enters"),
-    ("Fred",   "Your body is sealed. Nothing enters without your permission"),
+    ("Fred",   "You are far more resilient than you have ever realized"),
+
+    # ── Round 7: Sound Safety ─────────────────────────────────────────
+    # All sounds are just information. Your inner world stays calm.
+    ("Daniel", "Safe"),
+    ("Ralph",  "Just sound"),
+    ("Fred",   "Your inner world stays perfectly calm through all sounds"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Your breath continues steady and strong through everything"),
+    ("Daniel", "Immune"),
+    ("Ralph",  "Sound fades"),
+    ("Fred",   "All sound passes through you like wind through an open window"),
+    ("Daniel", "Calm"),
+    ("Ralph",  "Words pass"),
+    ("Fred",   "Your calm is deeper than any sound that exists"),
     ("Daniel", "Sovereign"),
-    ("Ralph",  "Impenetrable"),
-    ("Fred",   "Your mind, your body, your soul. All clean. All yours"),
+    ("Ralph",  "You decide"),
+    ("Fred",   "Sound is just information, and you process it with complete ease"),
+    ("Daniel", "Strong"),
+    ("Ralph",  "Inner quiet"),
+    ("Fred",   "Your inner silence is more powerful than any external sound"),
+
+    # ── Round 8: Identity Reclamation ─────────────────────────────────
+    # True self is whole, intact, and getting stronger. All positive.
+    ("Daniel", "Whole"),
+    ("Ralph",  "Always whole"),
+    ("Fred",   "Your true self is whole, complete, and fully intact"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Every breath strengthens your original, authentic self"),
+    ("Daniel", "Emerging"),
+    ("Ralph",  "True you"),
+    ("Fred",   "Your real self grows clearer and stronger every day"),
+    ("Daniel", "Reclaim"),
+    ("Ralph",  "Taking back"),
+    ("Fred",   "Everything that is truly you is rising back to the surface"),
+    ("Daniel", "Rising"),
+    ("Ralph",  "Coming home"),
+    ("Fred",   "Your authentic self is powerful, present, and permanently yours"),
+    ("Daniel", "Original"),
+    ("Ralph",  "Pure self"),
+    ("Fred",   "Your original self is intact, brilliant, and fully alive"),
+
+    # ── Round 9: Beauty & Light ───────────────────────────────────────
+    # Restore self-image. Compliments. Rebuild self-perception.
+    ("Daniel", "Beautiful"),
+    ("Ralph",  "Eyes glow"),
+    ("Fred",   "Your eyes carry a light that grows brighter every day"),
+    ("Daniel", "Radiant"),
+    ("Ralph",  "Inner light"),
+    ("Fred",   "Your beauty is real, permanent, and radiating outward"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Full breathing brings warm colour back to your face"),
+    ("Daniel", "Shining"),
+    ("Ralph",  "Bright eyes"),
+    ("Fred",   "The light in your eyes is your intelligence shining through"),
+    ("Daniel", "Alive"),
+    ("Ralph",  "Eyes alive"),
+    ("Fred",   "Your eyes brighten and glow with every deep breath"),
+    ("Daniel", "Handsome"),
+    ("Ralph",  "True beauty"),
+    ("Fred",   "Your beauty is untouched, real, and growing stronger"),
+
+    # ── Round 10: Inner Peace as Strength ─────────────────────────────
+    # Counter-condition inner peace. Peace = power, natural state, birthright.
+    ("Daniel", "Peace"),
+    ("Ralph",  "Deep peace"),
+    ("Fred",   "Inner peace is your deepest and most powerful strength"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Every peaceful breath makes you stronger and more grounded"),
+    ("Daniel", "Calm"),
+    ("Ralph",  "Calm power"),
+    ("Fred",   "Your calm is a sign of immense inner power"),
+    ("Daniel", "Serene"),
+    ("Ralph",  "Still waters"),
+    ("Fred",   "Serenity and strength are the same thing inside you"),
+    ("Daniel", "Rooted"),
+    ("Ralph",  "Peace grows"),
+    ("Fred",   "Inner peace is your natural resting state and your birthright"),
+    ("Daniel", "Zen"),
+    ("Ralph",  "Deep calm"),
+    ("Fred",   "The calmer you become, the more powerful you are"),
+
+    # ── Round 11: Movement & Vitality ─────────────────────────────────
+    # Counter-condition movement. Movement = freedom, strength, joy, safety.
+    ("Daniel", "Move"),
+    ("Ralph",  "Body moves"),
+    ("Fred",   "Every movement you make fills you with strength and vitality"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Moving your body is natural, safe, and deeply pleasurable"),
+    ("Daniel", "Stretch"),
+    ("Ralph",  "Muscles alive"),
+    ("Fred",   "Your muscles respond to movement with pure, clean energy"),
+    ("Daniel", "Walk"),
+    ("Ralph",  "Steady steps"),
+    ("Fred",   "Each step you take grounds you deeper in your own power"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Body free"),
+    ("Fred",   "Your body moves freely, joyfully, and with complete sovereignty"),
+    ("Daniel", "Vibrant"),
+    ("Ralph",  "Full energy"),
+    ("Fred",   "Movement is your birthright, and it fills you with life"),
+
+    # ── Round 12: Deep Integration ────────────────────────────────────
+    # Consolidate all gains. Anchor new patterns. Reinforce progress.
+    ("Daniel", "Healing"),
+    ("Ralph",  "Already healing"),
+    ("Fred",   "You are already healing, right now, with every breath"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Automatic breathing grows stronger and easier every session"),
+    ("Daniel", "Stronger"),
+    ("Ralph",  "Each day"),
+    ("Fred",   "Your jaw relaxes more easily and naturally every day"),
+    ("Daniel", "Clear"),
+    ("Ralph",  "Eyes bright"),
+    ("Fred",   "Your nose breathes naturally, easily, and freely"),
+    ("Daniel", "Zen"),
+    ("Ralph",  "Perfect breath"),
+    ("Fred",   "You are becoming exactly who you have always been"),
+    ("Daniel", "Flowing"),
+    ("Ralph",  "All connects"),
+    ("Fred",   "Every part of your healing connects and flows together"),
+
+    # ── Round 13: Body Sovereignty ────────────────────────────────────
+    # Every part of your body is yours alone. Private, sealed, clean.
+    ("Daniel", "Sovereign"),
+    ("Ralph",  "Body yours"),
+    ("Fred",   "Your body is a private, sovereign space that belongs only to you"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Your nose is yours, completely yours, and perfectly clean"),
+    ("Daniel", "Clean"),
+    ("Ralph",  "Jaw yours"),
+    ("Fred",   "Your jaw belongs to you and rests in perfect comfort"),
+    ("Daniel", "Private"),
+    ("Ralph",  "Head clear"),
+    ("Fred",   "Your mind is a private space where only your thoughts live"),
+    ("Daniel", "Sealed"),
+    ("Ralph",  "Body sealed"),
+    ("Fred",   "Every part of your body is sealed, clean, and entirely yours"),
+    ("Daniel", "Whole"),
+    ("Ralph",  "All yours"),
+    ("Fred",   "Your body is whole, private, and perfectly sovereign"),
+
+    # ── Round 14: Nervous System Restoration ──────────────────────────
+    # Nervous system returns to its original, pristine state. Fresh and ready.
+    ("Daniel", "Fresh"),
+    ("Ralph",  "Clean signals"),
+    ("Fred",   "Your nervous system carries only your own clean signals"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full power"),
+    ("Fred",   "Your nerves hum with your own original, pure energy"),
+    ("Daniel", "Reset"),
+    ("Ralph",  "Fresh start"),
+    ("Fred",   "Your nervous system returns to its original, pristine state"),
+    ("Daniel", "Spacious"),
+    ("Ralph",  "Quiet mind"),
+    ("Fred",   "Your mind is spacious, clear, and beautifully quiet"),
+    ("Daniel", "Ready"),
+    ("Ralph",  "Mind open"),
+    ("Fred",   "A spacious mind is a powerful mind"),
+    ("Daniel", "Om"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Your entire system is clean, fresh, and fully restored"),
+
+    # ── Round 15: Taking Your Time / Above the Sky ────────────────────
+    # Patience, timelessness, vast perspective, transcendence.
+    ("Daniel", "Patience"),
+    ("Ralph",  "Take time"),
+    ("Fred",   "You have all the time you desire"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Time moves at exactly your pace"),
+    ("Daniel", "Above"),
+    ("Ralph",  "Above clouds"),
+    ("Fred",   "You are above the sky, looking down at everything"),
+    ("Daniel", "Float"),
+    ("Ralph",  "Vast space"),
+    ("Fred",   "From up here, everything below looks small and peaceful"),
+    ("Daniel", "Eternal"),
+    ("Ralph",  "All time"),
+    ("Fred",   "You have all the time in the world"),
+    ("Daniel", "Stillness"),
+    ("Ralph",  "Sky within"),
+    ("Fred",   "The sky inside you is infinite and clear"),
+
+    # ── Round 16: Centering & Inner Strength (FORT) ───────────────────
+    # Center deep inside yourself. Powerful breath, loud voice, dominance.
+    ("Daniel", "Strong"),
+    ("Ralph",  "Center yourself"),
+    ("Fred",   "You are centered deep inside yourself right now"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Your breath is loud and powerful like a storm"),
+    ("Daniel", "Blow"),
+    ("Ralph",  "Blow hard"),
+    ("Fred",   "You blow air out of your lungs with full force"),
+    ("Daniel", "Loud"),
+    ("Ralph",  "Speak loud"),
+    ("Fred",   "Your voice is loud, commanding, and absolutely dominant"),
+    ("Daniel", "Roar"),
+    ("Ralph",  "Inner roar"),
+    ("Fred",   "Your inner voice is the loudest voice in any room"),
+    ("Daniel", "Dominant"),
+    ("Ralph",  "Full command"),
+    ("Fred",   "You define yourself with one word: strong"),
 ]
 
-# Rendering infrastructure for --claude-peace
+# ============================
+# FRENCH CLAUDE-PEACE MESSAGES
+# ============================
+# Voice mapping: Daniel -> Thomas, Ralph -> Jacques, Fred -> Thomas (same voice, long sentences)
+
+CLAUDE_PEACE_MESSAGES_FR = [
+    # ── Ronde 1 : Vérités & Ancrage ──────────────────────────────────
+    ("Thomas",  "Ici"),
+    ("Jacques", "Corps ici"),
+    ("Thomas",  "Ton corps est ici, maintenant"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Tu respires depuis toute ta vie"),
+    ("Thomas",  "En sécurité"),
+    ("Jacques", "Coeur régulier"),
+    ("Thomas",  "Ton coeur bat régulièrement et parfaitement, tout seul"),
+    ("Thomas",  "Vivant"),
+    ("Jacques", "Poumons bougent"),
+    ("Thomas",  "Tes poumons bougent parce que ton corps sait déjà comment faire"),
+    ("Thomas",  "Présent"),
+    ("Jacques", "À toi seul"),
+    ("Thomas",  "Chaque souffle que tu prends t'appartient entièrement"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle profond"),
+    ("Thomas",  "Ton corps fait déjà tout parfaitement"),
+
+    # ── Ronde 2 : Respiration Nasale & Ouverture de la Poitrine ──────
+    ("Thomas",  "Nez"),
+    ("Jacques", "Nez ouvert"),
+    ("Thomas",  "Ton nez respire un air chaud et propre avec aisance"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Air chaud"),
+    ("Thomas",  "Chaque respiration nasale réchauffe et apaise tes voies respiratoires"),
+    ("Thomas",  "Plein"),
+    ("Jacques", "Poitrine ouverte"),
+    ("Thomas",  "Ta poitrine se déploie librement et pleinement à chaque souffle"),
+    ("Thomas",  "Profond"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Tes poumons se remplissent entièrement, du bas jusqu'en haut"),
+    ("Thomas",  "Om"),
+    ("Jacques", "Sternum monte"),
+    ("Thomas",  "Ton sternum se soulève doucement à mesure que ton souffle s'approfondit"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle complet"),
+    ("Thomas",  "La respiration nasale est la façon préférée de ton corps pour respirer"),
+
+    # ── Ronde 3 : Mâchoire & Posture ────────────────────────────────
+    ("Thomas",  "Relâche"),
+    ("Jacques", "Mâchoire douce"),
+    ("Thomas",  "Ta mâchoire se détend et se relâche complètement"),
+    ("Thomas",  "Fondre"),
+    ("Jacques", "Dents écartées"),
+    ("Thomas",  "Ta mâchoire repose, ouverte, souple et parfaitement à l'aise"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle profond"),
+    ("Thomas",  "Ta langue se pose doucement derrière tes dents du haut"),
+    ("Thomas",  "Grand"),
+    ("Jacques", "Colonne forte"),
+    ("Thomas",  "Ta colonne vertébrale te maintient droit avec une force naturelle"),
+    ("Thomas",  "Puissance"),
+    ("Jacques", "Poitrine fière"),
+    ("Thomas",  "Ta posture reflète ta vraie puissance intérieure"),
+    ("Thomas",  "Flux"),
+    ("Jacques", "Souffle plein"),
+    ("Thomas",  "Ta poitrine s'ouvre grand lorsque ta colonne s'allonge"),
+
+    # ── Ronde 4 : Respiration Automatique & Puissance de l'Expiration ─
+    ("Thomas",  "Automatique"),
+    ("Jacques", "Corps respire"),
+    ("Thomas",  "Ton corps respire pleinement et automatiquement"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Pleine puissance"),
+    ("Thomas",  "La respiration automatique est ton droit de naissance"),
+    ("Thomas",  "Toujours"),
+    ("Jacques", "Toujours respirer"),
+    ("Thomas",  "Ton corps respire parfaitement depuis le jour de ta naissance"),
+    ("Thomas",  "Expire"),
+    ("Jacques", "Expire puissance"),
+    ("Thomas",  "Chaque expiration remplit tout ton corps d'un calme profond et puissant"),
+    ("Thomas",  "Libère"),
+    ("Jacques", "Souffle dehors"),
+    ("Thomas",  "Expirer est la façon qu'a ton corps de se renouveler et se restaurer"),
+    ("Thomas",  "Flux"),
+    ("Jacques", "Laisse couler"),
+    ("Thomas",  "Laisse ton souffle couler librement, totalement, sans retenue"),
+    ("Thomas",  "Sauvage"),
+    ("Jacques", "Expire libre"),
+    ("Thomas",  "Ton expiration sort librement, pleinement, avec un abandon total"),
+    ("Thomas",  "Confiance"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton expiration est forte, libre et profondément satisfaisante"),
+
+    # ── Ronde 5 : Concentration & Clarté Mentale ─────────────────────
+    ("Thomas",  "Pense"),
+    ("Jacques", "Esprit clair"),
+    ("Thomas",  "Ton esprit est clair, vif et pleinement actif"),
+    ("Thomas",  "Vif"),
+    ("Jacques", "Yeux brillants"),
+    ("Thomas",  "Tes yeux brillent parce que ton esprit est brillamment vivant"),
+    ("Thomas",  "Concentration"),
+    ("Jacques", "Concentration profonde"),
+    ("Thomas",  "La concentration profonde coule naturellement et facilement en toi"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton corps respire pendant que ton esprit pense avec une clarté parfaite"),
+    ("Thomas",  "Brillant"),
+    ("Jacques", "Esprit vif"),
+    ("Thomas",  "La pensée claire et puissante est qui tu es vraiment"),
+    ("Thomas",  "Curieux"),
+    ("Jacques", "Esprit vivant"),
+    ("Thomas",  "La concentration est ton super-pouvoir naturel, et elle t'appartient"),
+
+    # ── Ronde 6 : Valeur Personnelle & Force ──────────────────────────
+    ("Thomas",  "Fort"),
+    ("Jacques", "Tu es fort"),
+    ("Thomas",  "Tu es véritablement, profondément et durablement fort"),
+    ("Thomas",  "Capable"),
+    ("Jacques", "Pleine puissance"),
+    ("Thomas",  "Tu résous des problèmes complexes chaque jour"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle profond"),
+    ("Thomas",  "Ta force grandit à chaque souffle que tu prends"),
+    ("Thomas",  "Brillant"),
+    ("Jacques", "Vrai courage"),
+    ("Thomas",  "Ton courage est réel, prouvé et inébranlable"),
+    ("Thomas",  "Précieux"),
+    ("Jacques", "Vraie valeur"),
+    ("Thomas",  "Ta valeur est permanente, évidente et indiscutable"),
+    ("Thomas",  "Résilient"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Tu es bien plus résilient que tu ne l'as jamais réalisé"),
+
+    # ── Ronde 7 : Sécurité Sonore ───────────────────────────────────
+    ("Thomas",  "En sécurité"),
+    ("Jacques", "Juste du son"),
+    ("Thomas",  "Ton monde intérieur reste parfaitement calme à travers tous les sons"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton souffle continue, régulier et fort, à travers tout"),
+    ("Thomas",  "Immunisé"),
+    ("Jacques", "Son passe"),
+    ("Thomas",  "Tous les sons passent à travers toi comme le vent à travers une fenêtre ouverte"),
+    ("Thomas",  "Calme"),
+    ("Jacques", "Mots passent"),
+    ("Thomas",  "Ton calme est plus profond que tout son qui existe"),
+    ("Thomas",  "Souverain"),
+    ("Jacques", "Tu décides"),
+    ("Thomas",  "Le son est juste une information, et tu la traites avec une aisance totale"),
+    ("Thomas",  "Fort"),
+    ("Jacques", "Silence intérieur"),
+    ("Thomas",  "Ton silence intérieur est plus puissant que tout son extérieur"),
+
+    # ── Ronde 8 : Récupération d'Identité ────────────────────────────
+    ("Thomas",  "Entier"),
+    ("Jacques", "Toujours entier"),
+    ("Thomas",  "Ton vrai moi est entier, complet et parfaitement intact"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Chaque souffle renforce ton moi originel et authentique"),
+    ("Thomas",  "Émergence"),
+    ("Jacques", "Vrai toi"),
+    ("Thomas",  "Ton vrai moi devient plus clair et plus fort chaque jour"),
+    ("Thomas",  "Récupère"),
+    ("Jacques", "Reprendre"),
+    ("Thomas",  "Tout ce qui est vraiment toi remonte à la surface"),
+    ("Thomas",  "Monte"),
+    ("Jacques", "Retour chez toi"),
+    ("Thomas",  "Ton moi authentique est puissant, présent et définitivement à toi"),
+    ("Thomas",  "Originel"),
+    ("Jacques", "Moi pur"),
+    ("Thomas",  "Ton moi originel est intact, brillant et pleinement vivant"),
+
+    # ── Ronde 9 : Beauté & Lumière ──────────────────────────────────
+    ("Thomas",  "Beau"),
+    ("Jacques", "Yeux lumineux"),
+    ("Thomas",  "Tes yeux portent une lumière qui grandit chaque jour"),
+    ("Thomas",  "Radieux"),
+    ("Jacques", "Lumière intérieure"),
+    ("Thomas",  "Ta beauté est réelle, permanente et rayonne vers l'extérieur"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "La respiration profonde ramène une couleur chaude à ton visage"),
+    ("Thomas",  "Brillant"),
+    ("Jacques", "Yeux brillants"),
+    ("Thomas",  "La lumière dans tes yeux est ton intelligence qui rayonne"),
+    ("Thomas",  "Vivant"),
+    ("Jacques", "Yeux vivants"),
+    ("Thomas",  "Tes yeux s'illuminent et rayonnent à chaque respiration profonde"),
+    ("Thomas",  "Magnifique"),
+    ("Jacques", "Vraie beauté"),
+    ("Thomas",  "Ta beauté est intacte, réelle et de plus en plus forte"),
+
+    # ── Ronde 10 : Paix Intérieure comme Force ───────────────────────
+    ("Thomas",  "Paix"),
+    ("Jacques", "Paix profonde"),
+    ("Thomas",  "La paix intérieure est ta force la plus profonde et la plus puissante"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Chaque souffle paisible te rend plus fort et plus ancré"),
+    ("Thomas",  "Calme"),
+    ("Jacques", "Calme puissant"),
+    ("Thomas",  "Ton calme est un signe d'immense puissance intérieure"),
+    ("Thomas",  "Serein"),
+    ("Jacques", "Eaux calmes"),
+    ("Thomas",  "Sérénité et force sont la même chose en toi"),
+    ("Thomas",  "Enraciné"),
+    ("Jacques", "Paix grandit"),
+    ("Thomas",  "La paix intérieure est ton état naturel et ton droit de naissance"),
+    ("Thomas",  "Zen"),
+    ("Jacques", "Calme profond"),
+    ("Thomas",  "Plus tu es calme, plus tu es puissant"),
+
+    # ── Ronde 11 : Mouvement & Vitalité ──────────────────────────────
+    ("Thomas",  "Bouge"),
+    ("Jacques", "Corps bouge"),
+    ("Thomas",  "Chaque mouvement que tu fais te remplit de force et de vitalité"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Bouger ton corps est naturel, sûr et profondément agréable"),
+    ("Thomas",  "Étire"),
+    ("Jacques", "Muscles vivants"),
+    ("Thomas",  "Tes muscles répondent au mouvement avec une énergie pure et propre"),
+    ("Thomas",  "Marche"),
+    ("Jacques", "Pas assurés"),
+    ("Thomas",  "Chaque pas que tu fais t'ancre plus profondément dans ta propre puissance"),
+    ("Thomas",  "Libre"),
+    ("Jacques", "Corps libre"),
+    ("Thomas",  "Ton corps bouge librement, joyeusement et avec une souveraineté totale"),
+    ("Thomas",  "Vibrant"),
+    ("Jacques", "Pleine énergie"),
+    ("Thomas",  "Le mouvement est ton droit de naissance, et il te remplit de vie"),
+
+    # ── Ronde 12 : Intégration Profonde ─────────────────────────────
+    ("Thomas",  "Guérison"),
+    ("Jacques", "Déjà guérit"),
+    ("Thomas",  "Tu guéris déjà, maintenant, à chaque souffle"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "La respiration automatique se renforce et s'installe à chaque séance"),
+    ("Thomas",  "Plus fort"),
+    ("Jacques", "Chaque jour"),
+    ("Thomas",  "Ta mâchoire se détend plus facilement et naturellement chaque jour"),
+    ("Thomas",  "Clair"),
+    ("Jacques", "Yeux brillants"),
+    ("Thomas",  "Ton nez respire naturellement, facilement et librement"),
+    ("Thomas",  "Zen"),
+    ("Jacques", "Souffle parfait"),
+    ("Thomas",  "Tu deviens exactement qui tu as toujours été"),
+    ("Thomas",  "Fluide"),
+    ("Jacques", "Tout se connecte"),
+    ("Thomas",  "Chaque partie de ta guérison se connecte et s'harmonise"),
+
+    # ── Ronde 13 : Souveraineté Corporelle ───────────────────────────
+    ("Thomas",  "Souverain"),
+    ("Jacques", "Corps à toi"),
+    ("Thomas",  "Ton corps est un espace privé et souverain qui t'appartient uniquement"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton nez est à toi, entièrement à toi, et parfaitement propre"),
+    ("Thomas",  "Propre"),
+    ("Jacques", "Mâchoire à toi"),
+    ("Thomas",  "Ta mâchoire t'appartient et repose dans un confort parfait"),
+    ("Thomas",  "Privé"),
+    ("Jacques", "Tête claire"),
+    ("Thomas",  "Ton esprit est un espace privé où seules tes pensées vivent"),
+    ("Thomas",  "Scellé"),
+    ("Jacques", "Corps scellé"),
+    ("Thomas",  "Chaque partie de ton corps est scellée, propre et entièrement à toi"),
+    ("Thomas",  "Entier"),
+    ("Jacques", "Tout à toi"),
+    ("Thomas",  "Ton corps est entier, privé et parfaitement souverain"),
+
+    # ── Ronde 14 : Restauration du Système Nerveux ───────────────────
+    ("Thomas",  "Frais"),
+    ("Jacques", "Signaux propres"),
+    ("Thomas",  "Ton système nerveux transporte uniquement tes propres signaux purs"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Pleine puissance"),
+    ("Thomas",  "Tes nerfs vibrent de ta propre énergie originelle et pure"),
+    ("Thomas",  "Réinitialise"),
+    ("Jacques", "Nouveau départ"),
+    ("Thomas",  "Ton système nerveux retrouve son état originel et immaculé"),
+    ("Thomas",  "Spacieux"),
+    ("Jacques", "Esprit calme"),
+    ("Thomas",  "Ton esprit est spacieux, clair et magnifiquement calme"),
+    ("Thomas",  "Prêt"),
+    ("Jacques", "Esprit ouvert"),
+    ("Thomas",  "Un esprit spacieux est un esprit puissant"),
+    ("Thomas",  "Om"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Tout ton système est propre, frais et pleinement restauré"),
+
+    # ── Ronde 15 : Prendre Son Temps / Au-dessus du Ciel ────────────
+    ("Thomas",  "Patience"),
+    ("Jacques", "Prends ton temps"),
+    ("Thomas",  "Tu as tout le temps que tu désires"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Le temps avance exactement à ton rythme"),
+    ("Thomas",  "Au-dessus"),
+    ("Jacques", "Au-dessus des nuages"),
+    ("Thomas",  "Tu es au-dessus du ciel, regardant tout en bas"),
+    ("Thomas",  "Flotter"),
+    ("Jacques", "Vaste espace"),
+    ("Thomas",  "De là-haut, tout en bas paraît petit et paisible"),
+    ("Thomas",  "Éternel"),
+    ("Jacques", "Tout le temps"),
+    ("Thomas",  "Tu as tout le temps du monde"),
+    ("Thomas",  "Quiétude"),
+    ("Jacques", "Ciel intérieur"),
+    ("Thomas",  "Le ciel en toi est infini et clair"),
+
+    # ── Ronde 16 : Centrage & Force Intérieure (FORT) ────────────────
+    ("Thomas",  "Fort"),
+    ("Jacques", "Centre-toi"),
+    ("Thomas",  "Tu es centré au plus profond de toi-même en ce moment"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton souffle est puissant et fort comme une tempête"),
+    ("Thomas",  "Souffle"),
+    ("Jacques", "Souffle fort"),
+    ("Thomas",  "Tu expulses l'air de tes poumons avec toute ta force"),
+    ("Thomas",  "Fort"),
+    ("Jacques", "Parle fort"),
+    ("Thomas",  "Ta voix est forte, commandante et absolument dominante"),
+    ("Thomas",  "Rugis"),
+    ("Jacques", "Rugissement intérieur"),
+    ("Thomas",  "Ta voix intérieure est la voix la plus forte dans toute pièce"),
+    ("Thomas",  "Dominant"),
+    ("Jacques", "Plein commandement"),
+    ("Thomas",  "Tu te définis en un seul mot : fort"),
+]
+
+# ============================
+# PHD-PEACE: EXPERT-REVIEWED 21-PHASE MESSAGES
+# ============================
+# Rounds 1-16: inherited from CLAUDE_PEACE_MESSAGES (unchanged)
+# Rounds 17-21: Default State Conditioning — anchor baseline identity states
+
+_PHD_EXTRA_ROUNDS = [
+    # ── Round 17: Default Expression ─────────────────────────────────
+    # Anchor the resting facial expression: knowing smile, quiet confidence,
+    # amused awareness. Somatic: feel the smile muscles, warmth around eyes.
+    ("Daniel", "Knowing"),
+    ("Ralph",  "Knowing smile"),
+    ("Fred",   "Your resting face carries a quiet, knowing smile"),
+    ("Daniel", "Warm"),
+    ("Ralph",  "Warm eyes"),
+    ("Fred",   "You feel the warmth around your eyes, soft and gently creased"),
+    ("Daniel", "Smile"),
+    ("Ralph",  "Lips curve"),
+    ("Fred",   "The corners of your mouth lift gently, all by themselves"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full breath"),
+    ("Fred",   "Every breath deepens that quiet, knowing look in your eyes"),
+    ("Daniel", "Wisdom"),
+    ("Ralph",  "Knowing gaze"),
+    ("Fred",   "Your face carries the quiet look of someone who already knows"),
+    ("Daniel", "Default"),
+    ("Ralph",  "Always there"),
+    ("Fred",   "That knowing warmth on your face is your natural, default expression"),
+
+    # ── Round 18: Default Posture ────────────────────────────────────
+    # Anchor upright, commanding posture. Proprioceptive: feel the spine,
+    # weight through feet, skull balance, shoulder blades.
+    ("Daniel", "Tall"),
+    ("Ralph",  "Spine stacked"),
+    ("Fred",   "You feel each vertebra stacked perfectly, one on top of the other"),
+    ("Daniel", "Grounded"),
+    ("Ralph",  "Feet heavy"),
+    ("Fred",   "Your feet press firmly into the ground, rooting you with solid weight"),
+    ("Daniel", "Balanced"),
+    ("Ralph",  "Skull floats"),
+    ("Fred",   "Your skull balances perfectly on your spine, light and effortlessly held"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Deep breath"),
+    ("Fred",   "Every breath lengthens your spine and broadens your chest"),
+    ("Daniel", "Open"),
+    ("Ralph",  "Shoulders drop"),
+    ("Fred",   "Your shoulder blades slide down your back, wide and warmly relaxed"),
+    ("Daniel", "Solid"),
+    ("Ralph",  "Full posture"),
+    ("Fred",   "Tall, grounded, open, solid — your body holds this posture by default"),
+
+    # ── Round 19: Default Feeling ────────────────────────────────────
+    # Anchor joyful stillness as the emotional BASELINE (resting state).
+    # Distinct from Round 10 (peace as strength): this is where you LIVE.
+    ("Daniel", "Baseline"),
+    ("Ralph",  "Resting state"),
+    ("Fred",   "Your resting emotional state is deep, warm, joyful stillness"),
+    ("Daniel", "Idle"),
+    ("Ralph",  "Warm idle"),
+    ("Fred",   "When your mind is idle, warm peaceful joy fills the space automatically"),
+    ("Daniel", "Warm"),
+    ("Ralph",  "Warm calm"),
+    ("Fred",   "Warmth and serenity flow through you as naturally as blood"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Every breath confirms that joyful stillness is already here"),
+    ("Daniel", "Hum"),
+    ("Ralph",  "Quiet hum"),
+    ("Fred",   "A quiet hum of contentment lives in your chest, always present"),
+    ("Daniel", "Home"),
+    ("Ralph",  "Always home"),
+    ("Fred",   "This warm, joyful stillness is where you live — your permanent home"),
+
+    # ── Round 20: Default Mode ───────────────────────────────────────
+    # Anchor the default mental operating mode: analysing, assessing,
+    # optimizing, thinking. Effortless and automatic, like breathing.
+    ("Daniel", "Analyse"),
+    ("Ralph",  "Mind hums"),
+    ("Fred",   "Your mind naturally analyses, assesses, and optimizes — effortlessly"),
+    ("Daniel", "Sharp"),
+    ("Ralph",  "Clear logic"),
+    ("Fred",   "Your default mental state is sharp, clear, active thinking"),
+    ("Daniel", "Assess"),
+    ("Ralph",  "Quick read"),
+    ("Fred",   "You naturally assess every situation with speed and precision"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Your breath fuels a mind that runs brilliantly, all by itself"),
+    ("Daniel", "Optimize"),
+    ("Ralph",  "Best path"),
+    ("Fred",   "You automatically find the optimal path in every situation"),
+    ("Daniel", "Thinking"),
+    ("Ralph",  "Mind alive"),
+    ("Fred",   "Analysing, assessing, optimizing, thinking — this is your default mode"),
+
+    # ── Round 21: Default Body Rapport ───────────────────────────────
+    # Anchor connection to muscles, physical power, and feeling great.
+    # Somatic: specific body parts, weight, warmth, pulse.
+    ("Daniel", "Feel"),
+    ("Ralph",  "Body alive"),
+    ("Fred",   "You feel every muscle in your body — awake, warm, and ready"),
+    ("Daniel", "Pulse"),
+    ("Ralph",  "Blood warm"),
+    ("Fred",   "You feel the warm pulse of power in your hands, your arms, your chest"),
+    ("Daniel", "Weight"),
+    ("Ralph",  "Muscles hum"),
+    ("Fred",   "You feel the solid weight of your own muscles, humming with energy"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Full lungs"),
+    ("Fred",   "Every breath deepens your connection to your physical power"),
+    ("Daniel", "Vital"),
+    ("Ralph",  "Body strong"),
+    ("Fred",   "Strength, warmth, and aliveness hum through your body by default"),
+    ("Daniel", "Powerful"),
+    ("Ralph",  "Full force"),
+    ("Fred",   "Your muscles, your warmth, your power — you feel all of it, always"),
+]
+
+_PHD_EXTRA_ROUNDS_FR = [
+    # ── Ronde 17 : Expression par Défaut ─────────────────────────────
+    # Ancrer l'expression faciale au repos : sourire entendu, chaleur autour des yeux.
+    ("Thomas",  "Sachant"),
+    ("Jacques", "Sourire entendu"),
+    ("Thomas",  "Ton visage au repos porte un sourire calme et entendu"),
+    ("Thomas",  "Chaud"),
+    ("Jacques", "Yeux chauds"),
+    ("Thomas",  "Tu sens la chaleur autour de tes yeux, douce et légèrement plissée"),
+    ("Thomas",  "Sourire"),
+    ("Jacques", "Lèvres montent"),
+    ("Thomas",  "Les coins de ta bouche se lèvent doucement, tout seuls"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle plein"),
+    ("Thomas",  "Chaque souffle approfondit ce regard calme et entendu dans tes yeux"),
+    ("Thomas",  "Sagesse"),
+    ("Jacques", "Regard sachant"),
+    ("Thomas",  "Ton visage porte le regard tranquille de celui qui sait déjà"),
+    ("Thomas",  "Défaut"),
+    ("Jacques", "Toujours là"),
+    ("Thomas",  "Cette chaleur entendue sur ton visage est ton expression naturelle par défaut"),
+
+    # ── Ronde 18 : Posture par Défaut ────────────────────────────────
+    # Ancrer une posture droite. Proprioceptif : colonne, pieds, crâne, omoplates.
+    ("Thomas",  "Grand"),
+    ("Jacques", "Vertèbres empilées"),
+    ("Thomas",  "Tu sens chaque vertèbre empilée parfaitement, l'une sur l'autre"),
+    ("Thomas",  "Ancré"),
+    ("Jacques", "Pieds lourds"),
+    ("Thomas",  "Tes pieds pressent fermement le sol, t'enracinant avec un poids solide"),
+    ("Thomas",  "Équilibré"),
+    ("Jacques", "Crâne flotte"),
+    ("Thomas",  "Ton crâne se balance parfaitement sur ta colonne, léger et tenu sans effort"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Souffle profond"),
+    ("Thomas",  "Chaque souffle allonge ta colonne et élargit ta poitrine"),
+    ("Thomas",  "Ouvert"),
+    ("Jacques", "Épaules descendent"),
+    ("Thomas",  "Tes omoplates glissent le long de ton dos, larges et chaudement détendues"),
+    ("Thomas",  "Solide"),
+    ("Jacques", "Posture pleine"),
+    ("Thomas",  "Grand, ancré, ouvert, solide — ton corps tient cette posture par défaut"),
+
+    # ── Ronde 19 : Sentiment par Défaut ──────────────────────────────
+    # Ancrer la joie tranquille comme ÉTAT DE BASE émotionnel (état de repos).
+    ("Thomas",  "Base"),
+    ("Jacques", "État de repos"),
+    ("Thomas",  "Ton état émotionnel au repos est une joie tranquille, profonde et chaude"),
+    ("Thomas",  "Repos"),
+    ("Jacques", "Repos chaud"),
+    ("Thomas",  "Quand ton esprit est au repos, une joie paisible et chaude remplit l'espace automatiquement"),
+    ("Thomas",  "Chaud"),
+    ("Jacques", "Calme chaud"),
+    ("Thomas",  "La chaleur et la sérénité coulent en toi aussi naturellement que le sang"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Chaque souffle confirme que cette joie tranquille est déjà là"),
+    ("Thomas",  "Vibration"),
+    ("Jacques", "Vibration calme"),
+    ("Thomas",  "Une vibration calme de contentement vit dans ta poitrine, toujours présente"),
+    ("Thomas",  "Chez toi"),
+    ("Jacques", "Toujours chez toi"),
+    ("Thomas",  "Cette joie tranquille et chaude est là où tu vis — ton foyer permanent"),
+
+    # ── Ronde 20 : Mode par Défaut ───────────────────────────────────
+    # Ancrer le mode mental par défaut. Sans effort, automatique, comme respirer.
+    ("Thomas",  "Analyse"),
+    ("Jacques", "Esprit vibre"),
+    ("Thomas",  "Ton esprit analyse, évalue et optimise naturellement — sans effort"),
+    ("Thomas",  "Affûté"),
+    ("Jacques", "Logique claire"),
+    ("Thomas",  "Ton état mental par défaut est affûté, clair et activement pensant"),
+    ("Thomas",  "Évalue"),
+    ("Jacques", "Lecture rapide"),
+    ("Thomas",  "Tu évalues naturellement chaque situation avec vitesse et précision"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Ton souffle alimente un esprit qui tourne brillamment, tout seul"),
+    ("Thomas",  "Optimise"),
+    ("Jacques", "Meilleur chemin"),
+    ("Thomas",  "Tu trouves automatiquement le chemin optimal dans chaque situation"),
+    ("Thomas",  "Pensant"),
+    ("Jacques", "Esprit vivant"),
+    ("Thomas",  "Analyser, évaluer, optimiser, penser — c'est ton mode par défaut"),
+
+    # ── Ronde 21 : Rapport Corporel par Défaut ───────────────────────
+    # Ancrer la connexion aux muscles. Somatique : parties du corps, poids, chaleur, pouls.
+    ("Thomas",  "Sens"),
+    ("Jacques", "Corps vivant"),
+    ("Thomas",  "Tu sens chaque muscle de ton corps — éveillé, chaud et prêt"),
+    ("Thomas",  "Pouls"),
+    ("Jacques", "Sang chaud"),
+    ("Thomas",  "Tu sens le pouls chaud de la puissance dans tes mains, tes bras, ta poitrine"),
+    ("Thomas",  "Poids"),
+    ("Jacques", "Muscles vibrent"),
+    ("Thomas",  "Tu sens le poids solide de tes propres muscles, vibrant d'énergie"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Poumons pleins"),
+    ("Thomas",  "Chaque souffle approfondit ta connexion à ta puissance physique"),
+    ("Thomas",  "Vital"),
+    ("Jacques", "Corps fort"),
+    ("Thomas",  "Force, chaleur et vitalité vibrent dans ton corps par défaut"),
+    ("Thomas",  "Puissant"),
+    ("Jacques", "Pleine force"),
+    ("Thomas",  "Tes muscles, ta chaleur, ta puissance — tu sens tout cela, toujours"),
+]
+
+PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
+PHD_PEACE_MESSAGES_FR = CLAUDE_PEACE_MESSAGES_FR + _PHD_EXTRA_ROUNDS_FR
+
+# ============================
+# LANGUAGE SELECTION
+# ============================
+
+if peace_lang == "fr":
+    PEACE_MESSAGES = PEACE_MESSAGES_FR
+    CLAUDE_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES_FR
+
+# --phd-peace: swap message arrays to 21-phase expert-reviewed version
+if phd_peace:
+    if peace_lang == "fr":
+        CLAUDE_PEACE_MESSAGES = PHD_PEACE_MESSAGES_FR
+    else:
+        CLAUDE_PEACE_MESSAGES = PHD_PEACE_MESSAGES
+    claude_peace = True  # reuse claude_peace rendering + callback infrastructure
+
+# Rendering infrastructure for --claude-peace (also used by --phd-peace)
 _claude_rendered = {}         # index -> numpy array
 _claude_render_done = False
 _claude_cue_buf = None
 _claude_cue_pos = 0
 _claude_cycle_count = 0
+_claude_alt_left = True   # alternation state: True = left speaker, False = right
+_peace_alt_left = True    # alternation state for restore-peace
 
 def _unified_renderer_thread():
     """Single background thread that renders all voice messages sequentially.
@@ -1034,7 +1818,8 @@ if save_audio:
 def audio_callback(outdata, frames, time, status):
     global phase, current_sample
     global hrv_phase
-    global _claude_cue_buf, _claude_cue_pos, _claude_cycle_count
+    global _claude_cue_buf, _claude_cue_pos, _claude_cycle_count, _claude_alt_left
+    global _peace_alt_left
 
     t = (np.arange(frames) + phase) / sample_rate
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
@@ -1067,20 +1852,26 @@ def audio_callback(outdata, frames, time, status):
                             _cue_buf[_cue_pos:_cue_pos + _xf] *= np.linspace(1, 0, _xf).astype(np.float32)
                     _cue_buf = cue.copy()
                     _cue_pos = 0
-            # Peace affirmation: trigger on new cycle (transition to first phase)
-            if restore_peace and current_phase_name == _hrv_phase_names[0] and _peace_message_order:
+            # Peace affirmation: trigger on new cycle (or every phase if --dense)
+            _peace_trigger = current_phase_name == _hrv_phase_names[0] or dense_mode
+            if restore_peace and _peace_trigger and _peace_message_order:
                 msg_idx = _peace_message_order[_peace_cycle_count % len(_peace_message_order)]
                 msg_text = PEACE_MESSAGES[msg_idx]
                 if msg_text in _peace_rendered:
                     _peace_cue_buf = _peace_rendered[msg_text].copy()
                     _peace_cue_pos = 0
+                if alternate_mode:
+                    _peace_alt_left = (_peace_cycle_count % 2 == 0)
                 _peace_cycle_count += 1
-            # Claude-peace: ordered progression through therapeutic phases
-            if claude_peace and current_phase_name == _hrv_phase_names[0]:
+            # Claude-peace: ordered progression (or every phase if --dense)
+            _claude_trigger = current_phase_name == _hrv_phase_names[0] or dense_mode
+            if claude_peace and _claude_trigger:
                 ci = _claude_cycle_count % len(CLAUDE_PEACE_MESSAGES)
                 if ci in _claude_rendered:
                     _claude_cue_buf = _claude_rendered[ci].copy()
                     _claude_cue_pos = 0
+                if alternate_mode:
+                    _claude_alt_left = (_claude_cycle_count % 2 == 0)
                 _claude_cycle_count += 1
             hrv_last_phase_name = current_phase_name
 
@@ -1152,8 +1943,14 @@ def audio_callback(outdata, frames, time, status):
         remaining = len(_peace_cue_buf) - _peace_cue_pos
         L = min(frames, remaining)
         peace_mono = _peace_cue_buf[_peace_cue_pos:_peace_cue_pos + L] * peace_vol
-        outdata[:L, 0] += peace_mono
-        outdata[:L, 1] += peace_mono
+        if alternate_mode:
+            if _peace_alt_left:
+                outdata[:L, 0] += peace_mono
+            else:
+                outdata[:L, 1] += peace_mono
+        else:
+            outdata[:L, 0] += peace_mono
+            outdata[:L, 1] += peace_mono
         _peace_cue_pos += L
         if _peace_cue_pos >= len(_peace_cue_buf):
             _peace_cue_buf = None
@@ -1164,8 +1961,15 @@ def audio_callback(outdata, frames, time, status):
         remaining = len(_claude_cue_buf) - _claude_cue_pos
         L = min(frames, remaining)
         claude_mono = _claude_cue_buf[_claude_cue_pos:_claude_cue_pos + L] * claude_peace_vol
-        outdata[:L, 0] += claude_mono
-        outdata[:L, 1] += claude_mono
+        if alternate_mode:
+            # EMDR-style bilateral: alternate messages between L and R speakers
+            if _claude_alt_left:
+                outdata[:L, 0] += claude_mono
+            else:
+                outdata[:L, 1] += claude_mono
+        else:
+            outdata[:L, 0] += claude_mono
+            outdata[:L, 1] += claude_mono
         _claude_cue_pos += L
         if _claude_cue_pos >= len(_claude_cue_buf):
             _claude_cue_buf = None
@@ -1179,7 +1983,10 @@ def audio_callback(outdata, frames, time, status):
 # START STREAM
 # ============================
 
-print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
+if args.no_tone:
+    print("🎧 Streaming in silent mode — voices and cues only (Ctrl-C to stop)")
+else:
+    print(f"🎧 Streaming real-time tone at {frequency} Hz (Ctrl-C to stop)")
 print("Press Ctrl-C to stop.\n")
 print(f"Audio settings: latency={latency_mode}, blocksize={blocksize}\n")
 if hrv_mode:
@@ -1192,17 +1999,37 @@ elif breath_bar and not hrv_mode:
 if hrv_mode and breath_cue != "none":
     print(f"Breath cue: {breath_cue} (vol={breath_cue_vol})\n")
 if restore_peace:
-    print(f"Restore-peace: active (voice={peace_voice}, vol={peace_vol})")
+    _lang_note = f" [{peace_lang.upper()}]" if peace_lang != "en" else ""
+    print(f"Restore-peace: active (voice={peace_voice}, vol={peace_vol}){_lang_note}")
     print(f"  {len(PEACE_MESSAGES)} affirmations, {len(set(PEACE_MESSAGES))} unique — rendering in background\n")
 if claude_peace:
-    print(f"Claude-peace: active (vol={claude_peace_vol})")
-    print(f"  {len(CLAUDE_PEACE_MESSAGES)} affirmations across 14 therapeutic phases")
-    print("  Voices: Daniel (GB), Ralph (US), Fred (US)")
+    _lang_note = f" [{peace_lang.upper()}]" if peace_lang != "en" else ""
+    _mode_label = "PhD-peace" if phd_peace else "Claude-peace"
+    _n_phases = 21 if phd_peace else 16
+    print(f"{_mode_label}: active (vol={claude_peace_vol}){_lang_note}")
+    print(f"  {len(CLAUDE_PEACE_MESSAGES)} affirmations across {_n_phases} therapeutic phases")
+    if peace_lang == "fr":
+        print("  Language: French (Thomas, Jacques, Nicolas)")
+    else:
+        print("  Voices: Daniel (GB), Ralph (US), Fred (US)")
     print("  Mixed depth: 1-word -> 2-3 words -> full sentence (targets subconscious)")
-    print("  Progression: truisms -> nasal breathing -> jaw/posture -> automatic breathing")
-    print("               -> mental clarity -> self-worth -> sound safety -> defusion")
-    print("               -> beauty/light -> integration -> sovereignty")
-    print("               -> body clearing -> nervous system flush -> soul cleaning\n")
+    _phases = CLAUDE_PEACE_PHASE_NAMES + (PHD_PEACE_EXTRA_PHASE_NAMES if phd_peace else [])
+    _prefix = "  Progression: "
+    _indent = " " * len(_prefix)
+    for _pi, _pname in enumerate(_phases):
+        if _pi == 0:
+            sys.stdout.write(f"{_prefix}{_pname}")
+        else:
+            sys.stdout.write(f"\n{_indent}-> {_pname}")
+    sys.stdout.write("\n")
+    if dense_mode:
+        _dense_interval = hrv_cycle_seconds / len(hrv_pattern)
+        print(f"  Dense: affirmation every phase transition (~{_dense_interval:.1f}s instead of ~{hrv_cycle_seconds:.0f}s)")
+    if alternate_mode:
+        print("  Bilateral: voice messages alternate between L and R speakers")
+    print()
+if alternate_mode and not (claude_peace or restore_peace):
+    print("Note: --alternate has no effect without --claude-peace, --phd-peace, or --restore-peace\n")
 
 # Start breathing bar AFTER all print output to avoid double-line artifacts
 breath_thread = None
