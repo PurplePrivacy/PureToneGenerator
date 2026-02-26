@@ -36,7 +36,7 @@ The audio callback is the only code that writes to the output buffer. What you h
 - ⚡ Dense affirmation mode (`--dense`) — one message per breath phase instead of per full cycle
 - 🌫 Long-term fade-to-silence cultivation (`--fade-long`)
 - 🧱 Full-stack preset (`--full`)
-- 📖 Audiobook mode — 50 French public domain books read by Thomas voice during HRV sessions (`--audiobook`)
+- 📖 Audiobook mode — 86 public domain books (51 French + 35 English) with page tracking and resume (`--audiobook`)
 - 💾 Optional 1-hour **FLAC** export (`--save-audio`)
 - 🛡 Pure safe mode — single sine only (`--pure`)
 - 🔇 Output-only hardening (`--disable-inputs`)
@@ -95,9 +95,10 @@ CLI Options
 --peace-lang STR     Language for peace affirmations: en | fr (default: en)
 
 --audiobook BOOK     Read a book aloud during HRV breathing (e.g., --audiobook meditations)
---audiobook-list     List all 50 available audiobooks and exit
+--audiobook-list     List all 86 available audiobooks and exit (51 French, 35 English)
 --audiobook-vol FL   Audiobook voice volume (default: 0.40)
 --audiobook-resume   Resume from saved position (progress saved on Ctrl-C)
+--audiobook-page N   Start from page N (each page = 10 sentences)
 
 --latency STR        Audio latency: low | high (default: high)
 --blocksize INT      Audio blocksize in frames (default: 1024)
@@ -603,16 +604,21 @@ The --claude-peace flag (16 phases, 294 messages) remains available separately f
 
 ⸻
 
-Audiobook Mode (50 French Public Domain Books)
+Audiobook Mode (86 Public Domain Books — 51 French, 35 English)
 
-The --audiobook flag reads a full public domain book aloud during HRV breathing sessions using the French Thomas voice. Books are stored as local text files and rendered sentence-by-sentence using a rolling TTS renderer.
+The --audiobook flag reads a full public domain book aloud during HRV breathing sessions. Voice is auto-selected by language: Thomas (French) or Daniel (English). Books are stored as local text files and rendered sentence-by-sentence using a rolling TTS renderer. The base tone is automatically silenced in audiobook mode.
+
+Languages
+	•	[FR] French books — read by Thomas voice (51 books)
+	•	[EN] English books — read by Daniel voice (35 books)
+	•	The voice is auto-selected from the book metadata — no flag needed
 
 Setup
 
-# Download all 50 books from Project Gutenberg (run once)
+# Download all books from Project Gutenberg (run once)
 python books/fetch_books.py
 
-# List available books
+# List available books with language tags
 python stream_tone.py --audiobook-list
 
 How It Works
@@ -621,103 +627,154 @@ How It Works
 	•	If a sentence is still playing when a new cycle starts, it continues — no interruption
 	•	Memory stays bounded: only ~12 rendered sentences in memory at once
 	•	Uses the same TTS pipeline as claude-peace (macOS say → NumPy array)
+	•	Page progress logged to console every 10 sentences
 
-Available Books (50)
+Available Books (86)
 
-Stoic Philosophy (5):
-	•	meditations — Méditations (Marc Aurèle)
-	•	enchiridion — Manuel d'Épictète
-	•	lettres-lucilius — Lettres à Lucilius (Sénèque)
-	•	brievete-vie — De la brièveté de la vie (Sénèque)
-	•	tranquillite — De la tranquillité de l'âme (Sénèque)
+English Classics (35):
 
-Greek Philosophy (7):
-	•	republique — La République (Platon)
-	•	apologie — Apologie de Socrate (Platon)
-	•	banquet — Le Banquet (Platon)
-	•	phedon — Phédon (Platon)
-	•	phedre — Phèdre (Platon)
-	•	gorgias — Gorgias (Platon)
-	•	ethique-nicomaque — Éthique à Nicomaque (Aristote)
+Stoic Philosophy:
+	•	meditations — Meditations (Marcus Aurelius) [EN]
+	•	enchiridion — The Enchiridion (Epictetus) [EN]
+	•	lettres-lucilius — Minor Dialogues (Seneca) [EN]
+	•	brievete-vie — Of the Shortness of Life (Seneca) [EN]
+	•	tranquillite — Of Peace of Mind (Seneca) [EN]
 
-Eastern Philosophy (5):
-	•	art-guerre — L'Art de la guerre (Sun Tzu)
-	•	tao-te-king — Tao Te King (Lao Tseu)
-	•	dhammapada — Dhammapada (Bouddha)
-	•	bhagavad-gita — Bhagavad-Gita
-	•	entretiens-confucius — Les Entretiens (Confucius)
+Greek Philosophy:
+	•	republique — The Republic (Plato) [EN]
+	•	apologie — Apology (Plato) [EN]
+	•	banquet — Symposium (Plato) [EN]
+	•	phedon — Phaedo (Plato) [EN]
+	•	phedre — Phaedrus (Plato) [EN]
+	•	gorgias — Gorgias (Plato) [EN]
+	•	ethique-nicomaque — Nicomachean Ethics (Aristotle) [EN]
 
-Japanese Wisdom (2):
-	•	cinq-anneaux — Le Livre des cinq anneaux (Musashi)
-	•	bushido — Bushido, l'âme du Japon (Nitobe)
+Eastern Philosophy:
+	•	art-guerre — The Art of War (Sun Tzu) [EN]
+	•	tao-te-king — Tao Te Ching (Lao Tzu) [EN]
+	•	dhammapada — Dhammapada [EN]
+	•	bhagavad-gita — Bhagavad-Gita [EN]
 
-Religious Texts (2):
-	•	bible — La Sainte Bible (Louis Segond)
-	•	coran — Le Coran (Kasimirski)
+Religious Texts:
+	•	bible — The Bible, KJV [EN]
+	•	coran — The Quran (tr. Rodwell) [EN]
 
-French Philosophy (6):
-	•	essais — Essais (Montaigne)
-	•	discours-methode — Discours de la méthode (Descartes)
-	•	pensees — Pensées (Pascal)
-	•	prince — Le Prince (Machiavel)
-	•	contrat-social — Du contrat social (Rousseau)
-	•	oracle-manuel — L'Oracle manuel (Gracián)
+German Philosophy:
+	•	art-raison — The Art of Controversy (Schopenhauer) [EN]
+	•	bien-mal — Beyond Good and Evil (Nietzsche) [EN]
 
-German Philosophy (3):
-	•	zarathoustra — Ainsi parlait Zarathoustra (Nietzsche)
-	•	art-raison — L'Art d'avoir toujours raison (Schopenhauer)
-	•	bien-mal — Par-delà le bien et le mal (Nietzsche)
+Classical Literature:
+	•	eneide — The Aeneid (Virgil) [EN]
+	•	metamorphoses — The Metamorphoses (Ovid) [EN]
+	•	nature-choses — On the Nature of Things (Lucretius) [EN]
 
-French Literature (8):
-	•	candide — Candide (Voltaire)
-	•	fables — Les Fables (La Fontaine)
-	•	fleurs-mal — Les Fleurs du mal (Baudelaire)
-	•	miserables — Les Misérables (Hugo)
-	•	monte-cristo — Le Comte de Monte-Cristo (Dumas)
-	•	trois-mousquetaires — Les Trois Mousquetaires (Dumas)
-	•	cyrano — Cyrano de Bergerac (Rostand)
-	•	petit-prince — Le Petit Prince (Saint-Exupéry)
+Roman Wisdom:
+	•	amitie — Treatises on Friendship and Old Age (Cicero) [EN]
+	•	vieillesse — Treatises on Friendship and Old Age (Cicero) [EN]
 
-Classical Literature (5):
-	•	odyssee — L'Odyssée (Homère)
-	•	iliade — L'Iliade (Homère)
-	•	eneide — L'Énéide (Virgile)
-	•	metamorphoses — Les Métamorphoses (Ovide)
-	•	nature-choses — De la nature des choses (Lucrèce)
+Persian & Eastern Poetry:
+	•	rubaiyat — Rubaiyat of Omar Khayyam [EN]
 
-Roman Wisdom (2):
-	•	amitie — De l'amitié (Cicéron)
-	•	vieillesse — De la vieillesse (Cicéron)
+French Books (51):
 
-Persian & Eastern Poetry (2):
-	•	rubaiyat — Les Rubáiyát (Omar Khayyám)
-	•	masnavi — Le Masnavi (Rûmî)
+French Philosophy:
+	•	essais — Essais (Montaigne) [FR]
+	•	discours-methode — Discours de la méthode (Descartes) [FR]
+	•	zarathoustra — Ainsi parlait Zarathoustra (Nietzsche, tr. Albert) [FR]
+	•	traite-tolerance — Traité sur la tolérance (Voltaire) [FR]
 
-Spiritual Classics (3):
-	•	ecclesiaste — L'Ecclésiaste (Salomon)
-	•	proverbes — Les Proverbes de Salomon
-	•	imitation — L'Imitation de Jésus-Christ (Thomas a Kempis)
+French Literature (originals):
+	•	candide — Candide (Voltaire) [FR]
+	•	fables — Les Fables (La Fontaine) [FR]
+	•	fleurs-mal — Les Fleurs du mal (Baudelaire) [FR]
+	•	miserables — Les Misérables (Hugo) [FR]
+	•	monte-cristo — Le Comte de Monte-Cristo (Dumas) [FR]
+	•	trois-mousquetaires — Les Trois Mousquetaires (Dumas) [FR]
+	•	cyrano — Cyrano de Bergerac (Rostand) [FR]
+
+Classical Literature (French translations):
+	•	odyssee — L'Odyssée (Homère, tr. Leconte de Lisle) [FR]
+	•	iliade — L'Iliade (Homère, tr. Leconte de Lisle) [FR]
+	•	entretiens-confucius — Les quatre livres (Confucius) [FR]
+	•	imitation — L'Imitation de Jésus-Christ (Thomas a Kempis) [FR]
+
+French Novels (19):
+	•	madame-bovary — Madame Bovary (Flaubert) [FR]
+	•	rouge-et-noir — Le rouge et le noir (Stendhal) [FR]
+	•	chartreuse-de-parme — La Chartreuse de Parme (Stendhal) [FR]
+	•	eugenie-grandet — Eugénie Grandet (Balzac) [FR]
+	•	germinal — Germinal (Zola) [FR]
+	•	nana — Nana (Zola) [FR]
+	•	assommoir — L'Assommoir (Zola) [FR]
+	•	therese-raquin — Thérèse Raquin (Zola) [FR]
+	•	notre-dame-de-paris — Notre-Dame de Paris (Hugo) [FR]
+	•	homme-qui-rit — L'homme qui rit (Hugo) [FR]
+	•	quatrevingt-treize — Quatrevingt-Treize (Hugo) [FR]
+	•	dame-aux-camelias — La dame aux camélias (Dumas fils) [FR]
+	•	liaisons-dangereuses — Les liaisons dangereuses (Laclos) [FR]
+	•	grand-meaulnes — Le Grand Meaulnes (Alain-Fournier) [FR]
+	•	fantome-opera — Le Fantôme de l'Opéra (Leroux) [FR]
+	•	arsene-lupin — Arsène Lupin (Leblanc) [FR]
+	•	petite-fadette — La petite Fadette (Sand) [FR]
+	•	a-rebours — À rebours (Huysmans) [FR]
+	•	du-cote-de-chez-swann — Du côté de chez Swann (Proust) [FR]
+
+Jules Verne (5):
+	•	tour-du-monde — Le tour du monde en 80 jours [FR]
+	•	voyage-centre-terre — Voyage au centre de la Terre [FR]
+	•	vingt-mille-lieues — Vingt mille lieues sous les mers [FR]
+	•	ile-mysterieuse — L'île mystérieuse [FR]
+	•	de-la-terre-a-la-lune — De la terre à la lune [FR]
+
+French Theatre (3):
+	•	avare — L'Avare (Molière) [FR]
+	•	don-juan — Don Juan (Molière) [FR]
+	•	hernani — Hernani (Hugo) [FR]
+
+French Poetry (4):
+	•	alcools — Alcools (Apollinaire) [FR]
+	•	poesies-rimbaud — Poésies complètes (Rimbaud) [FR]
+	•	verlaine-oeuvres — Œuvres complètes (Verlaine) [FR]
+	•	legende-des-siecles — La Légende des siècles (Hugo) [FR]
+
+French Short Stories (4):
+	•	boule-de-suif — Boule de Suif (Maupassant) [FR]
+	•	le-horla — Le Horla (Maupassant) [FR]
+	•	contes-de-perrault — Contes du temps passé (Perrault) [FR]
+	•	lettres-de-mon-moulin — Lettres de mon moulin (Daudet) [FR]
 
 Examples
 
-# Listen to Meditations while breathing
-python stream_tone.py --freq 432 --audiobook meditations --audiobook-vol 0.40
+# French audiobook with bilateral alternation
+python stream_tone.py --audiobook candide --alternate --disable-inputs
 
-# Audiobook only, no tone, with bilateral alternation
-python stream_tone.py --audiobook bible --alternate --no-tone --disable-inputs
+# English philosophy
+python stream_tone.py --audiobook meditations --disable-inputs
 
 # Resume from where you left off
-python stream_tone.py --audiobook meditations --audiobook-resume --no-tone
+python stream_tone.py --audiobook meditations --audiobook-resume
+
+# Jump to a specific page
+python stream_tone.py --audiobook miserables --audiobook-page 42
 
 # Combine with claude-peace therapeutic affirmations
-python stream_tone.py --freq 432 --claude-peace --audiobook meditations --no-tone
+python stream_tone.py --freq 432 --claude-peace --audiobook germinal
 
 # Dense mode with bowl cue
-python stream_tone.py --freq 432 --audiobook candide --dense --breath-cue bowl --disable-inputs
+python stream_tone.py --audiobook madame-bovary --dense --breath-cue bowl --disable-inputs
 
-Progress & Resume
+Page Progress & Resume
 
-When using --audiobook-resume, the current sentence position is saved to books/.progress on Ctrl-C. Re-running with --audiobook-resume picks up exactly where you left off.
+Every 10 sentences, the console logs the current page:
+
+  [Candide — Voltaire [FR]] [FR] page 5/120
+
+On Ctrl-C, the exact page is shown with a resume command:
+
+  Audiobook: Candide — Voltaire [FR] — stopped at page 5/120
+  Resume with: --audiobook candide --audiobook-page 5
+
+With --audiobook-resume, progress is auto-saved/loaded from books/.progress.
 
 ⸻
 
