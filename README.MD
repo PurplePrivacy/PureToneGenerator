@@ -1,796 +1,483 @@
-# PureTones – Real-Time Brainwave & Breath Tone Generator
+# Resonance — Therapeutic Audio Engine
 
-PureTones is a small Python tool that generates **pure tones for focus, healing, breath regulation, and relaxation**.
+A real-time audio synthesis tool for **focus, healing, breath regulation, and relaxation**. Generates pure tones, HRV breath pacing, bilateral stimulation, therapeutic voice affirmations, and audiobook narration — entirely offline and mathematically computed.
 
-It works entirely **offline**, generating audio mathematically in real time and sending it directly to your output device (e.g. AirPods Max).
-No files are streamed, no microphone is used, and nothing external is mixed in.
+Nothing is streamed, no microphone is used, nothing external is mixed in.
 
 ### Untamperable by Design
 
-Every sample that reaches your ears is **mathematically computed in-process** — there is no way to inject, mix, or substitute external audio:
+Every sample that reaches your ears is **mathematically computed in-process**:
 
-- **Single output stream only** — one `sounddevice.OutputStream`, no input, no duplex, no second stream
-- **No external sources** — no TTS, no file playback, no OS voice synthesis, no network audio
-- **No input devices** — microphone access is architecturally impossible (not just disabled — never opened)
-- **Deterministic** — fixed RNG seed, reproducible across runs, no runtime entropy
-- **Cryptographic integrity proof** (`--integrity`) — rolling SHA-256 hash of every generated buffer
-- **Lockdown mode** (`--lockdown`) — pure sine + output-only + integrity proof combined
-
-The audio callback is the only code that writes to the output buffer. What you hear is exactly what was computed.
+- **Single output stream only** — one `sounddevice.OutputStream`, no input, no duplex
+- **No external audio sources** — no file playback, no network audio
+- **No input devices** — microphone access is architecturally impossible
+- **Deterministic** — fixed RNG seed, reproducible across runs
+- **Cryptographic integrity proof** (`--integrity`) — rolling SHA-256 of every buffer
+- **Lockdown mode** (`--lockdown`) — pure sine + output-only + integrity combined
 
 ---
 
-## Features
-
-- 🔊 Real-time tone streaming (pure flat sine — no harmonics, no beating)
-- 🎧 Stereo output (L = R or ABS alternation)
-- 🧠 Isochronic modulation (`--iso --pulse`)
-- 🧬 ABS – Alternating Bilateral Stimulation (`--abs`)
-- 💓 HRV breathing pacing (`--hrv --hrv-style`)
-- 🔔 Synthesized breath transition cues (`--breath-cue bell|bowl|drum|tick|waterdrop|woodblock|whoosh|doubletick`)
-- 🫁 Breathing bar with ANSI colors, sinusoidal fill, elapsed time (`--breath-bar`) — labels: BREATHE IN / BREATHE OUT / HOLD
-- 🕊 Counter-conditioning voice affirmations (`--restore-peace`) — auto-enables HRV, plays calming messages each breath cycle
-- 🧠 Clinically-structured therapeutic counter-conditioning (`--claude-peace`) — 16-phase restoration with 3 male voices, mixed-depth messaging
-- 🎓 Expert-reviewed 21-phase counter-conditioning (`--phd-peace`) — all claude-peace phases plus 5 default-state conditioning rounds
-- 👂 EMDR-style bilateral voice alternation (`--alternate`) — messages alternate between left and right speakers
-- ⚡ Dense affirmation mode (`--dense`) — one message per breath phase instead of per full cycle
-- 🌫 Long-term fade-to-silence cultivation (`--fade-long`)
-- 🧱 Full-stack preset (`--full`)
-- 📖 Audiobook mode — 86 public domain books (51 French + 35 English) with page tracking and resume (`--audiobook`)
-- 💾 Optional 1-hour **FLAC** export (`--save-audio`)
-- 🛡 Pure safe mode — single sine only (`--pure`)
-- 🔇 Output-only hardening (`--disable-inputs`)
-- 🧪 Integrity proof (`--integrity`)
-- 🔐 Lockdown preset (`--lockdown`)
-
----
-
-## Installation
-
-From the project root:
+## Quick Start
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate          # on macOS / Linux
-# .venv\Scripts\activate           # on Windows (PowerShell or CMD)
-
-pip install --upgrade pip
+source .venv/bin/activate
 pip install numpy sounddevice soundfile
 
-You may need to grant audio output permissions to your terminal / VS Code on macOS.
+# Voice setup (macOS — checks required TTS voices)
+./setup_voices.sh
 
-⸻
+# Download audiobook library (125 books, run once)
+python books/fetch_books.py
+```
 
-CLI Options
+---
 
---freq FLOAT         Frequency in Hz (e.g., 44, 174, 396, 432, 528)
---save-audio         Save a 1-hour FLAC file instead of real-time streaming
+## Preset Modes (One-Flag Therapeutic Sessions)
 
---iso                Enable isochronic mode (volume pulse modulation)
---pulse FLOAT        Isochronic pulse frequency in Hz (default: 40)
+The fastest way to get started — each preset combines optimal settings:
 
---abs                Enable alternating bilateral stimulation (ABS)
---abs-speed STR      ABS speed: slow | medium | fast (default: medium)
+```bash
+# Calm ambient tone with HRV breathing and isochronic pulse
+python stream_tone.py --peaceful-vibe
 
---hrv                Enable HRV (Heart-Rate Variability) breath pacing mode
---hrv-style STR      HRV pacing style: A | B | C | box | 478 | 426 (default: A)
+# Pure gamma focus (no breathing, just 528 Hz + 40 Hz isochronic)
+python stream_tone.py --deep-focus
 
---fade-long          Enable long-term fade-to-silence cultivation
---full               Enable full stack: HRV + ISO + ABS + long fade
+# Study mode (same as deep-focus)
+python stream_tone.py --study
 
---breath-cue STR     Cue sound at breath transitions: none|bell|bowl|drum|tick|waterdrop|woodblock|whoosh|doubletick|voice
---breath-cue-vol FL  Breath cue volume (default: 0.25)
---breath-bar         Show live breathing bar with colors, timing, and cycle count
+# 432 Hz meditation with slow breathing and 30-min fade
+python stream_tone.py --meditation
 
---restore-peace      Counter-conditioning voice affirmations during HRV breathing (auto-enables HRV)
---peace-voice STR    macOS voice for affirmations (default: Daniel)
---peace-vol FLOAT    Affirmation voice volume (default: 0.35)
+# Fall asleep: 174 Hz + slow breathing + 30-min fade
+python stream_tone.py --sleep
 
---claude-peace       Clinically-structured counter-conditioning (auto-enables HRV + breath-bar)
---claude-peace-vol FL  Claude-peace voice volume (default: 0.35)
---phd-peace          Expert-reviewed 21-phase counter-conditioning (auto-enables HRV + breath-bar)
---phd-peace-vol FL   PhD-peace voice volume (default: 0.35)
---alternate          Alternate voice messages between L and R speakers (EMDR-style bilateral)
---dense              Affirmation every breath phase (~5.5s) instead of every full cycle (~11s)
---peace-lang STR     Language for peace affirmations: en | fr (default: en)
+# Deep sleep with singing bowl cues
+python stream_tone.py --deep-sleep
 
---audiobook BOOK     Read a book aloud during HRV breathing (e.g., --audiobook meditations)
---audiobook-list     List all 86 available audiobooks and exit (51 French, 35 English)
---audiobook-vol FL   Audiobook voice volume (default: 0.40)
---audiobook-resume   Resume from saved position (progress saved on Ctrl-C)
---audiobook-page N   Start from page N (each page = 10 sentences)
+# 4-7-8 breathing for anxiety relief with bell cues
+python stream_tone.py --anxiety-relief
 
+# Morning energy: 528 Hz + isochronic + bilateral + fast breathing
+python stream_tone.py --morning-energy
+
+# 4-7-8 yoga breathing with singing bowl
+python stream_tone.py --yoga
+
+# Breathwork only (no tone, just voice-guided 4-7-8 breathing)
+python stream_tone.py --breathwork
+
+# 528 Hz Solfeggio healing + slow bilateral stimulation
+python stream_tone.py --healing
+
+# 639 Hz alpha-wave creativity boost
+python stream_tone.py --creativity
+
+# Gentle 432 Hz ambient for reading
+python stream_tone.py --reading-calm
+
+# 30-min power nap with gradual fade
+python stream_tone.py --power-nap
+
+# 528 Hz bilateral calm with alternating stimulation
+python stream_tone.py --bilateral-calm
+
+# 256 Hz ocean calm: slow ABS + slow breathing + 30-min fade
+python stream_tone.py --ocean-calm
+
+# Grounding: 396 Hz + HRV + Claude counter-conditioning
+python stream_tone.py --grounding
+
+# Full EMDR session: PhD-peace 21-phase + bilateral + alternating voices
+python stream_tone.py --emdr-session
+
+# Trauma release: PhD-peace + bilateral alternation + 4-7-8 breathing
+python stream_tone.py --trauma-release
+
+# Full therapeutic stack: everything enabled
+python stream_tone.py --full-restore
+```
+
+---
+
+## All CLI Options
+
+### Core Audio
+```
+--freq FLOAT         Frequency in Hz (e.g., 174, 396, 432, 528, 639)
+--no-tone            Silence the base tone (voice messages and cues still play)
+--save-audio         Save a 1-hour FLAC file instead of streaming
 --latency STR        Audio latency: low | high (default: high)
 --blocksize INT      Audio blocksize in frames (default: 1024)
+```
 
---no-tone            Silence the base tone (voice messages and cues still play)
---pure               Pure sine safe mode (no modulation, no harmonics)
---disable-inputs     Output-only hardening (no audio input paths)
---integrity          Print rolling SHA-256 of generated samples
+### Modulation
+```
+--iso                Enable isochronic mode (volume pulse)
+--pulse FLOAT        Isochronic pulse frequency in Hz (default: 40)
+--abs                Enable alternating bilateral stimulation (ABS)
+--abs-speed STR      ABS speed: slow | medium | fast (default: medium)
+```
+
+### HRV Breathing
+```
+--hrv                Enable HRV breath pacing mode
+--hrv-style STR      A | B | C | box | 478 | 426 (default: A)
+--breath-cue STR     Cue at transitions: bell|bowl|drum|tick|waterdrop|woodblock|whoosh|doubletick|voice
+--breath-cue-vol FL  Breath cue volume (default: 0.25)
+--breath-bar         Show live breathing bar in terminal
+--fade-long          30-minute fade-to-silence
+--full               Full stack: HRV + ISO + ABS + long fade
+```
+
+### Therapeutic Voice
+```
+--restore-peace      Counter-conditioning affirmations (auto-enables HRV)
+--peace-voice STR    macOS voice for affirmations (default: Daniel)
+--peace-vol FLOAT    Voice volume (default: 0.35)
+--claude-peace       16-phase clinical counter-conditioning
+--claude-peace-vol   Claude-peace volume (default: 0.35)
+--phd-peace          21-phase expert-reviewed counter-conditioning
+--phd-peace-vol      PhD-peace volume (default: 0.35)
+--alternate          EMDR-style bilateral voice alternation (L/R)
+--dense              Affirmation every phase (~5.5s) instead of per cycle (~11s)
+--peace-lang STR     Language: en | fr (default: en)
+```
+
+### Audiobook
+```
+--audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
+--audiobook-list     List all 125 available audiobooks and exit
+--audiobook-vol FL   Voice volume (default: 0.40)
+--audiobook-resume   Resume from saved position
+--audiobook-page N   Start from page N (each page = 10 sentences)
+```
+
+### Preset Modes
+```
+--peaceful-vibe      432 Hz + iso 40 Hz + HRV + breath bar
+--deep-focus         528 Hz + iso 40 Hz (gamma focus)
+--study              528 Hz + iso 40 Hz (pure focus)
+--sleep              174 Hz + HRV C + 30-min fade
+--deep-sleep         174 Hz + HRV C + 30-min fade + bowl cue
+--morning-energy     528 Hz + iso + ABS + HRV 4-2-6
+--anxiety-relief     396 Hz + HRV 4-7-8 + breath bar + bell cue
+--meditation         432 Hz + HRV C + breath bar + 30-min fade
+--yoga               432 Hz + HRV 4-7-8 + breath bar + bowl cue
+--breathwork         HRV 4-7-8 + voice cue (no tone)
+--healing            528 Hz + HRV + slow ABS
+--creativity         639 Hz + iso 10 Hz (alpha waves)
+--reading-calm       432 Hz gentle ambient
+--power-nap          396 Hz + HRV C + 30-min fade
+--bilateral-calm     528 Hz + ABS + HRV + alternating
+--ocean-calm         256 Hz + HRV C + slow ABS + 30-min fade
+--grounding          396 Hz + HRV + Claude counter-conditioning
+--emdr-session       PhD-peace + bilateral ABS + alternating voices
+--trauma-release     PhD-peace + bilateral + HRV 4-7-8
+--full-restore       Full stack: PhD-peace + ABS + HRV 4-7-8 + bowl cue
+```
+
+### Safety
+```
+--pure               Pure sine mode (no modulation)
+--disable-inputs     Output-only hardening
+--integrity          Rolling SHA-256 integrity proof
 --integrity-interval Seconds between integrity prints (default: 1.0)
---lockdown           Maximum safety preset: pure + disable-inputs + integrity
+--lockdown           Maximum safety: pure + disable-inputs + integrity
+```
 
+---
 
-⸻
+## HRV Breathing Styles
 
-HRV Styles
+**Simple (2-phase):**
+- **A** — Symmetric (5.5s in / 5.5s out) — classic HRV coherence
+- **B** — Parasympathetic (4s in / 6.5s out) — deeper relaxation
+- **C** — Deep meditative (6s in / 6s out) — very slow, deep calm
 
-Simple (2-phase: inhale/exhale):
-	•	A – Symmetric breathing (default)
-In 5.5s / Out 5.5s → 11s cycle (classic HRV coherence)
-	•	B – Parasympathetic bias
-In 4s / Out 6.5s → longer exhales for deeper relaxation
-	•	C – Deep meditative
-In 6s / Out 6s → very slow, suited for deep calm sessions
+**Controlled (with hold phases):**
+- **box** — Box breathing (4-4-4-4) — stress control
+- **478** — 4-7-8 breathing (4s in / 7s hold / 8s out) — relaxation technique
+- **426** — 4-2-6 breathing (4s in / 2s hold / 6s out) — calm focus
 
-Controlled breathing (with hold phases):
-	•	box – Box breathing (4-4-4-4)
-In 4s / Hold 4s / Out 4s / Hold 4s → 16s cycle. Used by Navy SEALs for stress control.
-	•	478 – 4-7-8 breathing
-In 4s / Hold 7s / Out 8s → 19s cycle. Dr. Weil's relaxation technique.
-	•	426 – 4-2-6 breathing
-In 4s / Hold 2s / Out 6s → 12s cycle. Short hold, extended exhale for calm focus.
+---
 
-⸻
+## Audiobook Mode (125 Books — 66 French, 59 English)
 
-Basic Usage
+Read a full public domain book aloud during sessions. Voice is auto-selected by language (Thomas for French, Alex for English). Base tone is silenced automatically.
 
-1. Simple pure tone
+### Setup
 
-python stream_tone.py --freq 432
-
-2. Isochronic focus tone
-
-python stream_tone.py --freq 528 --iso --pulse 40
-
-3. ABS Hemisphere Balancing
-
-python stream_tone.py --freq 432 --abs --abs-speed medium
-
-4. Iso + ABS combined
-
-python stream_tone.py --freq 396 --iso --pulse 10 --abs --abs-speed slow
-
-
-⸻
-
-HRV Breath Pacing
-
-Default HRV Mode (Style A)
-
-python stream_tone.py --freq 432 --hrv
-
-This applies a smooth ~0.1 Hz envelope (≈11 second cycles) to gently guide your breathing without thinking about it.
-
-Change HRV mode
-
-# Parasympathetic bias (longer exhale)
-python stream_tone.py --freq 432 --hrv --hrv-style B
-
-# Deep meditative
-python stream_tone.py --freq 528 --hrv --hrv-style C
-
-HRV + Iso + ABS
-
-python stream_tone.py --freq 432 --hrv --iso --pulse 30 --abs --abs-speed slow
-
-Controlled Breathing Patterns
-
-# Box breathing with voice guidance
-python stream_tone.py --freq 432 --hrv --hrv-style box --breath-cue voice --breath-bar --disable-inputs
-
-# 4-7-8 relaxation with bowl cue
-python stream_tone.py --freq 432 --hrv --hrv-style 478 --breath-cue bowl --breath-bar --disable-inputs
-
-# 4-2-6 calm focus with bell cue
-python stream_tone.py --freq 528 --hrv --hrv-style 426 --breath-cue bell --breath-bar --disable-inputs
-
-
-⸻
-
-Long-Term Silence Cultivation
-
-The --fade-long flag smoothly fades the stream toward silence over ~30 minutes (1800 seconds).
-This is useful if you want to:
-	•	train being at peace with silence
-	•	let the nervous system unhook slowly from sound
-	•	end a session gently without a hard stop
-
-Example
-
-python stream_tone.py --freq 528 --hrv --hrv-style A --fade-long
-
-You’ll feel the tone gradually recede while breath pacing remains coherent.
-
-⸻
-
-Full Stack Mode
-
---full enables:
-	•	Isochronic mode (--iso)
-	•	ABS (--abs)
-	•	HRV (--hrv)
-	•	Long fade (--fade-long)
-
-in a single flag.
-
-Example
-
-python stream_tone.py --freq 528 --full
-
-This is a very rich stimulation stack:
-	•	breathing guided,
-	•	hemispheres alternating,
-	•	tone pulsed,
-	•	slowly fading into silence.
-
-⸻
-
-🔐 Security & Reassurance Modes (New)
-
-Lockdown Mode (Maximum Certainty)
-
-python stream_tone.py --freq 432 --lockdown
-
-Lockdown enforces:
-	•	single pure sine wave only (--pure)
-	•	output-only audio (no input paths) (--disable-inputs)
-	•	rolling cryptographic integrity proof (--integrity)
-
-⚠️ Lockdown disables ISO / ABS / HRV by design.
-This mode prioritizes certainty over stimulation.
-
-Structured but Still Safe (Output-Only)
-
-When you want structure without full lockdown, use output-only hardening:
-
-python stream_tone.py --freq 432 --hrv --hrv-style A --iso --pulse 6 --disable-inputs
-
-
-⸻
-
-🎯 Recommended Frequencies by Goal (Exploratory)
-
-These associations come from meditation and sound-healing traditions (not medical claims).
-Use them as anchors for experimentation.
-
-Grounding & Safety
-	•	174 Hz
-	•	432 Hz
-
-Examples:
-
-python stream_tone.py --freq 174 --pure
-python stream_tone.py --freq 432 --lockdown
-
-Emotional Regulation / Release
-	•	396 Hz
-	•	417 Hz
-
-Examples:
-
-python stream_tone.py --freq 396 --hrv --hrv-style B
-python stream_tone.py --freq 417 --iso --pulse 6
-
-Coherence / Calm
-	•	432 Hz
-	•	528 Hz
-
-Examples:
-
-python stream_tone.py --freq 432 --hrv
-python stream_tone.py --freq 528 --hrv --hrv-style A
-
-Clarity / Focus / Mental Order
-	•	639 Hz
-	•	741 Hz
-	•	852 Hz
-
-Examples:
-
-python stream_tone.py --freq 639 --iso --pulse 10
-python stream_tone.py --freq 741 --iso --pulse 10 --abs --abs-speed slow
-python stream_tone.py --freq 852 --hrv --iso --pulse 12
-
-High Attention / Gamma Entrainment
-	•	Any carrier + ~40 Hz isochronic pulse
-
-Example:
-
-python stream_tone.py --freq 396 --iso --pulse 40
-
-
-⸻
-
-⭐ Personal Favorites
-
-Some curated presets that feel especially good:
-
-1. Deep Body Resonance + Iso + ABS (personal favorite)
-
-python3 stream_tone.py --freq 44 --iso --pulse 528 --abs --abs-speed medium
-
-Very low carrier with a high-rate iso pulse & ABS – strong, physical, and intense.
-
-2. HRV Breath Pacing + Iso + ABS
-
-python stream_tone.py --freq 432 --hrv --iso --pulse 30 --abs --abs-speed slow
-
-Great for calming the system while still feeling “awake.”
-
-3. Silence Cultivation + Smooth HRV
-
-python stream_tone.py --freq 528 --hrv --hrv-style A --fade-long
-
-Starts as a clear, coherent tone and slowly dissolves into silence.
-Ideal for closing the day or decompressing after stress.
-
-4. Full Stack Session
-
-python stream_tone.py --freq 528 --full
-
-Everything enabled:
-	•	HRV breath pacing
-	•	Isochronic pulsing
-	•	ABS hemisphere alternation
-	•	Long-term fade-out
-
-Use at comfortable volumes and give yourself time to feel the shift.
-
-5. Absolute Reset (Lockdown)
-
-python stream_tone.py --freq 432 --lockdown
-
-6. Breathing guidance
-
-python stream_tone.py --freq 40 --abs --abs-speed slow --hrv --hrv-style B --iso --pulse 512 --disable-inputs --breath-bar --breath-cue bell
-
-Maximum certainty, minimum stimulation.
-
-⸻
-
-Structured-Safe Presets (ABS / HRV / ISO + Output-Only)
-
-When you want structured stimulation while keeping the system output-only:
-
-HRV + Iso (output-only)
-
-python stream_tone.py --freq 432 --hrv --hrv-style A --iso --pulse 6 --disable-inputs
-
-ABS + HRV (output-only)
-
-python stream_tone.py --freq 528 --abs --abs-speed slow --hrv --hrv-style B --disable-inputs
-
-ABS + HRV + Iso (output-only)
-
-python stream_tone.py --freq 396 --abs --abs-speed slow --hrv --hrv-style B --iso --pulse 8 --disable-inputs
-
-
-⸻
-
-Saving a 1-Hour FLAC
-
-To generate a 1-hour file you can loop later (e.g., on an offline player):
-
-python stream_tone.py --freq 528 --iso --pulse 40 --abs --abs-speed medium --hrv --save-audio
-
-This will create:
-
-528Hz_YYYYMMDD_HHMMSS.flac
-
-in the current directory.
-
-⸻
-
-Breath Cues & Breathing Bar
-
-Breath cues are short synthesized sounds that mark inhale/exhale transitions during HRV mode. They are pre-computed at startup as NumPy arrays — never loaded from files, never generated by TTS.
-
-Available cues:
-	•	bell – Multi-partial singing bell (400ms, 5 inharmonic partials)
-	•	bowl – Singing bowl sustain (600ms, slow decay)
-	•	drum – Low thump with body resonance (200ms)
-	•	waterdrop – Descending chirp (250ms)
-	•	whoosh – Soft filtered air (500ms, 3-pass low-pass)
-	•	tick – Short click (30ms)
-	•	doubletick – Two quick clicks
-	•	woodblock – Percussive tap (60ms)
-	•	voice – Female voice: "Breathe in" / "Hold" / "Breathe out" (macOS Samantha, pre-rendered at startup)
-
-Inhale cues play at normal pitch; exhale cues are pitched down (0.85x) for an audible "in = higher, out = lower" distinction.
-
-The breathing bar (--breath-bar) shows a colored terminal display with sinusoidal fill that matches the auditory envelope, elapsed time, and cycle count.
-
-python stream_tone.py --freq 432 --hrv --breath-cue bowl --breath-bar
-
-⸻
-
-Restore-Peace Mode (Counter-Conditioning)
-
-The --restore-peace flag activates voice affirmations designed to restore natural, automatic breathing. It auto-enables HRV mode so affirmations are timed to your breath cycles.
-
-At each new breath cycle, a calm voice speaks one affirmation from a curated sequence of ~170 messages covering:
-	•	Breathing restoration ("Your breath is sovereign", "Your body breathes")
-	•	Mental clarity ("Your mind is clear", "Your thinking is clean")
-	•	Autonomy and sovereignty ("Just my voice", "immune mind", "untouchable")
-	•	Physical grounding ("strong body", "connect with your muscles")
-	•	Counter-conditioning ("all hypnosis gone", "free now", "reclaimed")
-
-The messages are pre-rendered at startup using macOS say (default voice: Daniel). They are stored as NumPy arrays and mixed inside the single audio callback — no TTS runs during playback.
-
-Example
-
-python stream_tone.py --freq 432 --hrv --hrv-style B --restore-peace --breath-bar --breath-cue bowl --disable-inputs
-
-This gives you:
-	•	Parasympathetic breathing (longer exhale)
-	•	Bowl cue at each breath transition
-	•	Voice affirmation at each new cycle
-	•	Breathing bar (BREATHE IN / BREATHE OUT)
-	•	Output-only hardening
-
-To change the voice or volume:
-
-python stream_tone.py --freq 432 --hrv --restore-peace --peace-voice Ralph --peace-vol 0.4
-
-Available macOS voices include Daniel (British), Ralph (US), Fred (US), Alex (US), and others. Run say -v ? to list all installed voices.
-
-⸻
-
-Claude-Peace Mode (Clinically-Structured Counter-Conditioning)
-
-The --claude-peace flag is a comprehensive therapeutic counter-conditioning system designed to restore automatic behaviors disrupted by sustained verbal conditioning. It was designed using evidence-based techniques from clinical hypnotherapy, ACT (Acceptance and Commitment Therapy), somatic experiencing, and ego-strengthening research.
-
-How It Works
-
-~290 affirmations are organized into 16 therapeutic phases that follow established clinical sequencing (body-first, then safety, then specifics, then clearing and sealing).
-
-Messages use a mixed-depth pattern designed to reach the subconscious:
-	•	1-word messages — direct, primal (e.g., "Breathe", "Safe", "Om")
-	•	2-3 word phrases — slightly more context (e.g., "Full lungs", "Body here")
-	•	Full sentences — conscious reinforcement (e.g., "Your body breathes completely without your help")
-
-This pattern repeats throughout each phase, so both the subconscious and conscious mind receive the message.
-
-All messages use purely positive language (zero negation). The subconscious does not process "not" — so every suggestion affirms what IS true, rather than denying what is false.
-
-Phase 1 — Truisms & Grounding
-Undeniable facts ("You have been breathing your entire life") build a yes-set. The subconscious accepts these, creating momentum for all suggestions that follow.
-
-Phase 2 — Nasal Breathing & Chest Opening
-Celebrate nasal breathing. Pair it with warmth, pleasure, and ease. Chest expands freely.
-
-Phase 3 — Jaw Release & Posture
-Jaw softens and melts. Spine holds you tall. All positive framing — "your jaw relaxes" rather than "your jaw doesn't need to hold."
-
-Phase 4 — Automatic Breathing & Exhale Power
-Core counter-conditioning. Breathing is automatic. Exhale = power, relief, renewal, satisfaction. Includes reminders to let breath flow wild and free — release all holding.
-
-Phase 5 — Focus & Mental Clarity
-Counter-condition focus. Concentration is your natural superpower. Deep focus flows easily. Your mind thinks with perfect clarity.
-
-Phase 6 — Self-Worth & Strength
-Hartland ego-strengthening. You are strong, capable, brilliant, resilient. Your value is permanent and self-evident.
-
-Phase 7 — Sound Safety
-Your inner world stays calm through all sounds. Sound passes through you like wind. Your inner silence is more powerful than any external sound.
-
-Phase 8 — Identity Reclamation
-Your true self is whole, intact, and rising. Everything that is truly you comes back to the surface. Your original self is brilliant and alive.
-
-Phase 9 — Beauty & Light
-Restore self-image. Eyes carry light. Beauty is real, permanent, and growing stronger. Compliments and warmth.
-
-Phase 10 — Inner Peace as Strength
-Counter-condition inner peace. Peace is your deepest power. Calm is strength. Serenity is your natural resting state and birthright.
-
-Phase 11 — Movement & Vitality
-Counter-condition movement. Every movement fills you with strength. Your body moves freely, joyfully, with complete sovereignty. Movement is your birthright.
-
-Phase 12 — Deep Integration
-Consolidate all gains. Healing connects and flows together. You become exactly who you have always been.
-
-Phase 13 — Body Sovereignty
-Every part of your body is yours alone. Private, sealed, clean, and sovereign.
-
-Phase 14 — Nervous System Restoration
-Your nervous system carries only your own pure signals. Returns to its original, pristine state. Mind is spacious and powerful.
-
-Phase 15 — Taking Your Time / Above the Sky
-Patience, timelessness, vast perspective. You are above the sky. Everything below looks small and peaceful.
-
-Phase 16 — Centering & Inner Strength (FORT)
-Center deep inside yourself. Breathe powerfully. Your voice is loud, commanding, dominant. You define yourself with one word: STRONG.
-
-Three male voices (Daniel, Ralph, Fred) alternate across messages, creating a sense of diverse, calm authority. Breathing emphasis ("Breathe", "Full lungs", "Full power") is woven into every phase.
-
-At ~11 seconds per HRV cycle, the full sequence takes ~54 minutes. After completion, it cycles back to Phase 1 for reinforcement — each pass deepens the counter-conditioning.
-
-Example
-
-python stream_tone.py --freq 432 --hrv --hrv-style B --claude-peace --breath-cue bowl --disable-inputs
-
-This gives you:
-	•	Parasympathetic breathing pattern (longer exhale)
-	•	Bowl cue at each breath transition
-	•	Therapeutic affirmation at each new breath cycle
-	•	Breathing bar (BREATHE IN / BREATHE OUT) auto-enabled
-	•	Output-only hardening
-
-Voice Requirements
-
-Claude-peace uses three macOS voices: Daniel, Ralph, and Fred. If a voice is not installed, that message is silently skipped. To install additional voices: System Settings → Accessibility → Spoken Content → System Voice → Manage Voices. Breath cues (--breath-cue voice) still use the female Samantha voice for "Breathe in" / "Breathe out" distinction.
-
-French Language Support
-
-Use --peace-lang fr to switch all peace affirmations (both --restore-peace and --claude-peace) to French. French voices are mapped from the English defaults:
-	•	Daniel → Thomas (fr_FR)
-	•	Ralph → Jacques (fr_FR)
-	•	Fred → Nicolas Enhanced (fr_CA)
-
-When --peace-lang fr is set:
-	•	--restore-peace defaults to Thomas (instead of Daniel) unless --peace-voice is explicitly set
-	•	--breath-cue voice remains in English (Samantha) regardless of language setting
-
-Examples:
-
-# French claude-peace
-python stream_tone.py --freq 432 --claude-peace --peace-lang fr --disable-inputs
-
-# French restore-peace
-python stream_tone.py --freq 432 --hrv --hrv-style B --restore-peace --peace-lang fr --breath-bar --disable-inputs
-
-Differences from --restore-peace
-
-	•	--restore-peace: User-defined messages, single voice, random order
-	•	--claude-peace: Clinically-structured messages, 3 male voices, ordered therapeutic progression, mixed-depth pattern
-
-Both can technically run simultaneously (separate audio buffers), but using one at a time is recommended.
-
-⸻
-
-PhD-Peace Mode (Expert-Reviewed 21-Phase Counter-Conditioning)
-
-The --phd-peace flag extends claude-peace with 5 additional "default state conditioning" rounds (17–21) that anchor your baseline identity states. All 384 messages were reviewed by an expert agent prompted as a PhD in clinical hypnosis, Ericksonian therapy, EMDR, counter-conditioning, and somatic experiencing.
-
-This mode includes all 16 original claude-peace phases plus:
-
-Phase 17 — Default Expression: "I Know Something You Don't"
-Anchor the resting facial expression: knowing smile, quiet confidence, amused awareness. Somatic: feel the smile muscles, the eyes, the face at rest.
-
-Phase 18 — Default Posture: Straight, Solemn, Dignity, Dominance
-Anchor upright, commanding posture as the natural resting state. Proprioceptive: spine, shoulders, chest, jaw — all aligned with power.
-
-Phase 19 — Default Feeling: Joyful Stillness, Inner Peace
-Reinforce inner peace as the default emotional baseline. Presuppose it's already the natural state, not something to achieve.
-
-Phase 20 — Default Mode: Analysing, Assessing, Optimizing, Thinking
-Anchor the default mental operating mode: always scanning, processing, optimizing. Natural intelligence as the resting state.
-
-Phase 21 — Default Body Rapport: Feeling Great, Connected to Muscles & Power
-Anchor deep connection to the physical body as the default. Strength, vitality, power — always present.
-
-Total: 384 affirmations across 21 phases (~70 minutes at 11s/cycle). After completion, cycles back to Phase 1 for reinforcement.
-
-Example
-
-python stream_tone.py --freq 432 --hrv --hrv-style B --phd-peace --breath-cue bowl --disable-inputs
-
-With EMDR-style bilateral voice alternation (each message alternates between left and right speaker):
-
-python stream_tone.py --freq 432 --hrv --hrv-style B --phd-peace --alternate --breath-cue bowl --disable-inputs
-
-The --alternate flag works with --claude-peace, --phd-peace, and --restore-peace. It creates bilateral auditory stimulation by sending each successive voice message to alternating ears.
-
-Dense mode (--dense) doubles the affirmation rate by triggering on every breath phase transition (~5.5s) instead of every full cycle (~11s). This cuts the full sequence from ~70 minutes to ~35 minutes:
-
-python stream_tone.py --phd-peace --dense --alternate --no-tone --disable-inputs
-
-All options can be combined freely:
-
-# Voices only, dense, bilateral, French
-python stream_tone.py --phd-peace --dense --alternate --no-tone --peace-lang fr --disable-inputs
-
-# With background tone and bowl cue
-python stream_tone.py --freq 432 --phd-peace --dense --alternate --breath-cue bowl --disable-inputs
-
-# Original 16-phase claude-peace, dense bilateral
-python stream_tone.py --claude-peace --dense --alternate --no-tone --disable-inputs
-
-# Restore-peace with dense bilateral
-python stream_tone.py --freq 432 --hrv --restore-peace --dense --alternate --breath-bar --disable-inputs
-
-The --claude-peace flag (16 phases, 294 messages) remains available separately for the original therapeutic sequence.
-
-⸻
-
-Audiobook Mode (86 Public Domain Books — 51 French, 35 English)
-
-The --audiobook flag reads a full public domain book aloud during HRV breathing sessions. Voice is auto-selected by language: Thomas (French) or Daniel (English). Books are stored as local text files and rendered sentence-by-sentence using a rolling TTS renderer. The base tone is automatically silenced in audiobook mode.
-
-Languages
-	•	[FR] French books — read by Thomas voice (51 books)
-	•	[EN] English books — read by Daniel voice (35 books)
-	•	The voice is auto-selected from the book metadata — no flag needed
-
-Setup
-
-# Download all books from Project Gutenberg (run once)
+```bash
+# Download books from Project Gutenberg (run once)
 python books/fetch_books.py
 
-# List available books with language tags
+# List all available books
 python stream_tone.py --audiobook-list
+```
 
-How It Works
-	•	A rolling renderer pre-renders ~10 sentences ahead of playback
-	•	Each sentence is triggered at HRV breath cycle transitions
-	•	If a sentence is still playing when a new cycle starts, it continues — no interruption
-	•	Memory stays bounded: only ~12 rendered sentences in memory at once
-	•	Uses the same TTS pipeline as claude-peace (macOS say → NumPy array)
-	•	Page progress logged to console every 10 sentences
+### Usage
 
-Available Books (86)
+```bash
+# Listen to Meditations by Marcus Aurelius
+python stream_tone.py --audiobook meditations
 
-English Classics (35):
-
-Stoic Philosophy:
-	•	meditations — Meditations (Marcus Aurelius) [EN]
-	•	enchiridion — The Enchiridion (Epictetus) [EN]
-	•	lettres-lucilius — Minor Dialogues (Seneca) [EN]
-	•	brievete-vie — Of the Shortness of Life (Seneca) [EN]
-	•	tranquillite — Of Peace of Mind (Seneca) [EN]
-
-Greek Philosophy:
-	•	republique — The Republic (Plato) [EN]
-	•	apologie — Apology (Plato) [EN]
-	•	banquet — Symposium (Plato) [EN]
-	•	phedon — Phaedo (Plato) [EN]
-	•	phedre — Phaedrus (Plato) [EN]
-	•	gorgias — Gorgias (Plato) [EN]
-	•	ethique-nicomaque — Nicomachean Ethics (Aristotle) [EN]
-
-Eastern Philosophy:
-	•	art-guerre — The Art of War (Sun Tzu) [EN]
-	•	tao-te-king — Tao Te Ching (Lao Tzu) [EN]
-	•	dhammapada — Dhammapada [EN]
-	•	bhagavad-gita — Bhagavad-Gita [EN]
-
-Religious Texts:
-	•	bible — The Bible, KJV [EN]
-	•	coran — The Quran (tr. Rodwell) [EN]
-
-German Philosophy:
-	•	art-raison — The Art of Controversy (Schopenhauer) [EN]
-	•	bien-mal — Beyond Good and Evil (Nietzsche) [EN]
-
-Classical Literature:
-	•	eneide — The Aeneid (Virgil) [EN]
-	•	metamorphoses — The Metamorphoses (Ovid) [EN]
-	•	nature-choses — On the Nature of Things (Lucretius) [EN]
-
-Roman Wisdom:
-	•	amitie — Treatises on Friendship and Old Age (Cicero) [EN]
-	•	vieillesse — Treatises on Friendship and Old Age (Cicero) [EN]
-
-Persian & Eastern Poetry:
-	•	rubaiyat — Rubaiyat of Omar Khayyam [EN]
-
-French Books (51):
-
-French Philosophy:
-	•	essais — Essais (Montaigne) [FR]
-	•	discours-methode — Discours de la méthode (Descartes) [FR]
-	•	zarathoustra — Ainsi parlait Zarathoustra (Nietzsche, tr. Albert) [FR]
-	•	traite-tolerance — Traité sur la tolérance (Voltaire) [FR]
-
-French Literature (originals):
-	•	candide — Candide (Voltaire) [FR]
-	•	fables — Les Fables (La Fontaine) [FR]
-	•	fleurs-mal — Les Fleurs du mal (Baudelaire) [FR]
-	•	miserables — Les Misérables (Hugo) [FR]
-	•	monte-cristo — Le Comte de Monte-Cristo (Dumas) [FR]
-	•	trois-mousquetaires — Les Trois Mousquetaires (Dumas) [FR]
-	•	cyrano — Cyrano de Bergerac (Rostand) [FR]
-
-Classical Literature (French translations):
-	•	odyssee — L'Odyssée (Homère, tr. Leconte de Lisle) [FR]
-	•	iliade — L'Iliade (Homère, tr. Leconte de Lisle) [FR]
-	•	entretiens-confucius — Les quatre livres (Confucius) [FR]
-	•	imitation — L'Imitation de Jésus-Christ (Thomas a Kempis) [FR]
-
-French Novels (19):
-	•	madame-bovary — Madame Bovary (Flaubert) [FR]
-	•	rouge-et-noir — Le rouge et le noir (Stendhal) [FR]
-	•	chartreuse-de-parme — La Chartreuse de Parme (Stendhal) [FR]
-	•	eugenie-grandet — Eugénie Grandet (Balzac) [FR]
-	•	germinal — Germinal (Zola) [FR]
-	•	nana — Nana (Zola) [FR]
-	•	assommoir — L'Assommoir (Zola) [FR]
-	•	therese-raquin — Thérèse Raquin (Zola) [FR]
-	•	notre-dame-de-paris — Notre-Dame de Paris (Hugo) [FR]
-	•	homme-qui-rit — L'homme qui rit (Hugo) [FR]
-	•	quatrevingt-treize — Quatrevingt-Treize (Hugo) [FR]
-	•	dame-aux-camelias — La dame aux camélias (Dumas fils) [FR]
-	•	liaisons-dangereuses — Les liaisons dangereuses (Laclos) [FR]
-	•	grand-meaulnes — Le Grand Meaulnes (Alain-Fournier) [FR]
-	•	fantome-opera — Le Fantôme de l'Opéra (Leroux) [FR]
-	•	arsene-lupin — Arsène Lupin (Leblanc) [FR]
-	•	petite-fadette — La petite Fadette (Sand) [FR]
-	•	a-rebours — À rebours (Huysmans) [FR]
-	•	du-cote-de-chez-swann — Du côté de chez Swann (Proust) [FR]
-
-Jules Verne (5):
-	•	tour-du-monde — Le tour du monde en 80 jours [FR]
-	•	voyage-centre-terre — Voyage au centre de la Terre [FR]
-	•	vingt-mille-lieues — Vingt mille lieues sous les mers [FR]
-	•	ile-mysterieuse — L'île mystérieuse [FR]
-	•	de-la-terre-a-la-lune — De la terre à la lune [FR]
-
-French Theatre (3):
-	•	avare — L'Avare (Molière) [FR]
-	•	don-juan — Don Juan (Molière) [FR]
-	•	hernani — Hernani (Hugo) [FR]
-
-French Poetry (4):
-	•	alcools — Alcools (Apollinaire) [FR]
-	•	poesies-rimbaud — Poésies complètes (Rimbaud) [FR]
-	•	verlaine-oeuvres — Œuvres complètes (Verlaine) [FR]
-	•	legende-des-siecles — La Légende des siècles (Hugo) [FR]
-
-French Short Stories (4):
-	•	boule-de-suif — Boule de Suif (Maupassant) [FR]
-	•	le-horla — Le Horla (Maupassant) [FR]
-	•	contes-de-perrault — Contes du temps passé (Perrault) [FR]
-	•	lettres-de-mon-moulin — Lettres de mon moulin (Daudet) [FR]
-
-Examples
-
-# French audiobook with bilateral alternation
-python stream_tone.py --audiobook candide --alternate --disable-inputs
-
-# English philosophy
-python stream_tone.py --audiobook meditations --disable-inputs
+# French literature with bilateral alternation
+python stream_tone.py --audiobook candide --alternate
 
 # Resume from where you left off
-python stream_tone.py --audiobook meditations --audiobook-resume
+python stream_tone.py --audiobook miserables --audiobook-resume
 
 # Jump to a specific page
 python stream_tone.py --audiobook miserables --audiobook-page 42
+```
 
-# Combine with claude-peace therapeutic affirmations
-python stream_tone.py --freq 432 --claude-peace --audiobook germinal
+### Real-Time Text Display
 
-# Dense mode with bowl cue
-python stream_tone.py --audiobook madame-bovary --dense --breath-cue bowl --disable-inputs
-
-Page Progress & Resume
-
-Every 10 sentences, the console logs the current page:
-
-  [Candide — Voltaire [FR]] [FR] page 5/120
-
-On Ctrl-C, the exact page is shown with a resume command:
-
-  Audiobook: Candide — Voltaire [FR] — stopped at page 5/120
-  Resume with: --audiobook candide --audiobook-page 5
-
-With --audiobook-resume, progress is auto-saved/loaded from books/.progress.
-
-⸻
-
-Safety Notes
-	•	Always keep volume at a comfortable level.
-	•	If you feel dizzy, anxious, or overloaded, stop the stream and rest.
-	•	For trauma history or strong sensitivity, start with:
-
-python stream_tone.py --freq 432 --hrv --hrv-style A
-
-at low volume and gradually adjust.
-
-This tool is here to help you take sound back as something that serves you, not something used against you.
-
-⸻
-
- python stream_tone.py --claude-peace --peace-lang fr --breath-bar --disable-inputs --no-tone   
+The current sentence is logged to the console as it plays, so you can follow along if you miss a word:
 
 ```
+  > Marcus Aurelius began each morning by telling himself...
+  > The happiness of your life depends upon the quality of your thoughts.
+```
+
+### Page Tracking & Resume
+
+Every 10 sentences, page progress is logged. On Ctrl-C, you get a resume command:
+
+```
+  [Candide — Voltaire [FR]] page 5/120
+  Resume with: --audiobook candide --audiobook-page 5
+```
+
+With `--audiobook-resume`, progress is auto-saved and restored between sessions.
+
+### Book Library (125 books)
+
+**Philosophy & Wisdom:**
+- `meditations` — Meditations (Marcus Aurelius) [EN]
+- `enchiridion` — The Enchiridion (Epictetus) [EN]
+- `golden-sayings-epictetus` — Golden Sayings of Epictetus [EN]
+- `lettres-lucilius` — Minor Dialogues (Seneca) [EN]
+- `republique` — The Republic (Plato) [EN]
+- `apologie` — Apology (Plato) [EN]
+- `banquet` — Symposium (Plato) [EN]
+- `phedon` — Phaedo (Plato) [EN]
+- `phedre` — Phaedrus (Plato) [EN]
+- `gorgias` — Gorgias (Plato) [EN]
+- `ethique-nicomaque` — Nicomachean Ethics (Aristotle) [EN]
+- `art-guerre` — The Art of War (Sun Tzu) [EN]
+- `tao-te-king` — Tao Te Ching (Lao Tzu) [EN]
+- `dhammapada` — Dhammapada [EN]
+- `bhagavad-gita` — Bhagavad-Gita [EN]
+- `bushido` — Bushido, the Soul of Japan (Nitobe) [EN]
+- `bible` — The Bible, KJV [EN]
+- `coran` — The Quran (tr. Rodwell) [EN]
+- `prince` — The Prince (Machiavelli) [EN]
+- `contrat-social` — The Social Contract (Rousseau) [EN]
+- `oracle-manuel` — The Art of Controversy (Schopenhauer) [EN]
+- `bien-mal` — Beyond Good and Evil (Nietzsche) [EN]
+- `rubaiyat` — Rubaiyat of Omar Khayyam [EN]
+- `amitie` — Treatises on Friendship and Old Age (Cicero) [EN]
+
+**French Philosophy:**
+- `essais` — Essais (Montaigne) [FR]
+- `discours-methode` — Discours de la méthode (Descartes) [FR]
+- `pensees` — Pensées (Pascal) [EN]
+- `zarathoustra` — Ainsi parlait Zarathoustra (Nietzsche) [FR]
+- `traite-tolerance` — Traité sur la tolérance (Voltaire) [FR]
+- `entretiens-confucius` — Les quatre livres (Confucius) [FR]
+- `imitation` — L'Imitation de Jésus-Christ [FR]
+
+**Classical Literature:**
+- `odyssee` — L'Odyssée (Homère) [FR]
+- `iliade` — L'Iliade (Homère) [FR]
+- `eneide` — The Aeneid (Virgil) [EN]
+- `metamorphoses` — The Metamorphoses (Ovid) [EN]
+- `nature-choses` — On the Nature of Things (Lucretius) [EN]
+
+**French Literature:**
+- `candide` — Candide (Voltaire) [FR]
+- `fables` — Les Fables (La Fontaine) [FR]
+- `fleurs-mal` — Les Fleurs du mal (Baudelaire) [FR]
+- `miserables` — Les Misérables (Hugo) [FR]
+- `monte-cristo` — Le Comte de Monte-Cristo (Dumas) [FR]
+- `trois-mousquetaires` — Les Trois Mousquetaires (Dumas) [FR]
+- `cyrano` — Cyrano de Bergerac (Rostand) [FR]
+- `madame-bovary` — Madame Bovary (Flaubert) [FR]
+- `rouge-et-noir` — Le rouge et le noir (Stendhal) [FR]
+- `chartreuse-de-parme` — La Chartreuse de Parme (Stendhal) [FR]
+- `eugenie-grandet` — Eugénie Grandet (Balzac) [FR]
+- `germinal` — Germinal (Zola) [FR]
+- `nana` — Nana (Zola) [FR]
+- `assommoir` — L'Assommoir (Zola) [FR]
+- `therese-raquin` — Thérèse Raquin (Zola) [FR]
+- `notre-dame-de-paris` — Notre-Dame de Paris (Hugo) [FR]
+- `homme-qui-rit` — L'homme qui rit (Hugo) [FR]
+- `quatrevingt-treize` — Quatrevingt-Treize (Hugo) [FR]
+- `dame-aux-camelias` — La dame aux camélias (Dumas fils) [FR]
+- `liaisons-dangereuses` — Les liaisons dangereuses (Laclos) [FR]
+- `grand-meaulnes` — Le Grand Meaulnes (Alain-Fournier) [FR]
+- `fantome-opera` — Le Fantôme de l'Opéra (Leroux) [FR]
+- `arsene-lupin` — Arsène Lupin (Leblanc) [FR]
+- `petite-fadette` — La petite Fadette (Sand) [FR]
+- `a-rebours` — À rebours (Huysmans) [FR]
+- `du-cote-de-chez-swann` — Du côté de chez Swann (Proust) [FR]
+
+**Jules Verne:**
+- `tour-du-monde` — Le tour du monde en 80 jours [FR]
+- `voyage-centre-terre` — Voyage au centre de la Terre [FR]
+- `vingt-mille-lieues` — Vingt mille lieues sous les mers [FR]
+- `ile-mysterieuse` — L'île mystérieuse [FR]
+- `de-la-terre-a-la-lune` — De la terre à la lune [FR]
+
+**French Theatre & Poetry:**
+- `avare` — L'Avare (Molière) [FR]
+- `don-juan` — Don Juan (Molière) [FR]
+- `hernani` — Hernani (Hugo) [FR]
+- `alcools` — Alcools (Apollinaire) [FR]
+- `poesies-rimbaud` — Poésies complètes (Rimbaud) [FR]
+- `verlaine-oeuvres` — Oeuvres complètes (Verlaine) [FR]
+- `legende-des-siecles` — La Légende des siècles (Hugo) [FR]
+- `boule-de-suif` — Boule de Suif (Maupassant) [FR]
+- `le-horla` — Le Horla (Maupassant) [FR]
+- `contes-de-perrault` — Contes du temps passé (Perrault) [FR]
+- `lettres-de-mon-moulin` — Lettres de mon moulin (Daudet) [FR]
+
+**Mindfulness & Self-Improvement:**
+- `walden` — Walden (Thoreau) [EN]
+- `as-a-man-thinketh` — As a Man Thinketh (James Allen) [EN]
+- `way-of-peace` — The Way of Peace (James Allen) [EN]
+- `self-help-smiles` — Self-Help (Samuel Smiles) [EN]
+- `how-to-live-24h` — How to Live on 24 Hours a Day (Bennett) [EN]
+- `power-concentration` — The Power of Concentration (Dumont) [EN]
+- `problems-philosophy` — The Problems of Philosophy (Russell) [EN]
+- `varieties-religious` — The Varieties of Religious Experience (James) [EN]
+- `pragmatism` — Pragmatism (William James) [EN]
+
+**Transcendentalism & Nature:**
+- `emerson-essays` — Essays, First Series (Emerson) [EN]
+- `nature-emerson` — Nature (Emerson) [EN]
+- `civil-disobedience` — On Civil Disobedience (Thoreau) [EN]
+- `leaves-of-grass` — Leaves of Grass (Whitman) [EN]
+- `songs-innocence` — Songs of Innocence and Experience (Blake) [EN]
+
+**Spiritual Wisdom:**
+- `imitation-christ-en` — The Imitation of Christ (Thomas a Kempis) [EN]
+- `confessions-augustine` — Confessions of St. Augustine [EN]
+- `prophet-gibran` — The Prophet (Kahlil Gibran) [EN]
+- `gospel-buddha` — The Gospel of Buddha (Paul Carus) [EN]
+- `gitanjali` — Gitanjali (Tagore) [EN]
+- `sadhana` — Sadhana (Tagore) [EN]
+- `songs-kabir` — Songs of Kabir (Tagore tr.) [EN]
+- `paradise-lost` — Paradise Lost (Milton) [EN]
+- `divine-comedy` — The Divine Comedy (Dante) [EN]
+- `pilgrim-progress` — The Pilgrim's Progress (Bunyan) [EN]
+
+**Literature on the Human Condition:**
+- `crime-punishment` — Crime and Punishment (Dostoyevsky) [EN]
+- `brothers-karamazov` — The Brothers Karamazov (Dostoyevsky) [EN]
+- `anna-karenina` — Anna Karenina (Tolstoy) [EN]
+- `war-and-peace` — War and Peace (Tolstoy) [EN]
+- `death-ivan-ilyich` — The Death of Ivan Ilyich (Tolstoy) [EN]
+- `resurrection-tolstoy` — Resurrection (Tolstoy) [EN]
+- `tale-two-cities` — A Tale of Two Cities (Dickens) [EN]
+
+**French Classics (New):**
+- `caracteres` — Les Caractères (La Bruyère) [FR]
+- `maximes` — Maximes (La Rochefoucauld) [FR]
+- `reveries-promeneur` — Les Rêveries du promeneur solitaire (Rousseau) [FR]
+- `lettres-persanes` — Lettres persanes (Montesquieu) [FR]
+- `esprit-des-lois` — De l'esprit des lois (Montesquieu) [FR]
+- `princesse-cleves` — La Princesse de Clèves (Lafayette) [FR]
+- `jacques-fataliste` — Jacques le Fataliste (Diderot) [FR]
+- `neveu-rameau` — Le Neveu de Rameau (Diderot) [FR]
+- `manon-lescaut` — Manon Lescaut (Abbé Prévost) [FR]
+- `colomba` — Colomba (Mérimée) [FR]
+- `adolphe` — Adolphe (Benjamin Constant) [FR]
+- `zadig` — Zadig (Voltaire) [FR]
+- `micromegas` — Micromégas (Voltaire) [FR]
+- `une-vie` — Une Vie (Maupassant) [FR]
+- `pierre-et-jean` — Pierre et Jean (Maupassant) [FR]
+- `bel-ami` — Bel-Ami (Maupassant) [FR]
+
+---
+
+## Therapeutic Voice Modes
+
+### Claude-Peace (16-Phase Counter-Conditioning)
+
+~290 affirmations across 16 therapeutic phases using evidence-based techniques from clinical hypnotherapy, ACT, somatic experiencing, and ego-strengthening research. Three male voices (Daniel, Ralph, Fred) alternate for diverse, calm authority.
+
+Phases: Truisms & Grounding → Nasal Breathing → Jaw Release → Automatic Breathing → Focus & Clarity → Self-Worth → Sound Safety → Identity Reclamation → Beauty & Light → Inner Peace → Movement & Vitality → Deep Integration → Body Sovereignty → Nervous System → Above the Sky → Centering & Inner Strength
+
+```bash
+python stream_tone.py --claude-peace --disable-inputs
+```
+
+### PhD-Peace (21-Phase Expert-Reviewed)
+
+Extends claude-peace with 5 additional default-state conditioning rounds (17-21): Default Expression, Default Posture, Default Feeling, Default Mode, Default Body Rapport. 384 affirmations, ~70 minutes at 11s/cycle.
+
+```bash
+# Full PhD-peace with bilateral alternation
+python stream_tone.py --phd-peace --alternate --disable-inputs
+
+# Dense mode (double speed, ~35 min)
+python stream_tone.py --phd-peace --dense --alternate --no-tone --disable-inputs
+
+# French language
+python stream_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
+```
+
+### Restore-Peace (Custom Affirmations)
+
+~170 affirmations covering breathing restoration, mental clarity, autonomy, grounding, and counter-conditioning.
+
+```bash
+python stream_tone.py --freq 432 --hrv --restore-peace --breath-bar --breath-cue bowl
+```
+
+---
+
+## Voice Setup (macOS)
+
+Resonance uses macOS `say` for TTS. Run the setup script to check required voices:
+
+```bash
+./setup_voices.sh
+```
+
+**Required voices:**
+- **Alex** (English) — audiobooks + affirmations
+- **Thomas** (French) — French audiobooks + affirmations
+- **Daniel** (English) — affirmations
+- **Samantha** (English) — breath cue voice mode
+
+**To install voices manually:**
+1. System Settings → Accessibility → Spoken Content → System Voice → Manage Voices
+2. Search for and download: Alex (Enhanced/Premium), Thomas, Daniel, Samantha
+
+The Premium Alex voice (~800 MB) sounds significantly better for audiobook listening.
+
+---
+
+## Recommended Frequencies
+
+| Goal | Frequencies | Example |
+|------|------------|---------|
+| Grounding & Safety | 174, 432 Hz | `--freq 174 --pure` |
+| Emotional Release | 396, 417 Hz | `--freq 396 --hrv --hrv-style B` |
+| Coherence & Calm | 432, 528 Hz | `--freq 432 --hrv` |
+| Focus & Clarity | 639, 741, 852 Hz | `--freq 639 --iso --pulse 10` |
+| Gamma Entrainment | Any + 40 Hz pulse | `--freq 528 --iso --pulse 40` |
+
+---
+
+## Safety Notes
+
+- Keep volume at a comfortable level
+- If you feel dizzy, anxious, or overloaded — stop and rest
+- For trauma sensitivity, start with: `python stream_tone.py --freq 432 --hrv` at low volume
+- This tool exists to help you take sound back as something that serves you

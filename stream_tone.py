@@ -20,7 +20,7 @@ import re
 # ============================
 
 # Argument parser
-parser = argparse.ArgumentParser(description="Pure tone streaming generator")
+parser = argparse.ArgumentParser(description="Resonance — Therapeutic Audio Engine")
 parser.add_argument("--freq", type=float, default=528, help="Frequency in Hz (e.g., 432, 528, 639)")
 parser.add_argument("--save-audio", action="store_true", help="Save 1 hour FLAC file instead of realtime streaming")
 parser.add_argument("--iso", action="store_true", help="Enable isochronic mode (volume pulse)")
@@ -92,6 +92,47 @@ parser.add_argument("--audiobook-resume", action="store_true",
                     help="Resume from where you left off (saves progress to books/.progress)")
 parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
+# ── Presets: one-flag therapeutic modes ────────────────────────
+parser.add_argument("--peaceful-vibe", action="store_true",
+                    help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
+parser.add_argument("--deep-focus", action="store_true",
+                    help="Preset: 528 Hz + isochronic 40 Hz (gamma focus, no breathing)")
+parser.add_argument("--sleep", action="store_true",
+                    help="Preset: 174 Hz + HRV style C + 30-min fade-to-silence")
+parser.add_argument("--morning-energy", action="store_true",
+                    help="Preset: 528 Hz + isochronic + ABS + HRV 4-2-6 breathing")
+parser.add_argument("--anxiety-relief", action="store_true",
+                    help="Preset: 396 Hz + HRV 4-7-8 + breath bar + bell cue")
+parser.add_argument("--meditation", action="store_true",
+                    help="Preset: 432 Hz + HRV style C + breath bar + 30-min fade")
+parser.add_argument("--emdr-session", action="store_true",
+                    help="Preset: PhD-peace 21-phase + bilateral ABS + alternating voices")
+parser.add_argument("--deep-sleep", action="store_true",
+                    help="Preset: 174 Hz + HRV style C + 30-min fade + bowl cue")
+parser.add_argument("--bilateral-calm", action="store_true",
+                    help="Preset: 528 Hz + ABS + HRV + alternating bilateral stimulation")
+parser.add_argument("--study", action="store_true",
+                    help="Preset: 528 Hz + isochronic 40 Hz (pure focus, no breathing)")
+parser.add_argument("--yoga", action="store_true",
+                    help="Preset: 432 Hz + HRV 4-7-8 + breath bar + singing bowl cue")
+parser.add_argument("--breathwork", action="store_true",
+                    help="Preset: HRV 4-7-8 + breath bar + voice cue (no tone)")
+parser.add_argument("--power-nap", action="store_true",
+                    help="Preset: 396 Hz + HRV style C + 30-min fade-to-silence")
+parser.add_argument("--grounding", action="store_true",
+                    help="Preset: 396 Hz + HRV + breath bar + Claude counter-conditioning")
+parser.add_argument("--healing", action="store_true",
+                    help="Preset: 528 Hz (Solfeggio healing) + HRV + slow ABS")
+parser.add_argument("--creativity", action="store_true",
+                    help="Preset: 639 Hz + isochronic 10 Hz (alpha waves for creativity)")
+parser.add_argument("--reading-calm", action="store_true",
+                    help="Preset: 432 Hz gentle ambient tone (minimal, calm background)")
+parser.add_argument("--trauma-release", action="store_true",
+                    help="Preset: PhD-peace 21-phase + bilateral alternation + HRV 4-7-8")
+parser.add_argument("--ocean-calm", action="store_true",
+                    help="Preset: 256 Hz + HRV style C + slow ABS + 30-min fade")
+parser.add_argument("--full-restore", action="store_true",
+                    help="Preset: full therapeutic stack — PhD-peace + ABS + HRV 4-7-8 + bowl cue")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -130,6 +171,56 @@ audiobook_list = args.audiobook_list
 audiobook_vol = args.audiobook_vol
 audiobook_resume = args.audiobook_resume
 audiobook_page = args.audiobook_page
+
+# ── Preset mode overrides ─────────────────────────────────────
+# Each preset sets variables that the existing cascade then refines
+if args.peaceful_vibe:
+    frequency = 432; iso_mode = True; pulse_freq = 40; hrv_mode = True; breath_bar = True
+if args.deep_focus:
+    frequency = 528; iso_mode = True; pulse_freq = 40
+if args.sleep:
+    frequency = 174; hrv_mode = True; hrv_style = "C"; fade_long = True
+if args.morning_energy:
+    frequency = 528; iso_mode = True; abs_mode = True; hrv_mode = True; hrv_style = "426"
+if args.anxiety_relief:
+    frequency = 396; hrv_mode = True; hrv_style = "478"; breath_bar = True; breath_cue = "bell"
+if args.meditation:
+    frequency = 432; hrv_mode = True; hrv_style = "C"; breath_bar = True; fade_long = True
+if args.emdr_session:
+    phd_peace = True; abs_mode = True; hrv_mode = True; hrv_style = "478"
+    alternate_mode = True; breath_bar = True
+if args.deep_sleep:
+    frequency = 174; hrv_mode = True; hrv_style = "C"; fade_long = True; breath_cue = "bowl"
+if args.bilateral_calm:
+    frequency = 528; abs_mode = True; hrv_mode = True; alternate_mode = True
+if args.study:
+    frequency = 528; iso_mode = True; pulse_freq = 40
+if args.yoga:
+    frequency = 432; hrv_mode = True; hrv_style = "478"; breath_bar = True; breath_cue = "bowl"
+if args.breathwork:
+    hrv_mode = True; hrv_style = "478"; breath_bar = True; breath_cue = "voice"
+if args.power_nap:
+    frequency = 396; hrv_mode = True; hrv_style = "C"; fade_long = True
+if args.grounding:
+    frequency = 396; hrv_mode = True; breath_bar = True; claude_peace = True
+if args.healing:
+    frequency = 528; hrv_mode = True; abs_mode = True; abs_speed = "slow"
+if args.creativity:
+    frequency = 639; iso_mode = True; pulse_freq = 10
+if args.reading_calm:
+    frequency = 432
+if args.trauma_release:
+    phd_peace = True; alternate_mode = True; hrv_mode = True; hrv_style = "478"; breath_bar = True
+if args.ocean_calm:
+    frequency = 256; hrv_mode = True; hrv_style = "C"; abs_mode = True; abs_speed = "slow"; fade_long = True
+if args.full_restore:
+    phd_peace = True; alternate_mode = True; abs_mode = True; hrv_mode = True
+    hrv_style = "478"; breath_bar = True; breath_cue = "bowl"
+
+# Presets that silence the base tone
+_preset_no_tone = args.breathwork
+# Presets with custom amplitude
+_preset_low_amp = args.reading_calm
 
 # French language: override default peace voice if user didn't explicitly set it
 if peace_lang == "fr" and "--peace-voice" not in sys.argv:
@@ -230,9 +321,8 @@ if audiobook_name:
     _audiobook_book_title = f"{_ab_meta['title']} — {_ab_meta['author']} [{_ab_lang.upper()}]"
     audiobook_mode = True
     hrv_mode = True
-    breath_bar = True
     if pure_mode:
-        print("Note: --audiobook overrides --pure to enable HRV + breath-bar")
+        print("Note: --audiobook overrides --pure to enable HRV")
 
 # map speed keyword to Hz
 if abs_speed == "slow":
@@ -261,7 +351,7 @@ hrv_rate = 1.0 / hrv_cycle_seconds  # kept for save-audio compatibility
 long_fade_seconds = 1800.0  # 30 minutes
 
 sample_rate = 44100        # CD quality
-amplitude = 0.0 if (args.no_tone or audiobook_mode) else 0.20  # --no-tone / --audiobook: silence base tone, keep cues/voices
+amplitude = 0.0 if (args.no_tone or audiobook_mode or _preset_no_tone) else (0.10 if _preset_low_amp else 0.20)
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
@@ -574,8 +664,9 @@ _VOICE_ALIASES = {
     "Nicolas": "Nicolas (Enhanced)",
 }
 
-def _render_peace_voice(text, voice, rate=140):
-    """Render a single affirmation via macOS say. Returns float32 numpy array or None."""
+def _render_peace_voice(text, voice, rate=140, trim_silence=False):
+    """Render a single affirmation via macOS say. Returns float32 numpy array or None.
+    If trim_silence=True, strips leading/trailing silence (for audiobook continuity)."""
     say_voice = _VOICE_ALIASES.get(voice, voice)
     try:
         tmp = tempfile.NamedTemporaryFile(suffix=".aiff", delete=False)
@@ -593,6 +684,16 @@ def _render_peace_voice(text, voice, rate=140):
         if sr != sample_rate:
             indices = np.linspace(0, len(data) - 1, int(len(data) * sample_rate / sr))
             data = np.interp(indices, np.arange(len(data)), data)
+        # Trim leading/trailing silence (threshold-based)
+        if trim_silence and len(data) > 0:
+            threshold = 0.005
+            above = np.where(np.abs(data) > threshold)[0]
+            if len(above) > 0:
+                # Keep a tiny pad (50ms) on each side for naturalness
+                pad = int(0.05 * sample_rate)
+                start = max(0, above[0] - pad)
+                end = min(len(data), above[-1] + pad)
+                data = data[start:end]
         # Smooth fade-in/out to prevent clicks
         fade_n = min(int(0.015 * sample_rate), len(data) // 4)
         if fade_n > 0:
@@ -1726,7 +1827,7 @@ def _audiobook_renderer_thread():
         if cache_key in _ab_tts_cache:
             _audiobook_rendered[_audiobook_next_render] = _ab_tts_cache[cache_key]
         else:
-            arr = _render_peace_voice(text, voice, rate=130)
+            arr = _render_peace_voice(text, voice, rate=145, trim_silence=True)
             if arr is not None:
                 _ab_tts_cache[cache_key] = arr
                 _audiobook_rendered[_audiobook_next_render] = arr
@@ -2057,31 +2158,37 @@ def audio_callback(outdata, frames, time, status):
                 if alternate_mode:
                     _claude_alt_left = (_claude_cycle_count % 2 == 0)
                 _claude_cycle_count += 1
-            # Audiobook: trigger next sentence when current finishes and breath cycle starts
-            if audiobook_mode and _audiobook_cue_buf is None:
-                _ab_trigger = current_phase_name == _hrv_phase_names[0] or dense_mode
-                if _ab_trigger and _audiobook_play_idx in _audiobook_rendered:
-                    _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
-                    _audiobook_cue_pos = 0
-                    if alternate_mode:
-                        _audiobook_alt_left = (_audiobook_play_idx % 2 == 0)
-                    _audiobook_play_idx += 1
-                    # Page progress logging (every _AUDIOBOOK_PAGE_SIZE sentences)
-                    _ab_page = (_audiobook_play_idx - 1) // _AUDIOBOOK_PAGE_SIZE
-                    if _ab_page != _audiobook_last_page_logged and _audiobook_play_idx % _AUDIOBOOK_PAGE_SIZE == 0:
-                        _audiobook_last_page_logged = _ab_page
-                        _ab_total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
-                        _ab_lang_tag = "FR" if _audiobook_sentences[0][0] == "Thomas" else "EN"
-                        _ab_page_msg = f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n"
-                        try:
-                            sys.stderr.write(_ab_page_msg)
-                        except Exception:
-                            pass
             hrv_last_phase_name = current_phase_name
 
         hrv_phase += frames
 
         # Cue mixing happens after gain — see below
+
+    # Audiobook: continuously trigger next sentence as soon as current finishes
+    if audiobook_mode and _audiobook_cue_buf is None and _audiobook_play_idx in _audiobook_rendered:
+        _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
+        _audiobook_cue_pos = 0
+        if alternate_mode:
+            _audiobook_alt_left = (_audiobook_play_idx % 2 == 0)
+        _audiobook_play_idx += 1
+        # Log the sentence text in real time so user can read along
+        _ab_sent_idx = _audiobook_play_idx - 1
+        try:
+            _, _ab_sent_text = _audiobook_sentences[_ab_sent_idx]
+            _ab_display = _ab_sent_text[:120] + ("..." if len(_ab_sent_text) > 120 else "")
+            sys.stderr.write(f"\n  > {_ab_display}\n")
+        except Exception:
+            pass
+        # Page progress logging (every _AUDIOBOOK_PAGE_SIZE sentences)
+        _ab_page = (_audiobook_play_idx - 1) // _AUDIOBOOK_PAGE_SIZE
+        if _ab_page != _audiobook_last_page_logged and _audiobook_play_idx % _AUDIOBOOK_PAGE_SIZE == 0:
+            _audiobook_last_page_logged = _ab_page
+            _ab_total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
+            _ab_lang_tag = "FR" if _audiobook_sentences[0][0] == "Thomas" else "EN"
+            try:
+                sys.stderr.write(f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n")
+            except Exception:
+                pass
 
     # fade-in curve
     if current_sample < fade_samples:
