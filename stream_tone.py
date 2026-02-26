@@ -90,6 +90,8 @@ parser.add_argument("--audiobook-vol", type=float, default=0.40,
                     help="Audiobook voice volume (default: 0.40)")
 parser.add_argument("--audiobook-resume", action="store_true",
                     help="Resume from where you left off (saves progress to books/.progress)")
+parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
+                    help="Start audiobook from page N (each page = ~10 sentences)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -127,6 +129,7 @@ audiobook_name = args.audiobook
 audiobook_list = args.audiobook_list
 audiobook_vol = args.audiobook_vol
 audiobook_resume = args.audiobook_resume
+audiobook_page = args.audiobook_page
 
 # French language: override default peace voice if user didn't explicitly set it
 if peace_lang == "fr" and "--peace-voice" not in sys.argv:
@@ -175,16 +178,23 @@ if phd_peace:
 if audiobook_list:
     from books.catalog import BOOK_CATALOG, BOOK_CATEGORIES
     _texts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", "texts")
-    print("\nAvailable audiobooks (50 books):\n")
+    _total = len(BOOK_CATALOG)
+    _n_fr = sum(1 for m in BOOK_CATALOG.values() if m.get("language") == "fr")
+    _n_en = sum(1 for m in BOOK_CATALOG.values() if m.get("language") == "en")
+    print(f"\nAvailable audiobooks ({_total} books — {_n_fr} French, {_n_en} English):\n")
     for cat in BOOK_CATEGORIES:
+        _cat_books = [(n, m) for n, m in BOOK_CATALOG.items() if m["category"] == cat]
+        if not _cat_books:
+            continue
         print(f"  {cat}:")
-        for name, meta in BOOK_CATALOG.items():
-            if meta["category"] == cat:
-                _dl = os.path.exists(os.path.join(_texts_dir, f"{name}.txt"))
-                _mark = "[OK]" if _dl else "[--]"
-                print(f"    {_mark} {name:<25s} {meta['title']} — {meta['author']}")
+        for name, meta in _cat_books:
+            _dl = os.path.exists(os.path.join(_texts_dir, f"{name}.txt"))
+            _mark = "[OK]" if _dl else "[--]"
+            _lang = meta.get("language", "fr").upper()
+            print(f"    {_mark} {name:<25s} {meta['title']} — {meta['author']}  [{_lang}]")
         print()
     print("  [OK] = downloaded    [--] = run: python books/fetch_books.py")
+    print("  [FR] = French (Thomas voice)    [EN] = English (Daniel voice)")
     print()
     sys.exit(0)
 
@@ -205,14 +215,19 @@ if audiobook_name:
         sys.exit(1)
     with open(_ab_text_path, "r", encoding="utf-8") as _f:
         _ab_raw = _f.read()
+    # Voice selection based on book language
+    _ab_lang = _ab_meta.get("language", "fr")
+    _ab_voice = _ab_meta.get("voice", "Thomas" if _ab_lang == "fr" else "Daniel")
+    if _ab_lang == "en":
+        print(f"Note: '{_ab_meta['title']}' is an English audiobook — using voice: {_ab_voice}")
     # Split into sentences: `. `, `? `, `! `, paragraph breaks
     _ab_parts = re.split(r'(?<=[.!?])\s+|\n{2,}', _ab_raw)
     _audiobook_sentences = [
-        (_ab_meta["voice"], s.strip())
+        (_ab_voice, s.strip())
         for s in _ab_parts
         if s.strip() and len(s.strip()) > 2
     ]
-    _audiobook_book_title = f"{_ab_meta['title']} — {_ab_meta['author']}"
+    _audiobook_book_title = f"{_ab_meta['title']} — {_ab_meta['author']} [{_ab_lang.upper()}]"
     audiobook_mode = True
     hrv_mode = True
     breath_bar = True
@@ -246,7 +261,7 @@ hrv_rate = 1.0 / hrv_cycle_seconds  # kept for save-audio compatibility
 long_fade_seconds = 1800.0  # 30 minutes
 
 sample_rate = 44100        # CD quality
-amplitude = 0.0 if args.no_tone else 0.20  # --no-tone: silence base tone, keep cues/voices
+amplitude = 0.0 if (args.no_tone or audiobook_mode) else 0.20  # --no-tone / --audiobook: silence base tone, keep cues/voices
 fade_seconds = 1           # duration of fade-in
 channels = 2               # stereo identical
 
@@ -1590,7 +1605,9 @@ _audiobook_cue_buf = None      # currently playing audiobook buffer
 _audiobook_cue_pos = 0         # position in current buffer
 _audiobook_done = False        # True when all sentences rendered
 _audiobook_alt_left = True     # bilateral alternation state
+_audiobook_last_page_logged = -1  # last page number logged to console
 _AUDIOBOOK_LOOK_AHEAD = 10     # pre-render up to N sentences ahead
+_AUDIOBOOK_PAGE_SIZE = 10      # sentences per "page" for progress logging
 _audiobook_progress_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", ".progress")
 
 def _audiobook_load_progress(book_name):
@@ -1620,12 +1637,18 @@ def _audiobook_save_progress(book_name, idx):
     except Exception:
         pass
 
-# Resume: set starting index from saved progress
-if audiobook_mode and audiobook_resume:
+# Resume: set starting index from saved progress or explicit page
+if audiobook_mode and audiobook_page is not None:
+    _audiobook_play_idx = audiobook_page * _AUDIOBOOK_PAGE_SIZE
+    _audiobook_next_render = _audiobook_play_idx
+    _total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
+    print(f"  Audiobook: starting from page {audiobook_page}/{_total_pages}")
+elif audiobook_mode and audiobook_resume:
     _audiobook_play_idx = _audiobook_load_progress(audiobook_name)
     _audiobook_next_render = _audiobook_play_idx
     if _audiobook_play_idx > 0:
-        print(f"  Audiobook: resuming from sentence {_audiobook_play_idx}/{len(_audiobook_sentences)}")
+        _resume_page = _audiobook_play_idx // _AUDIOBOOK_PAGE_SIZE
+        print(f"  Audiobook: resuming from page {_resume_page} (sentence {_audiobook_play_idx}/{len(_audiobook_sentences)})")
 
 def _unified_renderer_thread():
     """Single background thread that renders all voice messages sequentially.
@@ -1794,9 +1817,16 @@ def handle_interrupt(sig, frame):
     sys.stdout.flush()
     print("\n🛑 Stopping cleanly...")
     # Save audiobook progress on exit
-    if audiobook_mode and audiobook_resume:
-        _audiobook_save_progress(audiobook_name, _audiobook_play_idx)
-        print(f"  Audiobook progress saved: sentence {_audiobook_play_idx}/{len(_audiobook_sentences)}")
+    if audiobook_mode:
+        _ab_page = _audiobook_play_idx // _AUDIOBOOK_PAGE_SIZE
+        _ab_total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
+        _ab_lang_tag = "FR" if _audiobook_sentences and _audiobook_sentences[0][0] == "Thomas" else "EN"
+        print(f"  Audiobook: {_audiobook_book_title} [{_ab_lang_tag}] — stopped at page {_ab_page}/{_ab_total_pages}")
+        if audiobook_resume:
+            _audiobook_save_progress(audiobook_name, _audiobook_play_idx)
+            print(f"  Progress saved. Resume with: --audiobook {audiobook_name} --audiobook-resume")
+        else:
+            print(f"  Resume with: --audiobook {audiobook_name} --audiobook-page {_ab_page}")
     sd.stop()
     try:
         integrity_queue.put_nowait(None)
@@ -1973,7 +2003,7 @@ def audio_callback(outdata, frames, time, status):
     global hrv_phase
     global _claude_cue_buf, _claude_cue_pos, _claude_cycle_count, _claude_alt_left
     global _peace_alt_left
-    global _audiobook_cue_buf, _audiobook_cue_pos, _audiobook_play_idx, _audiobook_alt_left
+    global _audiobook_cue_buf, _audiobook_cue_pos, _audiobook_play_idx, _audiobook_alt_left, _audiobook_last_page_logged
 
     t = (np.arange(frames) + phase) / sample_rate
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
@@ -2036,6 +2066,17 @@ def audio_callback(outdata, frames, time, status):
                     if alternate_mode:
                         _audiobook_alt_left = (_audiobook_play_idx % 2 == 0)
                     _audiobook_play_idx += 1
+                    # Page progress logging (every _AUDIOBOOK_PAGE_SIZE sentences)
+                    _ab_page = (_audiobook_play_idx - 1) // _AUDIOBOOK_PAGE_SIZE
+                    if _ab_page != _audiobook_last_page_logged and _audiobook_play_idx % _AUDIOBOOK_PAGE_SIZE == 0:
+                        _audiobook_last_page_logged = _ab_page
+                        _ab_total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
+                        _ab_lang_tag = "FR" if _audiobook_sentences[0][0] == "Thomas" else "EN"
+                        _ab_page_msg = f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n"
+                        try:
+                            sys.stderr.write(_ab_page_msg)
+                        except Exception:
+                            pass
             hrv_last_phase_name = current_phase_name
 
         hrv_phase += frames
