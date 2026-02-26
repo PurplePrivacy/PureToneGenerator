@@ -12,6 +12,8 @@ import time
 import subprocess
 import tempfile
 import os
+import json
+import re
 
 # ============================
 # CONFIG
@@ -79,6 +81,15 @@ parser.add_argument("--dense", action="store_true",
                     help="Play affirmations on every breath phase transition (~5.5s) instead of every full cycle (~11s)")
 parser.add_argument("--peace-lang", type=str, default="en", choices=["en", "fr"],
                     help="Language for peace affirmations: en | fr (default: en)")
+parser.add_argument("--audiobook", type=str, default=None, metavar="BOOK",
+                    help="Read a book aloud with Thomas voice during HRV breathing "
+                         "(e.g., --audiobook meditations). Use --audiobook-list to see available books.")
+parser.add_argument("--audiobook-list", action="store_true",
+                    help="List all available audiobooks and exit")
+parser.add_argument("--audiobook-vol", type=float, default=0.40,
+                    help="Audiobook voice volume (default: 0.40)")
+parser.add_argument("--audiobook-resume", action="store_true",
+                    help="Resume from where you left off (saves progress to books/.progress)")
 args = parser.parse_args()
 
 frequency = args.freq       # active frequency
@@ -112,6 +123,10 @@ phd_peace_vol = args.phd_peace_vol
 alternate_mode = args.alternate
 dense_mode = args.dense
 peace_lang = args.peace_lang
+audiobook_name = args.audiobook
+audiobook_list = args.audiobook_list
+audiobook_vol = args.audiobook_vol
+audiobook_resume = args.audiobook_resume
 
 # French language: override default peace voice if user didn't explicitly set it
 if peace_lang == "fr" and "--peace-voice" not in sys.argv:
@@ -155,6 +170,54 @@ if phd_peace:
     claude_peace_vol = phd_peace_vol
     if pure_mode:
         print("Note: --phd-peace overrides --pure to enable HRV + breath-bar")
+
+# --audiobook-list: display catalog and exit
+if audiobook_list:
+    from books.catalog import BOOK_CATALOG, BOOK_CATEGORIES
+    _texts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", "texts")
+    print("\nAvailable audiobooks (50 books):\n")
+    for cat in BOOK_CATEGORIES:
+        print(f"  {cat}:")
+        for name, meta in BOOK_CATALOG.items():
+            if meta["category"] == cat:
+                _dl = os.path.exists(os.path.join(_texts_dir, f"{name}.txt"))
+                _mark = "[OK]" if _dl else "[--]"
+                print(f"    {_mark} {name:<25s} {meta['title']} — {meta['author']}")
+        print()
+    print("  [OK] = downloaded    [--] = run: python books/fetch_books.py")
+    print()
+    sys.exit(0)
+
+# --audiobook auto-enables HRV + breath-bar (like --claude-peace)
+audiobook_mode = False
+_audiobook_sentences = []
+_audiobook_book_title = ""
+if audiobook_name:
+    from books.catalog import BOOK_CATALOG
+    if audiobook_name not in BOOK_CATALOG:
+        print(f"Error: unknown book '{audiobook_name}'. Use --audiobook-list to see available books.")
+        sys.exit(1)
+    _ab_meta = BOOK_CATALOG[audiobook_name]
+    _ab_text_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", "texts", f"{audiobook_name}.txt")
+    if not os.path.exists(_ab_text_path):
+        print(f"Error: book file not found: {_ab_text_path}")
+        print("Run: python books/fetch_books.py")
+        sys.exit(1)
+    with open(_ab_text_path, "r", encoding="utf-8") as _f:
+        _ab_raw = _f.read()
+    # Split into sentences: `. `, `? `, `! `, paragraph breaks
+    _ab_parts = re.split(r'(?<=[.!?])\s+|\n{2,}', _ab_raw)
+    _audiobook_sentences = [
+        (_ab_meta["voice"], s.strip())
+        for s in _ab_parts
+        if s.strip() and len(s.strip()) > 2
+    ]
+    _audiobook_book_title = f"{_ab_meta['title']} — {_ab_meta['author']}"
+    audiobook_mode = True
+    hrv_mode = True
+    breath_bar = True
+    if pure_mode:
+        print("Note: --audiobook overrides --pure to enable HRV + breath-bar")
 
 # map speed keyword to Hz
 if abs_speed == "slow":
@@ -530,6 +593,8 @@ if restore_peace:
 
 if restore_peace or claude_peace:
     print("Pre-rendering voice affirmations (this may take a few minutes)...")
+if audiobook_mode:
+    print(f"Audiobook rolling renderer will start {'after peace rendering' if (claude_peace or restore_peace) else 'immediately'}...")
 
 # ============================
 # CLAUDE-PEACE: CLINICALLY-STRUCTURED COUNTER-CONDITIONING
@@ -1517,6 +1582,51 @@ _claude_cycle_count = 0
 _claude_alt_left = True   # alternation state: True = left speaker, False = right
 _peace_alt_left = True    # alternation state for restore-peace
 
+# Rendering infrastructure for --audiobook (rolling renderer)
+_audiobook_rendered = {}       # sentence_index -> numpy array
+_audiobook_next_render = 0     # next sentence index to render
+_audiobook_play_idx = 0        # next sentence index to play in callback
+_audiobook_cue_buf = None      # currently playing audiobook buffer
+_audiobook_cue_pos = 0         # position in current buffer
+_audiobook_done = False        # True when all sentences rendered
+_audiobook_alt_left = True     # bilateral alternation state
+_AUDIOBOOK_LOOK_AHEAD = 10     # pre-render up to N sentences ahead
+_audiobook_progress_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", ".progress")
+
+def _audiobook_load_progress(book_name):
+    """Load saved sentence index for a book. Returns 0 if no progress saved."""
+    if not os.path.exists(_audiobook_progress_path):
+        return 0
+    try:
+        with open(_audiobook_progress_path, "r") as f:
+            data = json.load(f)
+        return data.get(book_name, 0)
+    except Exception:
+        return 0
+
+def _audiobook_save_progress(book_name, idx):
+    """Save current sentence index for a book."""
+    data = {}
+    if os.path.exists(_audiobook_progress_path):
+        try:
+            with open(_audiobook_progress_path, "r") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+    data[book_name] = idx
+    try:
+        with open(_audiobook_progress_path, "w") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+# Resume: set starting index from saved progress
+if audiobook_mode and audiobook_resume:
+    _audiobook_play_idx = _audiobook_load_progress(audiobook_name)
+    _audiobook_next_render = _audiobook_play_idx
+    if _audiobook_play_idx > 0:
+        print(f"  Audiobook: resuming from sentence {_audiobook_play_idx}/{len(_audiobook_sentences)}")
+
 def _unified_renderer_thread():
     """Single background thread that renders all voice messages sequentially.
     Claude-peace messages are rendered first (phase-ordered, needed earliest).
@@ -1568,6 +1678,45 @@ def _unified_renderer_thread():
 if claude_peace or restore_peace:
     _render_thread = threading.Thread(target=_unified_renderer_thread, daemon=True)
     _render_thread.start()
+
+def _audiobook_renderer_thread():
+    """Rolling renderer: pre-renders a look-ahead buffer of audiobook sentences.
+    Stays ~10 sentences ahead of playback. Evicts old rendered sentences to keep memory bounded.
+    Waits for unified renderer to finish first (peace/claude-peace have priority at startup)."""
+    global _audiobook_next_render, _audiobook_done
+    # Wait for peace rendering to complete before starting audiobook
+    if claude_peace or restore_peace:
+        while not (_claude_render_done and _peace_render_done):
+            time.sleep(0.5)
+    total = len(_audiobook_sentences)
+    if total == 0:
+        _audiobook_done = True
+        return
+    _ab_tts_cache = {}  # (voice, text) -> numpy array (dedup within book)
+    while _audiobook_next_render < total:
+        # Don't render too far ahead — keep memory bounded
+        if _audiobook_next_render - _audiobook_play_idx > _AUDIOBOOK_LOOK_AHEAD:
+            time.sleep(0.5)
+            continue
+        voice, text = _audiobook_sentences[_audiobook_next_render]
+        cache_key = (voice, text)
+        if cache_key in _ab_tts_cache:
+            _audiobook_rendered[_audiobook_next_render] = _ab_tts_cache[cache_key]
+        else:
+            arr = _render_peace_voice(text, voice, rate=130)
+            if arr is not None:
+                _ab_tts_cache[cache_key] = arr
+                _audiobook_rendered[_audiobook_next_render] = arr
+        _audiobook_next_render += 1
+        # Evict old rendered sentences to free memory
+        for idx in list(_audiobook_rendered):
+            if idx < _audiobook_play_idx - 2:
+                del _audiobook_rendered[idx]
+    _audiobook_done = True
+
+if audiobook_mode:
+    _ab_thread = threading.Thread(target=_audiobook_renderer_thread, daemon=True)
+    _ab_thread.start()
 
 def _apply_fade_out(cue, fade_ms=10):
     """Apply a smooth fade-out tail to prevent clicks at cue end. Deterministic."""
@@ -1644,6 +1793,10 @@ def handle_interrupt(sig, frame):
     sys.stdout.write("\033[?25h")
     sys.stdout.flush()
     print("\n🛑 Stopping cleanly...")
+    # Save audiobook progress on exit
+    if audiobook_mode and audiobook_resume:
+        _audiobook_save_progress(audiobook_name, _audiobook_play_idx)
+        print(f"  Audiobook progress saved: sentence {_audiobook_play_idx}/{len(_audiobook_sentences)}")
     sd.stop()
     try:
         integrity_queue.put_nowait(None)
@@ -1820,6 +1973,7 @@ def audio_callback(outdata, frames, time, status):
     global hrv_phase
     global _claude_cue_buf, _claude_cue_pos, _claude_cycle_count, _claude_alt_left
     global _peace_alt_left
+    global _audiobook_cue_buf, _audiobook_cue_pos, _audiobook_play_idx, _audiobook_alt_left
 
     t = (np.arange(frames) + phase) / sample_rate
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
@@ -1873,6 +2027,15 @@ def audio_callback(outdata, frames, time, status):
                 if alternate_mode:
                     _claude_alt_left = (_claude_cycle_count % 2 == 0)
                 _claude_cycle_count += 1
+            # Audiobook: trigger next sentence when current finishes and breath cycle starts
+            if audiobook_mode and _audiobook_cue_buf is None:
+                _ab_trigger = current_phase_name == _hrv_phase_names[0] or dense_mode
+                if _ab_trigger and _audiobook_play_idx in _audiobook_rendered:
+                    _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
+                    _audiobook_cue_pos = 0
+                    if alternate_mode:
+                        _audiobook_alt_left = (_audiobook_play_idx % 2 == 0)
+                    _audiobook_play_idx += 1
             hrv_last_phase_name = current_phase_name
 
         hrv_phase += frames
@@ -1975,6 +2138,24 @@ def audio_callback(outdata, frames, time, status):
             _claude_cue_buf = None
             _claude_cue_pos = 0
 
+    # Mix audiobook voice (separate buffer, plays alongside or independently of peace voices)
+    if _audiobook_cue_buf is not None:
+        remaining = len(_audiobook_cue_buf) - _audiobook_cue_pos
+        L = min(frames, remaining)
+        ab_mono = _audiobook_cue_buf[_audiobook_cue_pos:_audiobook_cue_pos + L] * audiobook_vol
+        if alternate_mode:
+            if _audiobook_alt_left:
+                outdata[:L, 0] += ab_mono
+            else:
+                outdata[:L, 1] += ab_mono
+        else:
+            outdata[:L, 0] += ab_mono
+            outdata[:L, 1] += ab_mono
+        _audiobook_cue_pos += L
+        if _audiobook_cue_pos >= len(_audiobook_cue_buf):
+            _audiobook_cue_buf = None
+            _audiobook_cue_pos = 0
+
     # Safety-only clip guard (signal should not exceed 1.0 under normal conditions)
     np.clip(outdata, -1.0, 1.0, out=outdata)
 
@@ -2028,8 +2209,22 @@ if claude_peace:
     if alternate_mode:
         print("  Bilateral: voice messages alternate between L and R speakers")
     print()
-if alternate_mode and not (claude_peace or restore_peace):
-    print("Note: --alternate has no effect without --claude-peace, --phd-peace, or --restore-peace\n")
+if alternate_mode and not (claude_peace or restore_peace or audiobook_mode):
+    print("Note: --alternate has no effect without --claude-peace, --phd-peace, --restore-peace, or --audiobook\n")
+if audiobook_mode:
+    _ab_start = _audiobook_play_idx
+    _est_min = (len(_audiobook_sentences) - _ab_start) * hrv_cycle_seconds / 60
+    print(f"Audiobook: {_audiobook_book_title}")
+    print(f"  {len(_audiobook_sentences)} sentences (voice: Thomas, vol={audiobook_vol})")
+    if _ab_start > 0:
+        print(f"  Resuming from sentence {_ab_start}")
+    print(f"  Estimated duration: ~{_est_min:.0f} minutes")
+    if alternate_mode:
+        print("  Bilateral: sentences alternate between L and R speakers")
+    print("  Rolling renderer: pre-renders ~10 sentences ahead")
+    if audiobook_resume:
+        print("  Progress will be saved on exit (Ctrl-C)")
+    print()
 
 # Start breathing bar AFTER all print output to avoid double-line artifacts
 breath_thread = None

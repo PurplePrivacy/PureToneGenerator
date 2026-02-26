@@ -36,6 +36,7 @@ The audio callback is the only code that writes to the output buffer. What you h
 - ⚡ Dense affirmation mode (`--dense`) — one message per breath phase instead of per full cycle
 - 🌫 Long-term fade-to-silence cultivation (`--fade-long`)
 - 🧱 Full-stack preset (`--full`)
+- 📖 Audiobook mode — 50 French public domain books read by Thomas voice during HRV sessions (`--audiobook`)
 - 💾 Optional 1-hour **FLAC** export (`--save-audio`)
 - 🛡 Pure safe mode — single sine only (`--pure`)
 - 🔇 Output-only hardening (`--disable-inputs`)
@@ -92,6 +93,11 @@ CLI Options
 --alternate          Alternate voice messages between L and R speakers (EMDR-style bilateral)
 --dense              Affirmation every breath phase (~5.5s) instead of every full cycle (~11s)
 --peace-lang STR     Language for peace affirmations: en | fr (default: en)
+
+--audiobook BOOK     Read a book aloud during HRV breathing (e.g., --audiobook meditations)
+--audiobook-list     List all 50 available audiobooks and exit
+--audiobook-vol FL   Audiobook voice volume (default: 0.40)
+--audiobook-resume   Resume from saved position (progress saved on Ctrl-C)
 
 --latency STR        Audio latency: low | high (default: high)
 --blocksize INT      Audio blocksize in frames (default: 1024)
@@ -594,6 +600,124 @@ python stream_tone.py --claude-peace --dense --alternate --no-tone --disable-inp
 python stream_tone.py --freq 432 --hrv --restore-peace --dense --alternate --breath-bar --disable-inputs
 
 The --claude-peace flag (16 phases, 294 messages) remains available separately for the original therapeutic sequence.
+
+⸻
+
+Audiobook Mode (50 French Public Domain Books)
+
+The --audiobook flag reads a full public domain book aloud during HRV breathing sessions using the French Thomas voice. Books are stored as local text files and rendered sentence-by-sentence using a rolling TTS renderer.
+
+Setup
+
+# Download all 50 books from Project Gutenberg (run once)
+python books/fetch_books.py
+
+# List available books
+python stream_tone.py --audiobook-list
+
+How It Works
+	•	A rolling renderer pre-renders ~10 sentences ahead of playback
+	•	Each sentence is triggered at HRV breath cycle transitions
+	•	If a sentence is still playing when a new cycle starts, it continues — no interruption
+	•	Memory stays bounded: only ~12 rendered sentences in memory at once
+	•	Uses the same TTS pipeline as claude-peace (macOS say → NumPy array)
+
+Available Books (50)
+
+Stoic Philosophy (5):
+	•	meditations — Méditations (Marc Aurèle)
+	•	enchiridion — Manuel d'Épictète
+	•	lettres-lucilius — Lettres à Lucilius (Sénèque)
+	•	brievete-vie — De la brièveté de la vie (Sénèque)
+	•	tranquillite — De la tranquillité de l'âme (Sénèque)
+
+Greek Philosophy (7):
+	•	republique — La République (Platon)
+	•	apologie — Apologie de Socrate (Platon)
+	•	banquet — Le Banquet (Platon)
+	•	phedon — Phédon (Platon)
+	•	phedre — Phèdre (Platon)
+	•	gorgias — Gorgias (Platon)
+	•	ethique-nicomaque — Éthique à Nicomaque (Aristote)
+
+Eastern Philosophy (5):
+	•	art-guerre — L'Art de la guerre (Sun Tzu)
+	•	tao-te-king — Tao Te King (Lao Tseu)
+	•	dhammapada — Dhammapada (Bouddha)
+	•	bhagavad-gita — Bhagavad-Gita
+	•	entretiens-confucius — Les Entretiens (Confucius)
+
+Japanese Wisdom (2):
+	•	cinq-anneaux — Le Livre des cinq anneaux (Musashi)
+	•	bushido — Bushido, l'âme du Japon (Nitobe)
+
+Religious Texts (2):
+	•	bible — La Sainte Bible (Louis Segond)
+	•	coran — Le Coran (Kasimirski)
+
+French Philosophy (6):
+	•	essais — Essais (Montaigne)
+	•	discours-methode — Discours de la méthode (Descartes)
+	•	pensees — Pensées (Pascal)
+	•	prince — Le Prince (Machiavel)
+	•	contrat-social — Du contrat social (Rousseau)
+	•	oracle-manuel — L'Oracle manuel (Gracián)
+
+German Philosophy (3):
+	•	zarathoustra — Ainsi parlait Zarathoustra (Nietzsche)
+	•	art-raison — L'Art d'avoir toujours raison (Schopenhauer)
+	•	bien-mal — Par-delà le bien et le mal (Nietzsche)
+
+French Literature (8):
+	•	candide — Candide (Voltaire)
+	•	fables — Les Fables (La Fontaine)
+	•	fleurs-mal — Les Fleurs du mal (Baudelaire)
+	•	miserables — Les Misérables (Hugo)
+	•	monte-cristo — Le Comte de Monte-Cristo (Dumas)
+	•	trois-mousquetaires — Les Trois Mousquetaires (Dumas)
+	•	cyrano — Cyrano de Bergerac (Rostand)
+	•	petit-prince — Le Petit Prince (Saint-Exupéry)
+
+Classical Literature (5):
+	•	odyssee — L'Odyssée (Homère)
+	•	iliade — L'Iliade (Homère)
+	•	eneide — L'Énéide (Virgile)
+	•	metamorphoses — Les Métamorphoses (Ovide)
+	•	nature-choses — De la nature des choses (Lucrèce)
+
+Roman Wisdom (2):
+	•	amitie — De l'amitié (Cicéron)
+	•	vieillesse — De la vieillesse (Cicéron)
+
+Persian & Eastern Poetry (2):
+	•	rubaiyat — Les Rubáiyát (Omar Khayyám)
+	•	masnavi — Le Masnavi (Rûmî)
+
+Spiritual Classics (3):
+	•	ecclesiaste — L'Ecclésiaste (Salomon)
+	•	proverbes — Les Proverbes de Salomon
+	•	imitation — L'Imitation de Jésus-Christ (Thomas a Kempis)
+
+Examples
+
+# Listen to Meditations while breathing
+python stream_tone.py --freq 432 --audiobook meditations --audiobook-vol 0.40
+
+# Audiobook only, no tone, with bilateral alternation
+python stream_tone.py --audiobook bible --alternate --no-tone --disable-inputs
+
+# Resume from where you left off
+python stream_tone.py --audiobook meditations --audiobook-resume --no-tone
+
+# Combine with claude-peace therapeutic affirmations
+python stream_tone.py --freq 432 --claude-peace --audiobook meditations --no-tone
+
+# Dense mode with bowl cue
+python stream_tone.py --freq 432 --audiobook candide --dense --breath-cue bowl --disable-inputs
+
+Progress & Resume
+
+When using --audiobook-resume, the current sentence position is saved to books/.progress on Ctrl-C. Re-running with --audiobook-resume picks up exactly where you left off.
 
 ⸻
 
