@@ -1,299 +1,99 @@
-# CLAUDE.MD
+# CLAUDE.md
 
-## PureToneGenerator – Architecture, Constraints & Safety Contract
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-This document defines the architectural, technical, and behavioral contract of the PureToneGenerator project.
+## Quick Reference
 
-It is intended for AI code reviewers (Claude, GPT, etc.) and human maintainers.
+```bash
+# Setup
+python -m venv .venv && source .venv/bin/activate
+pip install numpy sounddevice soundfile
+./setup_voices.sh          # macOS TTS voice check/install
 
-The goal is to preserve:
+# Run (basic)
+python stream_tone.py                              # 528 Hz pure tone
+python stream_tone.py --phd-peace --alternate      # 21-phase therapeutic session
+python stream_tone.py --audiobook meditations      # audiobook mode
 
-- Deterministic audio generation
-- Architectural simplicity
-- Stability (no stream breakage)
-- Psychological safety
-- Zero ambiguity in signal origin
+# Download audiobook library (run once)
+python books/fetch_books.py
+```
 
----
-
-# 1. Project Overview
-
-PureToneGenerator is a real-time audio synthesis tool written in Python.
-
-It generates:
-
-- Pure sine tones
-- Optional HRV breath envelopes
-- Optional isochronic modulation
-- Optional alternating bilateral stimulation (ABS)
-- Optional breath transition cues (fully synthesized)
-
-The audio is:
-
-- Generated mathematically
-- Mixed entirely in-memory
-- Sent directly to a single `sounddevice.OutputStream`
-- Never read from disk
-- Never read from input devices
-- Never streamed externally
-
-This project is **intentionally minimalistic and deterministic**.
+No test suite or linter exists. Python 3.14 with venv. Dependencies: `numpy`, `sounddevice`, `soundfile`.
 
 ---
 
-# 2. Core Architectural Principles
+## Architecture
 
-## 2.1 Single Output Stream Only
+**Single-file application**: `stream_tone.py` (~2400 lines) is the entire program. No classes — it's a linear script with module-level state and functions.
 
-The program must:
+**Layout of stream_tone.py** (top to bottom):
+1. **Argument parsing** (~lines 1–130) — all CLI flags
+2. **Preset mode overrides** (~lines 175–240) — presets like `--emdr-session` set combinations of flags
+3. **Config resolution** (~lines 240–355) — flag interactions, amplitude selection, HRV pattern setup
+4. **HRV envelope lookup table** (~lines 367–410) — precomputed full-cycle envelope as NumPy array
+5. **Breath cue synthesis** (~lines 412–540) — 8 synthesized cue types (bell, drum, bowl, etc.)
+6. **Affirmation message arrays** (~lines 540–1680) — `PEACE_MESSAGES`, `CLAUDE_PEACE_MESSAGES`, `PHD_PEACE_MESSAGES` (EN + FR)
+7. **Audiobook infrastructure** (~lines 1680–1850) — book loading, progress save/resume, renderer thread
+8. **Voice rendering** (~lines 1750–1900) — `_unified_renderer_thread()`, `_render_peace_voice()`, TTS cache
+9. **Audio callback** (~lines 2102–2300) — THE critical function, processes every audio buffer
+10. **Stream startup** (~lines 2311–2395) — status display, `sd.OutputStream` context manager
 
-- Use `sounddevice.OutputStream`
-- Never use `InputStream`
-- Never use duplex `Stream`
-- Never mix external audio engines
-- Never spawn a second audio stream
+**Supporting files:**
+- `books/catalog.py` — 125-book metadata catalog (Gutenberg IDs, language, voice)
+- `books/fetch_books.py` — downloads texts from Project Gutenberg
+- `setup_voices.sh` — checks/guides macOS TTS voice installation
 
-All audio must be produced inside the single `audio_callback`.
+### Audio Signal Chain (inside `audio_callback`)
 
-This rule is absolute.
+```
+sine(freq) → iso pulse → HRV envelope → fade-in → long fade → gain(5.0x)
+         → ABS stereo split → outdata
+         → breath cues mixed post-gain (not amplified 5x)
+         → peace voice mixed post-gain
+         → claude/phd voice mixed post-gain
+         → audiobook voice mixed post-gain
+```
+
+### Key Patterns
+
+- **`--phd-peace` reuses claude-peace infrastructure**: sets `claude_peace = True` then swaps `CLAUDE_PEACE_MESSAGES = PHD_PEACE_MESSAGES`
+- **Amplitude**: `0.0` if `--no-tone` or `--audiobook` or `--breathwork`; `0.20` default; `0.10` for low-amp presets
+- **Voice rendering**: `_unified_renderer_thread()` pre-renders all TTS via macOS `say` into NumPy arrays at startup, cached by `(voice, text)` key
+- **`--alternate`** bilateral: pre-computed `_claude_alt_left` / `_peace_alt_left` flag at trigger time, mixes to L or R channel only
+- **Stream kept alive**: `threading.Event().wait()` (not `signal.pause()`, which breaks with `say` subprocesses)
 
 ---
 
-## 2.2 Deterministic Audio
+## Inviolable Constraints
 
-All audio signals must be:
+### Single Output Stream Only
+- One `sounddevice.OutputStream`, one `audio_callback`. No `InputStream`, no duplex, no second stream. This is absolute.
 
-- Procedurally generated
-- Mathematically defined
+### Deterministic Audio
+- All signals procedurally generated and mathematically defined
+- Fixed RNG seed if noise is used — no runtime entropy
 - Reproducible across runs
 
-If noise is used:
+### No External Audio Sources
+Forbidden: TTS engines during playback, `.wav`/`.mp3` loading, mic input, system audio capture, network audio, background mixing engines.
 
-- It must use a fixed RNG seed
-- It must not depend on runtime entropy
+**Exception**: `--breath-cue voice` and therapeutic voice modes use macOS `say` to **pre-render** at startup into NumPy arrays. No TTS runs during streaming.
 
-This prevents ambiguity and ensures reproducibility.
+### Stability Over Richness
+Reject anything that introduces: stream crackling, latency instability, blocking calls in callback, device renegotiation, race conditions.
 
----
+### Callback Rules
+The `audio_callback` must be: fast, non-blocking, deterministic. Threads (integrity logger, breathing bar) must never touch audio buffers or perform I/O inside callback.
 
-## 2.3 No External Audio Sources
-
-The following are strictly forbidden:
-
-- TTS engines (e.g., macOS `say`)
-- OS voice synthesis
-- Loading `.wav`, `.aiff`, `.mp3`
-- Background audio playback
-- External libraries that mix audio independently
-- System audio capture
-
-The program must never:
-
-- Play external files
-- Record microphone input
-- Depend on OS audio routing
+### Psychological Safety
+`--pure`, `--disable-inputs`, `--lockdown`, `--integrity` exist to guarantee output-only behavior and cryptographic proof-of-generation. Never remove or weaken these.
 
 ---
 
-## 2.4 Stability Over Richness
+## Before Modifying This Project
 
-If a feature introduces:
-
-- Stream crackling
-- Latency instability
-- Blocking calls
-- Device renegotiation
-- Race conditions
-
-It must be rejected.
-
-Sound quality and stability are prioritized over complexity.
-
----
-
-# 3. Audio Design
-
-## 3.1 Base Tone
-
-- Single sine oscillator
-- Sample rate: 44100 Hz
-- Amplitude capped to avoid clipping
-- Optional harmonic layers (if ever added) must remain soft
-
-No distortion effects allowed.
-
----
-
-## 3.2 HRV Envelope
-
-- Sinusoidal amplitude envelope
-- Frequency defined by `hrv_style`
-- Smooth modulation only
-- No hard edges
-
-This guides breathing gently.
-
----
-
-## 3.3 Isochronic Modulation
-
-- Implemented via smooth sine-based amplitude modulation
-- Must avoid square waves or hard clipping
-
-No abrupt on/off gating.
-
----
-
-## 3.4 ABS (Alternating Bilateral Stimulation)
-
-- Smooth sine-based stereo crossfade
-- No abrupt L/R switching
-
----
-
-## 3.5 Breath Cues
-
-Breath cues:
-
-- Are synthesized at startup
-- Stored as NumPy arrays
-- Mixed directly into the output buffer (after gain)
-- Never loaded from file at runtime
-
-All synthesized cues must:
-
-- Use exponential decay envelopes
-- Avoid broadband harsh noise
-- Avoid clipping
-- Be deterministic
-
-### Voice cue exception (`--breath-cue voice`)
-
-The `voice` cue uses macOS `say` (Samantha voice) to **pre-render** "inhale" and "exhale"
-at startup into NumPy arrays. Once rendered, they are mixed in the callback identically
-to any other cue. This is opt-in only, for users who need explicit verbal breathing guidance.
-
-- Rendered once at startup via subprocess (not during playback)
-- Stored as float32 NumPy arrays
-- Mixed inside the single audio callback
-- No TTS engine runs during streaming
-- Falls back to bell cue if rendering fails
-
----
-
-# 4. Security & Psychological Safety Model
-
-This project intentionally includes:
-
-- `--pure`
-- `--disable-inputs`
-- `--lockdown`
-- `--integrity`
-
-These exist to:
-
-- Remove ambiguity
-- Guarantee output-only behavior
-- Provide cryptographic proof-of-generation
-
-Claude must not:
-
-- Remove or weaken these guarantees
-- Introduce hidden signal paths
-- Introduce nondeterministic audio sources
-
----
-
-# 5. Threading Rules
-
-Allowed threads:
-
-- Integrity logger
-- Breathing bar (UI only)
-
-Threads must:
-
-- Never touch audio buffers directly
-- Never block the audio callback
-- Never perform I/O inside callback
-
-The audio callback must remain:
-
-- Fast
-- Non-blocking
-- Deterministic
-
----
-
-# 6. Forbidden Changes
-
-Claude must reject suggestions that introduce:
-
-- Speech synthesis
-- Audio file playback
-- Real-time mic analysis
-- Background mixing engines
-- Async audio processing outside callback
-- Compression, gating, DSP effects
-- Network access
-- Random entropy audio
-
-This tool is not a DAW.
-It is not a meditation app with voice narration.
-It is a deterministic tone generator.
-
----
-
-# 7. Acceptable Extensions
-
-Future extensions must:
-
-- Remain purely mathematical
-- Be mixed inside the existing callback
-- Not introduce new audio streams
-- Not introduce blocking calls
-- Not compromise determinism
-
-Examples of acceptable features:
-
-- Additional synthetic breath cues
-- Harmonic layering (soft)
-- Slow frequency drift (smooth)
-- Deterministic texture layers
-- Visual-only terminal enhancements
-
----
-
-# 8. Performance Constraints
-
-Default audio stability settings:
-
-- Latency: high
-- Blocksize: 1024+
-
-Bluetooth must be considered unstable at low latency.
-
-Audio must prioritize smooth playback over responsiveness.
-
----
-
-# 9. Design Philosophy
-
-This tool exists to provide:
-
-- Predictable sound
-- Controlled auditory experience
-- Calm, stable signal
-- Zero ambiguity
-
-Complexity is the enemy.
-Determinism is the goal.
-
----
-
-# 10. If You (Claude) Modify This Project
-
-Before suggesting changes, evaluate:
+Evaluate every change against:
 
 1. Does this introduce nondeterminism?
 2. Does this introduce external audio sources?
@@ -301,25 +101,20 @@ Before suggesting changes, evaluate:
 4. Does this violate single OutputStream rule?
 5. Does this increase psychological ambiguity?
 
-If yes to any → reject the change.
+**If yes to any → reject the change.**
 
----
+### Acceptable Extensions
+- Additional synthetic breath cues
+- Harmonic layering (soft)
+- Slow frequency drift (smooth)
+- Deterministic texture layers
+- Visual-only terminal enhancements
 
-# 11. Summary
-
-PureToneGenerator is:
-
-- Deterministic
-- Single-stream
-- Output-only
-- Procedural
-- Stable-first
-- Psychologically conservative
-
-It is intentionally constrained.
-
-Those constraints are features.
-
----
-
-End of CLAUDE.MD
+### Forbidden
+- Speech synthesis during playback
+- Audio file playback
+- Real-time mic analysis
+- Compression, gating, DSP effects
+- Network access
+- Random entropy audio
+- Async audio processing outside callback
