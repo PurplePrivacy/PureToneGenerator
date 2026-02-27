@@ -1,8 +1,28 @@
 # Resonance — Therapeutic Audio Engine
 
-A real-time audio synthesis tool for **focus, healing, breath regulation, and relaxation**. Generates pure tones, HRV breath pacing, bilateral stimulation, therapeutic voice affirmations, and audiobook narration — entirely offline and mathematically computed.
+Your personal sound therapist, running entirely on your machine. No cloud, no microphone, no external audio — just pure mathematics turned into healing sound.
 
-Nothing is streamed, no microphone is used, nothing external is mixed in.
+---
+
+### What You Get
+
+**Scientifically-Grounded Breathing** — 6 HRV breath pacing patterns (box breathing, 4-7-8, and more) with a live terminal breathing bar and 8 handcrafted audio cues (singing bowl, bell, woodblock...) to guide every inhale and exhale.
+
+**Therapeutic Voice Sessions** — Up to 384 counter-conditioning affirmations across 21 expert-reviewed phases, covering somatic restoration, nervous system regulation, identity reclamation, and default-state conditioning. Available in English and French.
+
+**EMDR-Style Bilateral Stimulation** — Smooth alternating left/right audio for bilateral processing. Combine with voice alternation (`--alternate`) for full EMDR-inspired sessions where affirmations move between ears.
+
+**Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
+
+**125-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, the Bhagavad-Gita, and 120 more classics read aloud during your sessions. 66 French, 59 English. Page tracking, resume support, and real-time subtitles.
+
+**20 One-Flag Presets** — From `--sleep` to `--emdr-session` to `--morning-energy`, each preset is a complete therapeutic session in a single command. No configuration needed.
+
+**30-Minute Fade-to-Silence** — Gradual volume dissolution for sleep, meditation, or power naps. Fall asleep to sound; wake up to silence.
+
+**FLAC Export** — Save any session as a 1-hour lossless audio file for offline listening.
+
+---
 
 ### Untamperable by Design
 
@@ -167,7 +187,7 @@ python stream_tone.py --full-restore
 --yoga               432 Hz + HRV 4-7-8 + breath bar + bowl cue
 --breathwork         HRV 4-7-8 + voice cue (no tone)
 --healing            528 Hz + HRV + slow ABS
---creativity         639 Hz + iso 10 Hz (alpha waves)
+--creativity         639 Hz + iso 10 Hz (alpha waves
 --reading-calm       432 Hz gentle ambient
 --power-nap          396 Hz + HRV C + 30-min fade
 --bilateral-calm     528 Hz + ABS + HRV + alternating
@@ -270,9 +290,9 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `art-guerre` — The Art of War (Sun Tzu) [EN]
 - `tao-te-king` — Tao Te Ching (Lao Tzu) [EN]
 - `dhammapada` — Dhammapada [EN]
-- `bhagavad-gita` — Bhagavad-Gita [EN]
-- `bushido` — Bushido, the Soul of Japan (Nitobe) [EN]
-- `bible` — The Bible, KJV [EN]
+- `bhagavad-gita` — Bhagavad-Gita [EN]^
+- `bushido` — Bushido, the Soul of Japa^^n (Nitobe) [EN]
+- `bible` — The Bible, KJV [EN]^^
 - `coran` — The Quran (tr. Rodwell) [EN]
 - `prince` — The Prince (Machiavelli) [EN]
 - `contrat-social` — The Social Contract (Rousseau) [EN]
@@ -290,7 +310,7 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `entretiens-confucius` — Les quatre livres (Confucius) [FR]
 - `imitation` — L'Imitation de Jésus-Christ [FR]
 
-**Classical Literature:**
+**Classical Literature:**qsd
 - `odyssee` — L'Odyssée (Homère) [FR]
 - `iliade` — L'Iliade (Homère) [FR]
 - `eneide` — The Aeneid (Virgil) [EN]
@@ -450,7 +470,7 @@ Resonance uses macOS `say` for TTS. Run the setup script to check required voice
 ```
 
 **Required voices:**
-- **Alex** (English) — audiobooks + affirmations
+- **Alex** (English) — ^s + affirmations
 - **Thomas** (French) — French audiobooks + affirmations
 - **Daniel** (English) — affirmations
 - **Samantha** (English) — breath cue voice mode
@@ -480,4 +500,4 @@ The Premium Alex voice (~800 MB) sounds significantly better for audiobook liste
 - Keep volume at a comfortable level
 - If you feel dizzy, anxious, or overloaded — stop and rest
 - For trauma sensitivity, start with: `python stream_tone.py --freq 432 --hrv` at low volume
-- This tool exists to help you take sound back as something that serves you
+- This tool exists to help you take sound back as something that serves y ou
