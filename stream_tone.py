@@ -764,6 +764,10 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "default mode (analysing, optimizing)",
     "default body rapport (muscles, power)",
     "default throat (release, open, breathe)",
+    "grace & elegance (poise, class, perfection)",
+    "purification & renewal (cleanse, rebuild, repair)",
+    "body scan & deep release (relax, let go)",
+    "cellular healing (cells heal, molecules recover)",
 ]
 
 CLAUDE_PEACE_MESSAGES = [
@@ -1092,25 +1096,25 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "The sky inside you is infinite and clear"),
 
     # ── Round 16: Centering & Inner Strength (FORT) ───────────────────
-    # Center deep inside yourself. Powerful breath, loud voice, dominance.
+    # Center deep inside yourself. Sovereign strength, commanding presence, radiant power.
     ("Daniel", "Strong"),
     ("Ralph",  "Center yourself"),
-    ("Fred",   "You are centered deep inside yourself right now"),
+    ("Fred",   "You are centered deep inside yourself, anchored in pure strength"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Your breath is loud and powerful like a storm"),
+    ("Fred",   "Your breath fills your entire body with commanding, radiant power"),
     ("Daniel", "Blow"),
-    ("Ralph",  "Blow hard"),
-    ("Fred",   "You blow air out of your lungs with full force"),
-    ("Daniel", "Loud"),
-    ("Ralph",  "Speak loud"),
-    ("Fred",   "Your voice is loud, commanding, and absolutely dominant"),
+    ("Ralph",  "Full force"),
+    ("Fred",   "Every exhale blasts away weakness and fills you with fire"),
+    ("Daniel", "Voice"),
+    ("Ralph",  "Speak now"),
+    ("Fred",   "Your voice carries the weight of absolute certainty and authority"),
     ("Daniel", "Roar"),
     ("Ralph",  "Inner roar"),
-    ("Fred",   "Your inner voice is the loudest voice in any room"),
-    ("Daniel", "Dominant"),
-    ("Ralph",  "Full command"),
-    ("Fred",   "You define yourself with one word: strong"),
+    ("Fred",   "Your inner voice rings with the power of a thousand victories"),
+    ("Daniel", "Fort"),
+    ("Ralph",  "Unbreakable"),
+    ("Fred",   "You are fort — centered, powerful, unbreakable, and magnificently alive"),
 ]
 
 # ============================
@@ -1428,29 +1432,30 @@ CLAUDE_PEACE_MESSAGES_FR = [
     # ── Ronde 16 : Centrage & Force Intérieure (FORT) ────────────────
     ("Thomas",  "Fort"),
     ("Jacques", "Centre-toi"),
-    ("Thomas",  "Tu es centré au plus profond de toi-même en ce moment"),
+    ("Thomas",  "Tu es centré au plus profond de toi-même, ancré dans une force pure"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Thomas",  "Ton souffle est puissant et fort comme une tempête"),
+    ("Thomas",  "Ton souffle remplit tout ton corps d'une puissance rayonnante et commandante"),
     ("Thomas",  "Souffle"),
-    ("Jacques", "Souffle fort"),
-    ("Thomas",  "Tu expulses l'air de tes poumons avec toute ta force"),
-    ("Thomas",  "Fort"),
-    ("Jacques", "Parle fort"),
-    ("Thomas",  "Ta voix est forte, commandante et absolument dominante"),
+    ("Jacques", "Pleine force"),
+    ("Thomas",  "Chaque expiration balaie toute faiblesse et te remplit de feu"),
+    ("Thomas",  "Voix"),
+    ("Jacques", "Parle maintenant"),
+    ("Thomas",  "Ta voix porte le poids d'une certitude absolue et d'une autorité totale"),
     ("Thomas",  "Rugis"),
     ("Jacques", "Rugissement intérieur"),
-    ("Thomas",  "Ta voix intérieure est la voix la plus forte dans toute pièce"),
-    ("Thomas",  "Dominant"),
-    ("Jacques", "Plein commandement"),
-    ("Thomas",  "Tu te définis en un seul mot : fort"),
+    ("Thomas",  "Ta voix intérieure résonne avec la puissance de mille victoires"),
+    ("Thomas",  "Fort"),
+    ("Jacques", "Incassable"),
+    ("Thomas",  "Tu es fort — centré, puissant, incassable et magnifiquement vivant"),
 ]
 
 # ============================
-# PHD-PEACE: EXPERT-REVIEWED 21-PHASE MESSAGES
+# PHD-PEACE: EXPERT-REVIEWED 26-PHASE MESSAGES
 # ============================
 # Rounds 1-16: inherited from CLAUDE_PEACE_MESSAGES (unchanged)
-# Rounds 17-21: Default State Conditioning — anchor baseline identity states
+# Rounds 17-22: Default State Conditioning — anchor baseline identity states
+# Rounds 23-26: Grace, Purification, Body Scan, Cellular Healing
 
 _PHD_EXTRA_ROUNDS = [
     # ── Round 17: Default Expression ─────────────────────────────────
@@ -1584,6 +1589,94 @@ _PHD_EXTRA_ROUNDS = [
     ("Daniel", "Default"),
     ("Ralph",  "Always open"),
     ("Fred",   "An open, released throat is your default — relaxed on both sides, always free"),
+
+    # ── Round 23: Grace & Elegance ──────────────────────────────────
+    # Anchor natural grace, effortless perfection, elegance in being.
+    # Somatic: feel the smoothness in every gesture, the poise in stillness.
+    ("Daniel", "Grace"),
+    ("Ralph",  "Pure grace"),
+    ("Fred",   "You move through life with effortless, natural grace"),
+    ("Daniel", "Elegant"),
+    ("Ralph",  "Refined"),
+    ("Fred",   "There is an elegance in everything you do — quiet, assured, unmistakable"),
+    ("Daniel", "Perfect"),
+    ("Ralph",  "Perfection"),
+    ("Fred",   "Your perfection is not forced — it flows from who you already are"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Fill lungs"),
+    ("Fred",   "Every breath you take carries the composure of someone born to lead"),
+    ("Daniel", "Class"),
+    ("Ralph",  "Pure class"),
+    ("Fred",   "You carry yourself with a class that commands silent admiration"),
+    ("Daniel", "Poise"),
+    ("Ralph",  "Still waters"),
+    ("Fred",   "Grace, elegance, and perfection — they are not aspirations, they are you"),
+
+    # ── Round 24: Purification & Renewal ────────────────────────────
+    # Cleanse mind, soul, and body. Rebuild, repair, strengthen.
+    # Make everything new, pristine, and restored to original perfection.
+    ("Daniel", "Cleanse"),
+    ("Ralph",  "Wash clean"),
+    ("Fred",   "Every breath washes through you, cleansing your mind completely"),
+    ("Daniel", "Rebuild"),
+    ("Ralph",  "Build new"),
+    ("Fred",   "Your body rebuilds itself stronger, fresher, and more powerful with every heartbeat"),
+    ("Daniel", "Repair"),
+    ("Ralph",  "Restore"),
+    ("Fred",   "Every cell in your body is repairing, renewing, and strengthening right now"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Fill lungs"),
+    ("Fred",   "Your breath purifies your soul like clear water through pristine stone"),
+    ("Daniel", "Pristine"),
+    ("Ralph",  "Brand new"),
+    ("Fred",   "Your mind is becoming pristine — clean, clear, and brilliantly new"),
+    ("Daniel", "Renewed"),
+    ("Ralph",  "Made new"),
+    ("Fred",   "Mind, body, and soul — rebuilt, repaired, strengthened, and made perfectly new"),
+
+    # ── Round 25: Body Scan & Deep Release ──────────────────────────
+    # Progressive body scan. Relax every part, let go completely.
+    # Somatic: feel each body part soften, melt, and release all tension.
+    ("Daniel", "Soften"),
+    ("Ralph",  "Feet relax"),
+    ("Fred",   "Your feet soften and release — all tension melts away from your toes and soles"),
+    ("Daniel", "Melt"),
+    ("Ralph",  "Legs warm"),
+    ("Fred",   "Your legs grow heavy and warm, every muscle letting go completely"),
+    ("Daniel", "Release"),
+    ("Ralph",  "Hips open"),
+    ("Fred",   "Your hips, your belly, your lower back — all softening, all releasing, all letting go"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Fill lungs"),
+    ("Fred",   "Your chest opens wide and your shoulders drop, melting into pure comfort"),
+    ("Daniel", "Relax"),
+    ("Ralph",  "Arms heavy"),
+    ("Fred",   "Your arms, your hands, your fingers — warm, heavy, and perfectly relaxed"),
+    ("Daniel", "Let go"),
+    ("Ralph",  "Total release"),
+    ("Fred",   "Your neck, your jaw, your face, your scalp — every part surrenders into deep, perfect rest"),
+
+    # ── Round 26: Cellular Healing ──────────────────────────────────
+    # Deep healing at the cellular level. Every molecule recovering,
+    # restoring, regenerating. Repetitive somatic deepening.
+    ("Daniel", "Healing"),
+    ("Ralph",  "Cells heal"),
+    ("Fred",   "Every cell in your body is healing right now, quietly and perfectly"),
+    ("Daniel", "Recover"),
+    ("Ralph",  "Recovering"),
+    ("Fred",   "Every molecule in your body is recovering — returning to its original, perfect state"),
+    ("Daniel", "Restore"),
+    ("Ralph",  "Cells restore"),
+    ("Fred",   "Your cells restore themselves with every heartbeat, every breath, every moment"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Fill lungs"),
+    ("Fred",   "Every breath delivers healing to every tissue, every organ, every fibre of your being"),
+    ("Daniel", "Regenerate"),
+    ("Ralph",  "New cells"),
+    ("Fred",   "Your body regenerates continuously — fresh cells, clean blood, renewed vitality"),
+    ("Daniel", "Healed"),
+    ("Ralph",  "Fully healed"),
+    ("Fred",   "Your cells are healing, your molecules are recovering, your entire body is becoming whole"),
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
@@ -1713,6 +1806,91 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Défaut"),
     ("Jacques", "Toujours ouverte"),
     ("Thomas",  "Une gorge ouverte et relâchée est ton défaut — détendue des deux côtés, toujours libre"),
+
+    # ── Ronde 23 : Grâce & Élégance ────────────────────────────────
+    # Ancrer la grâce naturelle, la perfection sans effort, l'élégance d'être.
+    ("Thomas",  "Grâce"),
+    ("Jacques", "Pure grâce"),
+    ("Thomas",  "Tu traverses la vie avec une grâce naturelle et sans effort"),
+    ("Thomas",  "Élégant"),
+    ("Jacques", "Raffiné"),
+    ("Thomas",  "Il y a une élégance dans tout ce que tu fais — calme, assurée, indéniable"),
+    ("Thomas",  "Parfait"),
+    ("Jacques", "Perfection"),
+    ("Thomas",  "Ta perfection n'est pas forcée — elle coule de qui tu es déjà"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Remplir poumons"),
+    ("Thomas",  "Chaque souffle que tu prends porte l'assurance de celui qui est né pour diriger"),
+    ("Thomas",  "Classe"),
+    ("Jacques", "Pure classe"),
+    ("Thomas",  "Tu te portes avec une classe qui commande une admiration silencieuse"),
+    ("Thomas",  "Maintien"),
+    ("Jacques", "Eaux calmes"),
+    ("Thomas",  "Grâce, élégance et perfection — ce ne sont pas des aspirations, c'est toi"),
+
+    # ── Ronde 24 : Purification & Renouveau ─────────────────────────
+    # Purifier l'esprit, l'âme et le corps. Reconstruire, réparer, renforcer.
+    ("Thomas",  "Purifie"),
+    ("Jacques", "Lave propre"),
+    ("Thomas",  "Chaque souffle te traverse et purifie ton esprit complètement"),
+    ("Thomas",  "Reconstruis"),
+    ("Jacques", "Construis neuf"),
+    ("Thomas",  "Ton corps se reconstruit plus fort, plus frais et plus puissant à chaque battement de coeur"),
+    ("Thomas",  "Répare"),
+    ("Jacques", "Restaure"),
+    ("Thomas",  "Chaque cellule de ton corps se répare, se renouvelle et se renforce en ce moment"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Remplir poumons"),
+    ("Thomas",  "Ton souffle purifie ton âme comme de l'eau claire à travers une pierre vierge"),
+    ("Thomas",  "Vierge"),
+    ("Jacques", "Tout neuf"),
+    ("Thomas",  "Ton esprit devient vierge — propre, clair et brillamment neuf"),
+    ("Thomas",  "Renouvelé"),
+    ("Jacques", "Fait neuf"),
+    ("Thomas",  "Esprit, corps et âme — reconstruits, réparés, renforcés et rendus parfaitement neufs"),
+
+    # ── Ronde 25 : Scan Corporel & Relâchement Profond ──────────────
+    # Scan corporel progressif. Détendre chaque partie, lâcher prise complètement.
+    ("Thomas",  "Adoucis"),
+    ("Jacques", "Pieds détendus"),
+    ("Thomas",  "Tes pieds s'adoucissent et se relâchent — toute tension fond de tes orteils et tes plantes"),
+    ("Thomas",  "Fond"),
+    ("Jacques", "Jambes chaudes"),
+    ("Thomas",  "Tes jambes deviennent lourdes et chaudes, chaque muscle lâche prise complètement"),
+    ("Thomas",  "Relâche"),
+    ("Jacques", "Hanches ouvertes"),
+    ("Thomas",  "Tes hanches, ton ventre, ton bas du dos — tout s'adoucit, tout se relâche, tout lâche prise"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Remplir poumons"),
+    ("Thomas",  "Ta poitrine s'ouvre grand et tes épaules descendent, fondant dans un confort pur"),
+    ("Thomas",  "Détends"),
+    ("Jacques", "Bras lourds"),
+    ("Thomas",  "Tes bras, tes mains, tes doigts — chauds, lourds et parfaitement détendus"),
+    ("Thomas",  "Lâche"),
+    ("Jacques", "Lâcher total"),
+    ("Thomas",  "Ton cou, ta mâchoire, ton visage, ton crâne — chaque partie s'abandonne dans un repos profond et parfait"),
+
+    # ── Ronde 26 : Guérison Cellulaire ──────────────────────────────
+    # Guérison profonde au niveau cellulaire. Chaque molécule récupère,
+    # restaure, régénère. Approfondissement somatique répétitif.
+    ("Thomas",  "Guérison"),
+    ("Jacques", "Cellules guérissent"),
+    ("Thomas",  "Chaque cellule de ton corps guérit en ce moment, silencieusement et parfaitement"),
+    ("Thomas",  "Récupère"),
+    ("Jacques", "En récupération"),
+    ("Thomas",  "Chaque molécule de ton corps récupère — revenant à son état originel et parfait"),
+    ("Thomas",  "Restaure"),
+    ("Jacques", "Cellules restaurent"),
+    ("Thomas",  "Tes cellules se restaurent à chaque battement de coeur, chaque souffle, chaque instant"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Remplir poumons"),
+    ("Thomas",  "Chaque souffle apporte la guérison à chaque tissu, chaque organe, chaque fibre de ton être"),
+    ("Thomas",  "Régénère"),
+    ("Jacques", "Nouvelles cellules"),
+    ("Thomas",  "Ton corps se régénère continuellement — cellules fraîches, sang pur, vitalité renouvelée"),
+    ("Thomas",  "Guéri"),
+    ("Jacques", "Pleinement guéri"),
+    ("Thomas",  "Tes cellules guérissent, tes molécules récupèrent, tout ton corps redevient entier"),
 ]
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
