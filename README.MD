@@ -8,13 +8,13 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Scientifically-Grounded Breathing** — 6 HRV breath pacing patterns (box breathing, 4-7-8, and more) with a live terminal breathing bar and 8 handcrafted audio cues (singing bowl, bell, woodblock...) to guide every inhale and exhale.
 
-**Therapeutic Voice Sessions** — Up to 384 counter-conditioning affirmations across 21 expert-reviewed phases, covering somatic restoration, nervous system regulation, identity reclamation, and default-state conditioning. Available in English and French.
+**Therapeutic Voice Sessions** — Up to 500+ counter-conditioning affirmations across 27 expert-reviewed phases, covering somatic restoration, nervous system regulation, identity reclamation, default-state conditioning, grace, purification, body scan, and cellular healing. Available in English and French with Amélie positive reinforcement voice.
 
 **EMDR-Style Bilateral Stimulation** — Smooth alternating left/right audio for bilateral processing. Combine with voice alternation (`--alternate`) for full EMDR-inspired sessions where affirmations move between ears.
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
-**125-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, the Bhagavad-Gita, and 120 more classics read aloud during your sessions. 66 French, 59 English. Page tracking, resume support, and real-time subtitles.
+**155-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, the Yoga Sutras, the Bhagavad-Gita, Zen Buddhism, the Science of Breath, and 145 more classics read aloud during your sessions. 70 French, 85 English. Page tracking, resume support, and real-time subtitles.
 
 **20 One-Flag Presets** — From `--sleep` to `--emdr-session` to `--morning-energy`, each preset is a complete therapeutic session in a single command. No configuration needed.
 
@@ -47,7 +47,7 @@ pip install numpy sounddevice soundfile
 # Voice setup (macOS — checks required TTS voices)
 ./setup_voices.sh
 
-# Download audiobook library (125 books, run once)
+# Download audiobook library (155 books, run once)
 python books/fetch_books.py
 ```
 
@@ -168,7 +168,7 @@ python stream_tone.py --full-restore
 ### Audiobook
 ```
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
---audiobook-list     List all 125 available audiobooks and exit
+--audiobook-list     List all 155 available audiobooks and exit
 --audiobook-vol FL   Voice volume (default: 0.40)
 --audiobook-resume   Resume from saved position
 --audiobook-page N   Start from page N (each page = 10 sentences)
@@ -273,7 +273,7 @@ Every 10 sentences, page progress is logged. On Ctrl-C, you get a resume command
 
 With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 
-### Book Library (125 books)
+### Book Library (155 books)
 
 **Philosophy & Wisdom:**
 - `meditations` — Meditations (Marcus Aurelius) [EN]
@@ -422,6 +422,46 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `pierre-et-jean` — Pierre et Jean (Maupassant) [FR]
 - `bel-ami` — Bel-Ami (Maupassant) [FR]
 
+**Yoga & Breath Science:**
+- `science-of-breath` — The Hindu-Yogi Science of Breath (Yogi Ramacharaka) [EN]
+- `raja-yoga` — A Series of Lessons in Raja Yoga (Yogi Ramacharaka) [EN]
+- `gnani-yoga` — A Series of Lessons in Gnani Yoga (Yogi Ramacharaka) [EN]
+- `yoga-sutras` — The Yoga Sutras of Patanjali (tr. Johnston) [EN]
+- `upanishads` — The Upanishads (tr. Swami Paramananda) [EN]
+- `autobiography-yogi` — Autobiography of a Yogi (Yogananda) [EN]
+- `jnana-yoga` — Jnana Yoga (Swami Vivekananda) [EN]
+- `light-of-asia` — The Light of Asia (Sir Edwin Arnold) [EN]
+
+**Mindfulness & Presence:**
+- `presence-of-god` — The Practice of the Presence of God (Brother Lawrence) [EN]
+- `light-on-path` — Light on the Path (Mabel Collins) [EN]
+- `heavenly-life` — The Heavenly Life (James Allen) [EN]
+- `zen-buddhism` — Essays in Zen Buddhism (D.T. Suzuki) [EN]
+- `buddhas-path-virtue` — The Buddha's Path of Virtue (Dhammapada) [EN]
+- `kybalion` — The Kybalion (Three Initiates) [EN]
+- `edinburgh-lectures` — Edinburgh Lectures on Mental Science (Troward) [EN]
+
+**Mental Power & New Thought:**
+- `dynamic-thought` — Dynamic Thought (Atkinson) [EN]
+- `thought-culture` — Thought-Culture (Atkinson) [EN]
+- `your-mind` — Your Mind and How to Use It (Atkinson) [EN]
+- `memory-atkinson` — Memory: How to Develop, Train, and Use It (Atkinson) [EN]
+- `hidden-power` — The Hidden Power (Troward) [EN]
+- `science-getting-rich` — The Science of Getting Rich (Wattles) [EN]
+- `science-being-well` — The Science of Being Well (Wattles) [EN]
+- `mystic-christianity` — Mystic Christianity (Atkinson) [EN]
+
+**Stoic & Contemplative Wisdom:**
+- `discourses-epictetus` — Discourses of Epictetus [EN]
+- `wisdom-destiny` — Wisdom and Destiny (Maeterlinck) [EN]
+- `treasure-humble` — The Treasure of the Humble (Maeterlinck) [EN]
+
+**French Mindfulness & Wisdom:**
+- `sagesse-destinee` — La sagesse et la destinée (Maeterlinck) [FR]
+- `tresor-humbles` — Le trésor des humbles (Maeterlinck) [FR]
+- `sentiers-montagne` — Les sentiers dans la montagne (Maeterlinck) [FR]
+- `aphorismes-sagesse` — Aphorismes sur la sagesse dans la vie (Schopenhauer) [FR]
+
 ---
 
 ## Therapeutic Voice Modes
@@ -436,17 +476,13 @@ Phases: Truisms & Grounding → Nasal Breathing → Jaw Release → Automatic Br
 python stream_tone.py --claude-peace --disable-inputs
 ```
 
-### PhD-Peace (21-Phase Expert-Reviewed)
+### PhD-Peace (27-Phase Expert-Reviewed)
 
-Extends claude-peace with 5 additional default-state conditioning rounds (17-21): Default Expression, Default Posture, Default Feeling, Default Mode, Default Body Rapport. 384 affirmations, ~70 minutes at 11s/cycle.
+Extends claude-peace with 11 additional rounds (17-27): Default Expression, Default Posture, Default Feeling, Default Mode, Default Body Rapport, Default Throat, Grace & Elegance, Purification & Renewal, Body Scan & Deep Release, Cellular Healing, Head & Face Release. 500+ affirmations, ~90 minutes at 11s/cycle. French version includes Amélie positive reinforcement voice ("c'est bien", "comme ça", "voilà").
 
 ```bash
 # Full PhD-peace with bilateral alternation
-python stream_tone.py --phd-peace --alternate --disable-inputs
-
-# Dense mode (double speed, ~35 min)
-python stream_tone.py --phd-peace --dense --alternate --no-tone --disable-inputs
-
+python stream_tone.py --phd-peace --alternate --disable-inputs-
 # French language
 python stream_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
 ```
