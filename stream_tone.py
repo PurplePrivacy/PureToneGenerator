@@ -768,6 +768,7 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "purification & renewal (cleanse, rebuild, repair)",
     "body scan & deep release (relax, let go)",
     "cellular healing (cells heal, molecules recover)",
+    "head & face release (forehead, cheeks, eyes, scalp)",
 ]
 
 CLAUDE_PEACE_MESSAGES = [
@@ -1451,11 +1452,11 @@ CLAUDE_PEACE_MESSAGES_FR = [
 ]
 
 # ============================
-# PHD-PEACE: EXPERT-REVIEWED 26-PHASE MESSAGES
+# PHD-PEACE: EXPERT-REVIEWED 27-PHASE MESSAGES
 # ============================
 # Rounds 1-16: inherited from CLAUDE_PEACE_MESSAGES (unchanged)
 # Rounds 17-22: Default State Conditioning — anchor baseline identity states
-# Rounds 23-26: Grace, Purification, Body Scan, Cellular Healing
+# Rounds 23-27: Grace, Purification, Body Scan, Cellular Healing, Head & Face Release
 
 _PHD_EXTRA_ROUNDS = [
     # ── Round 17: Default Expression ─────────────────────────────────
@@ -1594,23 +1595,23 @@ _PHD_EXTRA_ROUNDS = [
     # Anchor natural grace, effortless perfection, elegance in being.
     # Somatic: feel the smoothness in every gesture, the poise in stillness.
     ("Daniel", "Grace"),
-    ("Ralph",  "Pure grace"),
-    ("Fred",   "You move through life with effortless, natural grace"),
-    ("Daniel", "Elegant"),
-    ("Ralph",  "Refined"),
-    ("Fred",   "There is an elegance in everything you do — quiet, assured, unmistakable"),
-    ("Daniel", "Perfect"),
-    ("Ralph",  "Perfection"),
-    ("Fred",   "Your perfection is not forced — it flows from who you already are"),
+    ("Ralph",  "Body flows"),
+    ("Fred",   "You feel the smooth, effortless grace in every movement your body makes"),
+    ("Daniel", "Smooth"),
+    ("Ralph",  "Fluid motion"),
+    ("Fred",   "There is a quiet elegance in how you move — your muscles know it, your bones carry it"),
+    ("Daniel", "Flow"),
+    ("Ralph",  "Easy flow"),
+    ("Fred",   "Your perfection flows naturally — it comes from who you already are"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
     ("Fred",   "Every breath you take carries the composure of someone born to lead"),
-    ("Daniel", "Class"),
-    ("Ralph",  "Pure class"),
-    ("Fred",   "You carry yourself with a class that commands silent admiration"),
     ("Daniel", "Poise"),
-    ("Ralph",  "Still waters"),
-    ("Fred",   "Grace, elegance, and perfection — they are not aspirations, they are you"),
+    ("Ralph",  "Still center"),
+    ("Fred",   "You feel the poise in your center — still, steady, and silently commanding"),
+    ("Daniel", "Default"),
+    ("Ralph",  "Always this"),
+    ("Fred",   "Grace, elegance, and perfection — they already live in you, they already are you"),
 
     # ── Round 24: Purification & Renewal ────────────────────────────
     # Cleanse mind, soul, and body. Rebuild, repair, strengthen.
@@ -1657,26 +1658,48 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "Your neck, your jaw, your face, your scalp — every part surrenders into deep, perfect rest"),
 
     # ── Round 26: Cellular Healing ──────────────────────────────────
-    # Deep healing at the cellular level. Every molecule recovering,
-    # restoring, regenerating. Repetitive somatic deepening.
-    ("Daniel", "Healing"),
-    ("Ralph",  "Cells heal"),
-    ("Fred",   "Every cell in your body is healing right now, quietly and perfectly"),
-    ("Daniel", "Recover"),
-    ("Ralph",  "Recovering"),
-    ("Fred",   "Every molecule in your body is recovering — returning to its original, perfect state"),
-    ("Daniel", "Restore"),
-    ("Ralph",  "Cells restore"),
-    ("Fred",   "Your cells restore themselves with every heartbeat, every breath, every moment"),
+    # Deep healing at the cellular level. Somatic: warmth, pulse, hum, glow.
+    # Each triplet deepens from cells → blood → whole body → integration.
+    ("Daniel", "Warm"),
+    ("Ralph",  "Cells warm"),
+    ("Fred",   "Every cell in your body glows with warm, quiet healing right now"),
+    ("Daniel", "Pulse"),
+    ("Ralph",  "Blood heals"),
+    ("Fred",   "You feel the warm pulse of healing flowing through every vein, every artery"),
+    ("Daniel", "Hum"),
+    ("Ralph",  "Body hums"),
+    ("Fred",   "Your cells hum with restoration — rebuilding, renewing, strengthening with every heartbeat"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Every breath delivers healing to every tissue, every organ, every fibre of your being"),
-    ("Daniel", "Regenerate"),
-    ("Ralph",  "New cells"),
-    ("Fred",   "Your body regenerates continuously — fresh cells, clean blood, renewed vitality"),
-    ("Daniel", "Healed"),
-    ("Ralph",  "Fully healed"),
-    ("Fred",   "Your cells are healing, your molecules are recovering, your entire body is becoming whole"),
+    ("Fred",   "Every breath delivers warmth and healing to every tissue, every organ, every fibre"),
+    ("Daniel", "Glow"),
+    ("Ralph",  "Inner glow"),
+    ("Fred",   "A deep, warm glow of regeneration fills your body — fresh cells, clean blood, renewed vitality"),
+    ("Daniel", "Whole"),
+    ("Ralph",  "Fully whole"),
+    ("Fred",   "Your body hums with wholeness — healed, restored, and perfectly alive"),
+
+    # ── Round 27: Head & Face Release ───────────────────────────────
+    # Deep relaxation of every muscle in the head and face.
+    # Somatic: forehead smooths, cheeks soften, eyes heal, scalp melts.
+    ("Daniel", "Forehead"),
+    ("Ralph",  "Smooth brow"),
+    ("Fred",   "Your forehead smooths completely — every line, every furrow melts away into warm stillness"),
+    ("Daniel", "Cheeks"),
+    ("Ralph",  "Cheeks soft"),
+    ("Fred",   "Your cheeks soften and warm, all the muscles of your face releasing deeply"),
+    ("Daniel", "Eyes"),
+    ("Ralph",  "Eyes heal"),
+    ("Fred",   "Your eyes relax behind your lids — warm, soft, and gently healing with every breath"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Fill lungs"),
+    ("Fred",   "Every breath sends warm, healing relaxation through your entire face and head"),
+    ("Daniel", "Temples"),
+    ("Ralph",  "Temples melt"),
+    ("Fred",   "Your temples, your jaw, the muscles around your ears — all melting, all softening, all letting go"),
+    ("Daniel", "Scalp"),
+    ("Ralph",  "Scalp warm"),
+    ("Fred",   "Your scalp relaxes completely — warm, loose, and perfectly at ease from crown to brow"),
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
@@ -1810,23 +1833,23 @@ _PHD_EXTRA_ROUNDS_FR = [
     # ── Ronde 23 : Grâce & Élégance ────────────────────────────────
     # Ancrer la grâce naturelle, la perfection sans effort, l'élégance d'être.
     ("Thomas",  "Grâce"),
-    ("Jacques", "Pure grâce"),
-    ("Thomas",  "Tu traverses la vie avec une grâce naturelle et sans effort"),
-    ("Thomas",  "Élégant"),
-    ("Jacques", "Raffiné"),
-    ("Thomas",  "Il y a une élégance dans tout ce que tu fais — calme, assurée, indéniable"),
-    ("Thomas",  "Parfait"),
-    ("Jacques", "Perfection"),
-    ("Thomas",  "Ta perfection n'est pas forcée — elle coule de qui tu es déjà"),
+    ("Jacques", "Corps coule"),
+    ("Thomas",  "Tu sens la grâce douce et naturelle dans chaque mouvement de ton corps"),
+    ("Thomas",  "Lisse"),
+    ("Jacques", "Mouvement fluide"),
+    ("Thomas",  "Il y a une élégance calme dans ta façon de bouger — tes muscles le savent, tes os la portent"),
+    ("Thomas",  "Flux"),
+    ("Jacques", "Flux facile"),
+    ("Thomas",  "Ta perfection coule naturellement — elle vient de qui tu es déjà"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle que tu prends porte l'assurance de celui qui est né pour diriger"),
-    ("Thomas",  "Classe"),
-    ("Jacques", "Pure classe"),
-    ("Thomas",  "Tu te portes avec une classe qui commande une admiration silencieuse"),
     ("Thomas",  "Maintien"),
-    ("Jacques", "Eaux calmes"),
-    ("Thomas",  "Grâce, élégance et perfection — ce ne sont pas des aspirations, c'est toi"),
+    ("Jacques", "Centre calme"),
+    ("Thomas",  "Tu sens le maintien dans ton centre — calme, stable et silencieusement commandant"),
+    ("Thomas",  "Défaut"),
+    ("Jacques", "Toujours ainsi"),
+    ("Thomas",  "Grâce, élégance et perfection — elles vivent déjà en toi, elles sont déjà toi"),
 
     # ── Ronde 24 : Purification & Renouveau ─────────────────────────
     # Purifier l'esprit, l'âme et le corps. Reconstruire, réparer, renforcer.
@@ -1871,26 +1894,48 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Ton cou, ta mâchoire, ton visage, ton crâne — chaque partie s'abandonne dans un repos profond et parfait"),
 
     # ── Ronde 26 : Guérison Cellulaire ──────────────────────────────
-    # Guérison profonde au niveau cellulaire. Chaque molécule récupère,
-    # restaure, régénère. Approfondissement somatique répétitif.
-    ("Thomas",  "Guérison"),
-    ("Jacques", "Cellules guérissent"),
-    ("Thomas",  "Chaque cellule de ton corps guérit en ce moment, silencieusement et parfaitement"),
-    ("Thomas",  "Récupère"),
-    ("Jacques", "En récupération"),
-    ("Thomas",  "Chaque molécule de ton corps récupère — revenant à son état originel et parfait"),
-    ("Thomas",  "Restaure"),
-    ("Jacques", "Cellules restaurent"),
-    ("Thomas",  "Tes cellules se restaurent à chaque battement de coeur, chaque souffle, chaque instant"),
+    # Guérison profonde au niveau cellulaire. Somatique : chaleur, pouls, vibration, lueur.
+    # Chaque triplet approfondit : cellules → sang → corps entier → intégration.
+    ("Thomas",  "Chaud"),
+    ("Jacques", "Cellules chaudes"),
+    ("Thomas",  "Chaque cellule de ton corps rayonne d'une guérison chaude et silencieuse en ce moment"),
+    ("Thomas",  "Pouls"),
+    ("Jacques", "Sang guérit"),
+    ("Thomas",  "Tu sens le pouls chaud de la guérison couler dans chaque veine, chaque artère"),
+    ("Thomas",  "Vibration"),
+    ("Jacques", "Corps vibre"),
+    ("Thomas",  "Tes cellules vibrent de restauration — reconstruisant, renouvelant, renforçant à chaque battement"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Thomas",  "Chaque souffle apporte la guérison à chaque tissu, chaque organe, chaque fibre de ton être"),
-    ("Thomas",  "Régénère"),
-    ("Jacques", "Nouvelles cellules"),
-    ("Thomas",  "Ton corps se régénère continuellement — cellules fraîches, sang pur, vitalité renouvelée"),
-    ("Thomas",  "Guéri"),
-    ("Jacques", "Pleinement guéri"),
-    ("Thomas",  "Tes cellules guérissent, tes molécules récupèrent, tout ton corps redevient entier"),
+    ("Thomas",  "Chaque souffle apporte chaleur et guérison à chaque tissu, chaque organe, chaque fibre"),
+    ("Thomas",  "Lueur"),
+    ("Jacques", "Lueur intérieure"),
+    ("Thomas",  "Une lueur chaude et profonde de régénération remplit ton corps — cellules fraîches, sang pur, vitalité renouvelée"),
+    ("Thomas",  "Entier"),
+    ("Jacques", "Pleinement entier"),
+    ("Thomas",  "Ton corps vibre de plénitude — guéri, restauré et parfaitement vivant"),
+
+    # ── Ronde 27 : Relâchement Tête & Visage ────────────────────────
+    # Relaxation profonde de chaque muscle de la tête et du visage.
+    # Somatique : front lisse, joues douces, yeux guérissent, cuir chevelu fond.
+    ("Thomas",  "Front"),
+    ("Jacques", "Front lisse"),
+    ("Thomas",  "Ton front se lisse complètement — chaque ligne, chaque pli fond dans une tiédeur paisible"),
+    ("Thomas",  "Joues"),
+    ("Jacques", "Joues douces"),
+    ("Thomas",  "Tes joues s'adoucissent et se réchauffent, tous les muscles de ton visage se relâchent profondément"),
+    ("Thomas",  "Yeux"),
+    ("Jacques", "Yeux guérissent"),
+    ("Thomas",  "Tes yeux se détendent derrière tes paupières — chauds, doux, guérissant doucement à chaque souffle"),
+    ("Thomas",  "Respire"),
+    ("Jacques", "Remplir poumons"),
+    ("Thomas",  "Chaque souffle envoie une relaxation chaude et guérissante à travers tout ton visage et ta tête"),
+    ("Thomas",  "Tempes"),
+    ("Jacques", "Tempes fondent"),
+    ("Thomas",  "Tes tempes, ta mâchoire, les muscles autour de tes oreilles — tout fond, tout s'adoucit, tout lâche prise"),
+    ("Thomas",  "Crâne"),
+    ("Jacques", "Crâne chaud"),
+    ("Thomas",  "Ton cuir chevelu se détend complètement — chaud, souple et parfaitement à l'aise du sommet au front"),
 ]
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
