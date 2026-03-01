@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download all 125 books from Project Gutenberg.
+"""Download all 155 books from Project Gutenberg.
 
 Run once:  python books/fetch_books.py
 

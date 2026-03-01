@@ -1,4 +1,4 @@
-"""Audiobook catalog — 125 books (66 French + 59 English), all public domain.
+"""Audiobook catalog — 155 books (70 French + 85 English), all public domain.
 
 Each entry maps a short CLI name to metadata used by stream_tone.py and fetch_books.py.
 Voice is auto-selected by language: Thomas (fr) or Alex (en).
@@ -698,7 +698,7 @@ BOOK_CATALOG = {
     "way-of-peace": {
         "title": "The Way of Peace",
         "author": "James Allen",
-        "gutenberg_id": 3465,
+        "gutenberg_id": 10740,
         "voice": "Alex",
         "language": "en",
         "category": "Mindfulness & Inner Peace",
@@ -1065,6 +1065,271 @@ BOOK_CATALOG = {
         "language": "fr",
         "category": "More French Literature",
     },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  YOGA, BREATH & EASTERN MEDITATION — 8 books
+    # ══════════════════════════════════════════════════════════════════
+
+    "science-of-breath": {
+        "title": "The Hindu-Yogi Science of Breath",
+        "author": "Yogi Ramacharaka",
+        "gutenberg_id": 13402,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "raja-yoga": {
+        "title": "A Series of Lessons in Raja Yoga",
+        "author": "Yogi Ramacharaka",
+        "gutenberg_id": 13656,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "gnani-yoga": {
+        "title": "A Series of Lessons in Gnani Yoga",
+        "author": "Yogi Ramacharaka",
+        "gutenberg_id": 13407,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "yoga-sutras": {
+        "title": "The Yoga Sutras of Patanjali",
+        "author": "Patanjali (tr. Charles Johnston)",
+        "gutenberg_id": 2526,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "upanishads": {
+        "title": "The Upanishads",
+        "author": "tr. Swami Paramananda",
+        "gutenberg_id": 3283,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "autobiography-yogi": {
+        "title": "Autobiography of a Yogi",
+        "author": "Paramahansa Yogananda",
+        "gutenberg_id": 7452,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "jnana-yoga": {
+        "title": "Jnana Yoga, Part II: Seven Lectures",
+        "author": "Swami Vivekananda",
+        "gutenberg_id": 72368,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+    "light-of-asia": {
+        "title": "The Light of Asia",
+        "author": "Sir Edwin Arnold",
+        "gutenberg_id": 8920,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Yoga & Breath Science",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  MINDFULNESS, PRESENCE & LETTING GO — 7 books
+    # ══════════════════════════════════════════════════════════════════
+
+    "presence-of-god": {
+        "title": "The Practice of the Presence of God",
+        "author": "Brother Lawrence",
+        "gutenberg_id": 5657,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "light-on-path": {
+        "title": "Light on the Path and Through the Gates of Gold",
+        "author": "Mabel Collins",
+        "gutenberg_id": 14599,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "heavenly-life": {
+        "title": "The Heavenly Life",
+        "author": "James Allen",
+        "gutenberg_id": 20679,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "zen-buddhism": {
+        "title": "Essays in Zen Buddhism: First Series",
+        "author": "Daisetz Teitaro Suzuki",
+        "gutenberg_id": 71157,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "buddhas-path-virtue": {
+        "title": "The Buddha's Path of Virtue (Dhammapada)",
+        "author": "tr. F.L. Woodward",
+        "gutenberg_id": 35185,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "kybalion": {
+        "title": "The Kybalion",
+        "author": "Three Initiates",
+        "gutenberg_id": 14209,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+    "edinburgh-lectures": {
+        "title": "The Edinburgh Lectures on Mental Science",
+        "author": "T. Troward",
+        "gutenberg_id": 10390,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mindfulness & Presence",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  MENTAL POWER & NEW THOUGHT — 8 books
+    # ══════════════════════════════════════════════════════════════════
+
+    "dynamic-thought": {
+        "title": "Dynamic Thought; Or, The Law of Vibrant Energy",
+        "author": "William Walker Atkinson",
+        "gutenberg_id": 41892,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "thought-culture": {
+        "title": "Thought-Culture; Or, Practical Mental Training",
+        "author": "William Walker Atkinson",
+        "gutenberg_id": 41519,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "your-mind": {
+        "title": "Your Mind and How to Use It",
+        "author": "William Walker Atkinson",
+        "gutenberg_id": 42055,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "memory-atkinson": {
+        "title": "Memory: How to Develop, Train, and Use It",
+        "author": "William Walker Atkinson",
+        "gutenberg_id": 41478,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "hidden-power": {
+        "title": "The Hidden Power, and Other Papers upon Mental Science",
+        "author": "T. Troward",
+        "gutenberg_id": 25638,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "science-getting-rich": {
+        "title": "The Science of Getting Rich",
+        "author": "Wallace D. Wattles",
+        "gutenberg_id": 59844,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "science-being-well": {
+        "title": "The Science of Being Well",
+        "author": "Wallace D. Wattles",
+        "gutenberg_id": 33917,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+    "mystic-christianity": {
+        "title": "Mystic Christianity; Or, The Inner Teachings of the Master",
+        "author": "William Walker Atkinson",
+        "gutenberg_id": 13143,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Mental Power & New Thought",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  STOIC & CONTEMPLATIVE WISDOM (additional) — 4 books
+    # ══════════════════════════════════════════════════════════════════
+
+    "discourses-epictetus": {
+        "title": "A Selection from the Discourses of Epictetus",
+        "author": "Epictetus",
+        "gutenberg_id": 10661,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Stoic Wisdom (additional)",
+    },
+    "wisdom-destiny": {
+        "title": "Wisdom and Destiny",
+        "author": "Maurice Maeterlinck",
+        "gutenberg_id": 4349,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Stoic Wisdom (additional)",
+    },
+    "treasure-humble": {
+        "title": "The Treasure of the Humble",
+        "author": "Maurice Maeterlinck",
+        "gutenberg_id": 48217,
+        "voice": "Alex",
+        "language": "en",
+        "category": "Stoic Wisdom (additional)",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  FRENCH MINDFULNESS & WISDOM — 4 books
+    # ══════════════════════════════════════════════════════════════════
+
+    "sagesse-destinee": {
+        "title": "La sagesse et la destinée",
+        "author": "Maurice Maeterlinck",
+        "gutenberg_id": 11178,
+        "voice": "Thomas",
+        "language": "fr",
+        "category": "French Mindfulness & Wisdom",
+    },
+    "tresor-humbles": {
+        "title": "Le trésor des humbles",
+        "author": "Maurice Maeterlinck",
+        "gutenberg_id": 64719,
+        "voice": "Thomas",
+        "language": "fr",
+        "category": "French Mindfulness & Wisdom",
+    },
+    "sentiers-montagne": {
+        "title": "Les sentiers dans la montagne",
+        "author": "Maurice Maeterlinck",
+        "gutenberg_id": 63187,
+        "voice": "Thomas",
+        "language": "fr",
+        "category": "French Mindfulness & Wisdom",
+    },
+    "aphorismes-sagesse": {
+        "title": "Aphorismes sur la sagesse dans la vie",
+        "author": "Arthur Schopenhauer (tr. Cantacuzène)",
+        "gutenberg_id": 35444,
+        "voice": "Thomas",
+        "language": "fr",
+        "category": "French Mindfulness & Wisdom",
+    },
 }
 
 # Ordered category list for display
@@ -1089,12 +1354,18 @@ BOOK_CATEGORIES = [
     "French Poetry",
     "French Short Stories",
     "French Philosophy (additional)",
-    # Mindfulness & Self-Improvement (new)
+    # Mindfulness & Self-Improvement
     "Mindfulness & Inner Peace",
     "Transcendentalism & Nature",
     "Spiritual Wisdom",
     "Human Condition",
-    # French Classics (new)
+    # French Classics
     "French Classics (new)",
     "More French Literature",
+    # Yoga, Breath & Meditation
+    "Yoga & Breath Science",
+    "Mindfulness & Presence",
+    "Mental Power & New Thought",
+    "Stoic Wisdom (additional)",
+    "French Mindfulness & Wisdom",
 ]
