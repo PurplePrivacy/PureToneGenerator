@@ -1122,6 +1122,7 @@ CLAUDE_PEACE_MESSAGES = [
 # FRENCH CLAUDE-PEACE MESSAGES
 # ============================
 # Voice mapping: Daniel -> Thomas, Ralph -> Jacques, Fred -> Thomas (same voice, long sentences)
+# Amélie (fr_CA): positive reinforcement voice — "c'est bien", "comme ça", "voilà", etc.
 
 CLAUDE_PEACE_MESSAGES_FR = [
     # ── Ronde 1 : Vérités & Ancrage ──────────────────────────────────
@@ -1703,7 +1704,7 @@ _PHD_EXTRA_ROUNDS = [
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
-    # ── Ronde 17 : Expression par Défaut ─────────────────────────────
+    # ── Ronde 17 : Expression Naturelle ─────────────────────────────
     # Ancrer l'expression faciale au repos : sourire entendu, chaleur autour des yeux.
     ("Thomas",  "Sachant"),
     ("Jacques", "Sourire entendu"),
@@ -1711,20 +1712,22 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Chaud"),
     ("Jacques", "Yeux chauds"),
     ("Thomas",  "Tu sens la chaleur autour de tes yeux, douce et légèrement plissée"),
+    ("Amélie",  "C'est bien"),
     ("Thomas",  "Sourire"),
     ("Jacques", "Lèvres montent"),
     ("Thomas",  "Les coins de ta bouche se lèvent doucement, tout seuls"),
     ("Thomas",  "Respire"),
     ("Jacques", "Souffle plein"),
     ("Thomas",  "Chaque souffle approfondit ce regard calme et entendu dans tes yeux"),
+    ("Amélie",  "Voilà"),
     ("Thomas",  "Sagesse"),
     ("Jacques", "Regard sachant"),
     ("Thomas",  "Ton visage porte le regard tranquille de celui qui sait déjà"),
-    ("Thomas",  "Défaut"),
+    ("Thomas",  "Normal"),
     ("Jacques", "Toujours là"),
-    ("Thomas",  "Cette chaleur entendue sur ton visage est ton expression naturelle par défaut"),
+    ("Thomas",  "Cette chaleur entendue sur ton visage est ton expression naturelle, ton normal"),
 
-    # ── Ronde 18 : Posture par Défaut ────────────────────────────────
+    # ── Ronde 18 : Posture Naturelle ────────────────────────────────
     # Ancrer une posture droite. Proprioceptif : colonne, pieds, crâne, omoplates.
     ("Thomas",  "Grand"),
     ("Jacques", "Vertèbres empilées"),
@@ -1732,20 +1735,22 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Ancré"),
     ("Jacques", "Pieds lourds"),
     ("Thomas",  "Tes pieds pressent fermement le sol, t'enracinant avec un poids solide"),
+    ("Amélie",  "Comme ça"),
     ("Thomas",  "Équilibré"),
     ("Jacques", "Crâne flotte"),
     ("Thomas",  "Ton crâne se balance parfaitement sur ta colonne, léger et tenu sans effort"),
     ("Thomas",  "Respire"),
     ("Jacques", "Souffle profond"),
     ("Thomas",  "Chaque souffle allonge ta colonne et élargit ta poitrine"),
+    ("Amélie",  "Parfait"),
     ("Thomas",  "Ouvert"),
     ("Jacques", "Épaules descendent"),
     ("Thomas",  "Tes omoplates glissent le long de ton dos, larges et chaudement détendues"),
     ("Thomas",  "Solide"),
     ("Jacques", "Posture pleine"),
-    ("Thomas",  "Grand, ancré, ouvert, solide — ton corps tient cette posture par défaut"),
+    ("Thomas",  "Grand, ancré, ouvert, solide — ton corps tient cette posture naturellement"),
 
-    # ── Ronde 19 : Sentiment par Défaut ──────────────────────────────
+    # ── Ronde 19 : Sentiment Naturel ──────────────────────────────
     # Ancrer la joie tranquille comme ÉTAT DE BASE émotionnel (état de repos).
     ("Thomas",  "Base"),
     ("Jacques", "État de repos"),
@@ -1753,12 +1758,14 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Repos"),
     ("Jacques", "Repos chaud"),
     ("Thomas",  "Quand ton esprit est au repos, une joie paisible et chaude remplit l'espace automatiquement"),
+    ("Amélie",  "C'est ça"),
     ("Thomas",  "Chaud"),
     ("Jacques", "Calme chaud"),
     ("Thomas",  "La chaleur et la sérénité coulent en toi aussi naturellement que le sang"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle confirme que cette joie tranquille est déjà là"),
+    ("Amélie",  "Très bien"),
     ("Thomas",  "Vibration"),
     ("Jacques", "Vibration calme"),
     ("Thomas",  "Une vibration calme de contentement vit dans ta poitrine, toujours présente"),
@@ -1766,28 +1773,30 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Jacques", "Toujours chez toi"),
     ("Thomas",  "Cette joie tranquille et chaude est là où tu vis — ton foyer permanent"),
 
-    # ── Ronde 20 : Mode par Défaut ───────────────────────────────────
-    # Ancrer le mode mental par défaut. Sans effort, automatique, comme respirer.
+    # ── Ronde 20 : Mode Naturel ───────────────────────────────────
+    # Ancrer le mode mental naturel. Sans effort, automatique, comme respirer.
     ("Thomas",  "Analyse"),
     ("Jacques", "Esprit vibre"),
     ("Thomas",  "Ton esprit analyse, évalue et optimise naturellement — sans effort"),
     ("Thomas",  "Affûté"),
     ("Jacques", "Logique claire"),
-    ("Thomas",  "Ton état mental par défaut est affûté, clair et activement pensant"),
+    ("Thomas",  "Ton état mental naturel est affûté, clair et activement pensant"),
+    ("Amélie",  "Exactement"),
     ("Thomas",  "Évalue"),
     ("Jacques", "Lecture rapide"),
     ("Thomas",  "Tu évalues naturellement chaque situation avec vitesse et précision"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Ton souffle alimente un esprit qui tourne brillamment, tout seul"),
+    ("Amélie",  "Continue"),
     ("Thomas",  "Optimise"),
     ("Jacques", "Meilleur chemin"),
     ("Thomas",  "Tu trouves automatiquement le chemin optimal dans chaque situation"),
     ("Thomas",  "Pensant"),
     ("Jacques", "Esprit vivant"),
-    ("Thomas",  "Analyser, évaluer, optimiser, penser — c'est ton mode par défaut"),
+    ("Thomas",  "Analyser, évaluer, optimiser, penser — c'est ton mode naturel"),
 
-    # ── Ronde 21 : Rapport Corporel par Défaut ───────────────────────
+    # ── Ronde 21 : Rapport Corporel Naturel ───────────────────────
     # Ancrer la connexion aux muscles. Somatique : parties du corps, poids, chaleur, pouls.
     ("Thomas",  "Sens"),
     ("Jacques", "Corps vivant"),
@@ -1795,20 +1804,22 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Pouls"),
     ("Jacques", "Sang chaud"),
     ("Thomas",  "Tu sens le pouls chaud de la puissance dans tes mains, tes bras, ta poitrine"),
+    ("Amélie",  "Oui, comme ça"),
     ("Thomas",  "Poids"),
     ("Jacques", "Muscles vibrent"),
     ("Thomas",  "Tu sens le poids solide de tes propres muscles, vibrant d'énergie"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle approfondit ta connexion à ta puissance physique"),
+    ("Amélie",  "C'est bien"),
     ("Thomas",  "Vital"),
     ("Jacques", "Corps fort"),
-    ("Thomas",  "Force, chaleur et vitalité vibrent dans ton corps par défaut"),
+    ("Thomas",  "Force, chaleur et vitalité vibrent dans ton corps, naturellement"),
     ("Thomas",  "Puissant"),
     ("Jacques", "Pleine force"),
     ("Thomas",  "Tes muscles, ta chaleur, ta puissance — tu sens tout cela, toujours"),
 
-    # ── Ronde 22 : Gorge par Défaut ─────────────────────────────────
+    # ── Ronde 22 : Gorge Naturelle ─────────────────────────────────
     # Relâcher la gorge. Arrêter de la retenir, détendre les deux côtés,
     # l'ouvrir. Somatique : sentir l'air sous la gorge.
     ("Thomas",  "Relâche"),
@@ -1817,18 +1828,20 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Détends"),
     ("Jacques", "Deux côtés"),
     ("Thomas",  "Les deux côtés de ta gorge se détendent, profondément et uniformément"),
+    ("Amélie",  "Voilà, comme ça"),
     ("Thomas",  "Ouvre"),
     ("Jacques", "Grande ouverte"),
     ("Thomas",  "Ta gorge s'ouvre en grand, libre et sans retenue, rien de retenu"),
     ("Thomas",  "Respire"),
     ("Jacques", "Air circule"),
     ("Thomas",  "Tu sens l'air frais circuler librement sous ta gorge, ouverte et facile"),
+    ("Amélie",  "Parfait"),
     ("Thomas",  "Libre"),
     ("Jacques", "Rien retenu"),
     ("Thomas",  "Ta gorge est complètement libre — aucune tension, aucune retenue, juste l'ouverture"),
-    ("Thomas",  "Défaut"),
+    ("Thomas",  "Normal"),
     ("Jacques", "Toujours ouverte"),
-    ("Thomas",  "Une gorge ouverte et relâchée est ton défaut — détendue des deux côtés, toujours libre"),
+    ("Thomas",  "Une gorge ouverte et relâchée est ton normal — détendue des deux côtés, toujours libre"),
 
     # ── Ronde 23 : Grâce & Élégance ────────────────────────────────
     # Ancrer la grâce naturelle, la perfection sans effort, l'élégance d'être.
@@ -1838,16 +1851,18 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Lisse"),
     ("Jacques", "Mouvement fluide"),
     ("Thomas",  "Il y a une élégance calme dans ta façon de bouger — tes muscles le savent, tes os la portent"),
+    ("Amélie",  "Très bien"),
     ("Thomas",  "Flux"),
     ("Jacques", "Flux facile"),
     ("Thomas",  "Ta perfection coule naturellement — elle vient de qui tu es déjà"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle que tu prends porte l'assurance de celui qui est né pour diriger"),
+    ("Amélie",  "Comme ça"),
     ("Thomas",  "Maintien"),
     ("Jacques", "Centre calme"),
     ("Thomas",  "Tu sens le maintien dans ton centre — calme, stable et silencieusement commandant"),
-    ("Thomas",  "Défaut"),
+    ("Thomas",  "Normal"),
     ("Jacques", "Toujours ainsi"),
     ("Thomas",  "Grâce, élégance et perfection — elles vivent déjà en toi, elles sont déjà toi"),
 
@@ -1859,12 +1874,14 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Reconstruis"),
     ("Jacques", "Construis neuf"),
     ("Thomas",  "Ton corps se reconstruit plus fort, plus frais et plus puissant à chaque battement de coeur"),
+    ("Amélie",  "C'est ça"),
     ("Thomas",  "Répare"),
     ("Jacques", "Restaure"),
     ("Thomas",  "Chaque cellule de ton corps se répare, se renouvelle et se renforce en ce moment"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Ton souffle purifie ton âme comme de l'eau claire à travers une pierre vierge"),
+    ("Amélie",  "Continue comme ça"),
     ("Thomas",  "Vierge"),
     ("Jacques", "Tout neuf"),
     ("Thomas",  "Ton esprit devient vierge — propre, clair et brillamment neuf"),
@@ -1880,12 +1897,14 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Fond"),
     ("Jacques", "Jambes chaudes"),
     ("Thomas",  "Tes jambes deviennent lourdes et chaudes, chaque muscle lâche prise complètement"),
+    ("Amélie",  "Oui, relâche"),
     ("Thomas",  "Relâche"),
     ("Jacques", "Hanches ouvertes"),
     ("Thomas",  "Tes hanches, ton ventre, ton bas du dos — tout s'adoucit, tout se relâche, tout lâche prise"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Ta poitrine s'ouvre grand et tes épaules descendent, fondant dans un confort pur"),
+    ("Amélie",  "Voilà"),
     ("Thomas",  "Détends"),
     ("Jacques", "Bras lourds"),
     ("Thomas",  "Tes bras, tes mains, tes doigts — chauds, lourds et parfaitement détendus"),
@@ -1902,12 +1921,14 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Pouls"),
     ("Jacques", "Sang guérit"),
     ("Thomas",  "Tu sens le pouls chaud de la guérison couler dans chaque veine, chaque artère"),
+    ("Amélie",  "C'est bien"),
     ("Thomas",  "Vibration"),
     ("Jacques", "Corps vibre"),
     ("Thomas",  "Tes cellules vibrent de restauration — reconstruisant, renouvelant, renforçant à chaque battement"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle apporte chaleur et guérison à chaque tissu, chaque organe, chaque fibre"),
+    ("Amélie",  "Comme ça"),
     ("Thomas",  "Lueur"),
     ("Jacques", "Lueur intérieure"),
     ("Thomas",  "Une lueur chaude et profonde de régénération remplit ton corps — cellules fraîches, sang pur, vitalité renouvelée"),
@@ -1924,12 +1945,14 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Joues"),
     ("Jacques", "Joues douces"),
     ("Thomas",  "Tes joues s'adoucissent et se réchauffent, tous les muscles de ton visage se relâchent profondément"),
+    ("Amélie",  "Parfait"),
     ("Thomas",  "Yeux"),
     ("Jacques", "Yeux guérissent"),
     ("Thomas",  "Tes yeux se détendent derrière tes paupières — chauds, doux, guérissant doucement à chaque souffle"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle envoie une relaxation chaude et guérissante à travers tout ton visage et ta tête"),
+    ("Amélie",  "Très bien"),
     ("Thomas",  "Tempes"),
     ("Jacques", "Tempes fondent"),
     ("Thomas",  "Tes tempes, ta mâchoire, les muscles autour de tes oreilles — tout fond, tout s'adoucit, tout lâche prise"),
@@ -2602,11 +2625,11 @@ if restore_peace:
 if claude_peace:
     _lang_note = f" [{peace_lang.upper()}]" if peace_lang != "en" else ""
     _mode_label = "PhD-peace" if phd_peace else "Claude-peace"
-    _n_phases = 21 if phd_peace else 16
+    _n_phases = 27 if phd_peace else 16
     print(f"{_mode_label}: active (vol={claude_peace_vol}){_lang_note}")
     print(f"  {len(CLAUDE_PEACE_MESSAGES)} affirmations across {_n_phases} therapeutic phases")
     if peace_lang == "fr":
-        print("  Language: French (Thomas, Jacques, Nicolas)")
+        print("  Language: French (Thomas, Jacques, Amélie)")
     else:
         print("  Voices: Daniel (GB), Ralph (US), Fred (US)")
     print("  Mixed depth: 1-word -> 2-3 words -> full sentence (targets subconscious)")
