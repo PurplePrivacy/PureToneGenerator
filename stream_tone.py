@@ -2122,6 +2122,10 @@ def _audiobook_renderer_thread():
             if arr is not None:
                 _ab_tts_cache[cache_key] = arr
                 _audiobook_rendered[_audiobook_next_render] = arr
+            else:
+                # TTS failed (timeout, encoding issue, etc.) — insert tiny silence
+                # so playback index advances past this sentence instead of stalling
+                _audiobook_rendered[_audiobook_next_render] = np.zeros(int(0.05 * sample_rate), dtype=np.float32)
         _audiobook_next_render += 1
         # Evict old rendered sentences to free memory
         for idx in list(_audiobook_rendered):
@@ -2438,6 +2442,12 @@ def audio_callback(outdata, frames, time, status):
                     _peace_cue_pos = 0
                 if alternate_mode:
                     _peace_alt_left = (_peace_cycle_count % 2 == 0)
+                _peace_side = "L" if alternate_mode and _peace_alt_left else "R" if alternate_mode else ""
+                _peace_side_tag = f" [{_peace_side}]" if _peace_side else ""
+                try:
+                    sys.stderr.write(f"\n  ~ {msg_text}{_peace_side_tag}\n")
+                except Exception:
+                    pass
                 _peace_cycle_count += 1
             # Claude-peace: ordered progression (or every phase if --dense)
             _claude_trigger = current_phase_name == _hrv_phase_names[0] or dense_mode
@@ -2448,6 +2458,13 @@ def audio_callback(outdata, frames, time, status):
                     _claude_cue_pos = 0
                 if alternate_mode:
                     _claude_alt_left = (_claude_cycle_count % 2 == 0)
+                _cv, _ct = CLAUDE_PEACE_MESSAGES[ci]
+                _claude_side = "L" if alternate_mode and _claude_alt_left else "R" if alternate_mode else ""
+                _claude_side_tag = f" [{_claude_side}]" if _claude_side else ""
+                try:
+                    sys.stderr.write(f"\n  ~ [{_cv}] {_ct}{_claude_side_tag}\n")
+                except Exception:
+                    pass
                 _claude_cycle_count += 1
             hrv_last_phase_name = current_phase_name
 
@@ -2456,6 +2473,11 @@ def audio_callback(outdata, frames, time, status):
         # Cue mixing happens after gain — see below
 
     # Audiobook: continuously trigger next sentence as soon as current finishes
+    # Safety: skip past any sentence indices missing from rendered dict (TTS failure fallback)
+    if audiobook_mode and _audiobook_cue_buf is None:
+        while (_audiobook_play_idx not in _audiobook_rendered
+               and _audiobook_play_idx < _audiobook_next_render):
+            _audiobook_play_idx += 1
     if audiobook_mode and _audiobook_cue_buf is None and _audiobook_play_idx in _audiobook_rendered:
         _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
         _audiobook_cue_pos = 0
