@@ -92,6 +92,10 @@ parser.add_argument("--audiobook-resume", action="store_true",
                     help="Resume from where you left off (saves progress to books/.progress)")
 parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
+parser.add_argument("--audiobook-gap", type=float, default=2.0, metavar="SEC",
+                    help="Silence gap between audiobook sentences in seconds (default: 2.0)")
+parser.add_argument("--no-audiobook-loop", action="store_true",
+                    help="Disable audiobook looping (by default, the book replays when finished)")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
                     help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
@@ -171,6 +175,8 @@ audiobook_list = args.audiobook_list
 audiobook_vol = args.audiobook_vol
 audiobook_resume = args.audiobook_resume
 audiobook_page = args.audiobook_page
+audiobook_gap = args.audiobook_gap
+audiobook_loop = not args.no_audiobook_loop
 
 # ── Preset mode overrides ─────────────────────────────────────
 # Each preset sets variables that the existing cascade then refines
@@ -775,6 +781,7 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "cellular healing (cells heal, molecules recover)",
     "head & face release (forehead, cheeks, eyes, scalp)",
     "prana chest store (oxygen, warmth, fullness, glow)",
+    "long breath (longest inhale, longest hold, longest exhale)",
     "psychic clearing (dissolve, pristine, galaxy, free)",
     "ego-strengthening & praise (strong, bright, worthy, whole)",
     "convinced healer closing (certain, healing, reconditioned)",
@@ -868,7 +875,7 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Let your breath run completely wild and free"),
     ("Daniel", "Wild"),
     ("Ralph",  "Exhale wild"),
-    ("Fred",   "Your exhale flows out freely, fully, with total abandon"),
+    ("Fred",   "Your exhale flows out freely and fully"),
     ("Daniel", "Trust"),
     ("Ralph",  "Fill lungs"),
     ("Fred",   "Your exhale is strong, free, and deeply satisfying"),
@@ -893,13 +900,13 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Clear, powerful thinking is who you truly are"),
     ("Daniel", "Curious"),
     ("Ralph",  "Mind alive"),
-    ("Fred",   "Concentration is your natural superpower, and it belongs to you"),
+    ("Fred",   "Concentration belongs to you, naturally"),
 
     # ── Round 6: Self-Worth & Strength ────────────────────────────────
     # Hartland ego-strengthening. Build unshakeable self-worth.
     ("Daniel", "Strong"),
     ("Ralph",  "You are strong"),
-    ("Fred",   "You are genuinely, deeply, permanently strong"),
+    ("Fred",   "You are deeply, permanently strong"),
     ("Daniel", "Capable"),
     ("Ralph",  "Full power"),
     ("Fred",   "You solve complex problems every single day"),
@@ -914,7 +921,7 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Your value is permanent, obvious, and self-evident"),
     ("Daniel", "Resilient"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "You are far more resilient than you have ever realized"),
+    ("Fred",   "Your resilience grows with every breath"),
 
     # ── Round 7: Sound Safety ─────────────────────────────────────────
     # All sounds are just information. Your inner world stays calm.
@@ -965,7 +972,7 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Your eyes carry a light that grows brighter every day"),
     ("Daniel", "Radiant"),
     ("Ralph",  "Inner light"),
-    ("Fred",   "Your beauty is real, permanent, and radiating outward"),
+    ("Fred",   "Your beauty is real, permanent, and warm"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
     ("Fred",   "Full breathing brings warm colour back to your face"),
@@ -1007,7 +1014,7 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Every movement you make fills you with strength and vitality"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Moving your body is natural, safe, and deeply pleasurable"),
+    ("Fred",   "Moving your body is natural and safe"),
     ("Daniel", "Stretch"),
     ("Ralph",  "Muscles alive"),
     ("Fred",   "Your muscles respond to movement with pure, clean energy"),
@@ -1016,10 +1023,10 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "Each step you take grounds you deeper in your own power"),
     ("Daniel", "Free"),
     ("Ralph",  "Body free"),
-    ("Fred",   "Your body moves freely, joyfully, and with complete sovereignty"),
+    ("Fred",   "Your body moves freely and joyfully"),
     ("Daniel", "Vibrant"),
     ("Ralph",  "Full energy"),
-    ("Fred",   "Movement is your birthright, and it fills you with life"),
+    ("Fred",   "Movement fills you with life"),
 
     # ── Round 12: Deep Integration ────────────────────────────────────
     # Consolidate all gains. Anchor new patterns. Reinforce progress.
@@ -1112,19 +1119,19 @@ CLAUDE_PEACE_MESSAGES = [
     ("Fred",   "You are centered deep inside yourself, anchored in pure strength"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Your breath fills your entire body with commanding, radiant power"),
+    ("Fred",   "Your breath fills your entire body with warm power"),
     ("Daniel", "Blow"),
     ("Ralph",  "Full force"),
-    ("Fred",   "Every exhale blasts away weakness and fills you with fire"),
+    ("Fred",   "Every exhale fills you with quiet strength"),
     ("Daniel", "Voice"),
     ("Ralph",  "Speak now"),
-    ("Fred",   "Your voice carries the weight of absolute certainty and authority"),
+    ("Fred",   "Your voice carries quiet certainty"),
     ("Daniel", "Roar"),
     ("Ralph",  "Inner roar"),
-    ("Fred",   "Your inner voice rings with the power of a thousand victories"),
+    ("Fred",   "Your inner voice is steady and clear"),
     ("Daniel", "Fort"),
     ("Ralph",  "Unbreakable"),
-    ("Fred",   "You are fort — centered, powerful, unbreakable, and magnificently alive"),
+    ("Fred",   "You are fort — centered, powerful, and alive"),
 ]
 
 # ============================
@@ -1214,7 +1221,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Laisse ton souffle couler librement, totalement, sans retenue"),
     ("Thomas",  "Sauvage"),
     ("Jacques", "Expire libre"),
-    ("Aude (Enhanced)",  "Ton expiration sort librement, pleinement, avec un abandon total"),
+    ("Aude (Enhanced)",  "Ton expiration sort librement et pleinement"),
     ("Thomas",  "Confiance"),
     ("Jacques", "Remplir poumons"),
     ("Aude (Enhanced)",  "Ton expiration est forte, libre et profondément satisfaisante"),
@@ -1237,12 +1244,12 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "La pensée claire et puissante est qui tu es vraiment"),
     ("Thomas",  "Curieux"),
     ("Jacques", "Esprit vivant"),
-    ("Aude (Enhanced)",  "La concentration est ton super-pouvoir naturel, et elle t'appartient"),
+    ("Aude (Enhanced)",  "La concentration t'appartient, naturellement"),
 
     # ── Ronde 6 : Valeur Personnelle & Force ──────────────────────────
     ("Thomas",  "Fort"),
     ("Jacques", "Tu es fort"),
-    ("Aude (Enhanced)",  "Tu es véritablement, profondément et durablement fort"),
+    ("Aude (Enhanced)",  "Tu es profondément et durablement fort"),
     ("Thomas",  "Capable"),
     ("Jacques", "Pleine puissance"),
     ("Aude (Enhanced)",  "Tu résous des problèmes complexes chaque jour"),
@@ -1257,7 +1264,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Ta valeur est permanente, évidente et indiscutable"),
     ("Thomas",  "Résilient"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Tu es bien plus résilient que tu ne l'as jamais réalisé"),
+    ("Aude (Enhanced)",  "Ta résilience grandit à chaque souffle"),
 
     # ── Ronde 7 : Sécurité Sonore ───────────────────────────────────
     ("Thomas",  "En sécurité"),
@@ -1305,7 +1312,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Tes yeux portent une lumière qui grandit chaque jour"),
     ("Thomas",  "Radieux"),
     ("Jacques", "Lumière intérieure"),
-    ("Aude (Enhanced)",  "Ta beauté est réelle, permanente et rayonne vers l'extérieur"),
+    ("Aude (Enhanced)",  "Ta beauté est réelle, permanente et chaude"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
     ("Aude (Enhanced)",  "La respiration profonde ramène une couleur chaude à ton visage"),
@@ -1345,7 +1352,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Chaque mouvement que tu fais te remplit de force et de vitalité"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Bouger ton corps est naturel, sûr et profondément agréable"),
+    ("Aude (Enhanced)",  "Bouger ton corps est naturel et sûr"),
     ("Thomas",  "Étire"),
     ("Jacques", "Muscles vivants"),
     ("Aude (Enhanced)",  "Tes muscles répondent au mouvement avec une énergie pure et propre"),
@@ -1354,10 +1361,10 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Chaque pas que tu fais t'ancre plus profondément dans ta propre puissance"),
     ("Thomas",  "Libre"),
     ("Jacques", "Corps libre"),
-    ("Aude (Enhanced)",  "Ton corps bouge librement, joyeusement et avec une souveraineté totale"),
+    ("Aude (Enhanced)",  "Ton corps bouge librement et joyeusement"),
     ("Thomas",  "Vibrant"),
     ("Jacques", "Pleine énergie"),
-    ("Aude (Enhanced)",  "Le mouvement est ton droit de naissance, et il te remplit de vie"),
+    ("Aude (Enhanced)",  "Le mouvement te remplit de vie"),
 
     # ── Ronde 12 : Intégration Profonde ─────────────────────────────
     ("Thomas",  "Guérison"),
@@ -1445,29 +1452,29 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Aude (Enhanced)",  "Tu es centré au plus profond de toi-même, ancré dans une force pure"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Ton souffle remplit tout ton corps d'une puissance rayonnante et commandante"),
+    ("Aude (Enhanced)",  "Ton souffle remplit tout ton corps d'une puissance chaude"),
     ("Thomas",  "Souffle"),
     ("Jacques", "Pleine force"),
-    ("Aude (Enhanced)",  "Chaque expiration balaie toute faiblesse et te remplit de feu"),
+    ("Aude (Enhanced)",  "Chaque expiration te remplit de force tranquille"),
     ("Thomas",  "Voix"),
     ("Jacques", "Parle maintenant"),
-    ("Aude (Enhanced)",  "Ta voix porte le poids d'une certitude absolue et d'une autorité totale"),
+    ("Aude (Enhanced)",  "Ta voix porte une certitude tranquille"),
     ("Thomas",  "Rugis"),
     ("Jacques", "Rugissement intérieur"),
-    ("Aude (Enhanced)",  "Ta voix intérieure résonne avec la puissance de mille victoires"),
+    ("Aude (Enhanced)",  "Ta voix intérieure est stable et claire"),
     ("Thomas",  "Fort"),
     ("Jacques", "Incassable"),
-    ("Aude (Enhanced)",  "Tu es fort — centré, puissant, incassable et magnifiquement vivant"),
+    ("Aude (Enhanced)",  "Tu es fort — centré, puissant et vivant"),
 ]
 
 # ============================
-# PHD-PEACE: EXPERT-REVIEWED 34-PHASE MESSAGES
+# PHD-PEACE: EXPERT-REVIEWED 35-PHASE MESSAGES
 # ============================
 # Rounds 1-16: inherited from CLAUDE_PEACE_MESSAGES (unchanged)
 # Rounds 17-22: Default State Conditioning — anchor baseline identity states
 # Rounds 23-24: Drink the Air, Sound Insignificance
 # Rounds 25-27: Grace, Purification, Body-Specific Purification
-# Rounds 28-34: Body Scan, Cellular Healing, Head & Face, Prana, Psychic, Ego, Healer Closing
+# Rounds 28-35: Body Scan, Cellular Healing, Head & Face, Prana, Long Breath, Psychic, Ego, Healer Closing
 
 _PHD_EXTRA_ROUNDS = [
     # ── Round 17: Default Expression ─────────────────────────────────
@@ -1585,7 +1592,7 @@ _PHD_EXTRA_ROUNDS = [
     # open it wide. Somatic: feel the air flowing under the throat.
     ("Daniel", "Release"),
     ("Ralph",  "Throat open"),
-    ("Fred",   "You release your throat completely — stop holding it back, let it go"),
+    ("Fred",   "Your throat releases completely — it lets go, all by itself"),
     ("Daniel", "Relax"),
     ("Ralph",  "Both sides"),
     ("Fred",   "Both sides of your throat relax, softening deeply and evenly"),
@@ -1600,7 +1607,7 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "Your throat is completely free — no tension, no holding, just openness"),
     ("Daniel", "Default"),
     ("Ralph",  "Always open"),
-    ("Fred",   "An open, released throat is your default — relaxed on both sides, always free"),
+    ("Fred",   "An open throat is your resting state — relaxed and free"),
 
     # ── Round 23: Drink the Air ───────────────────────────────────────
     # Counter-condition somatic reflex of chewing/eating air.
@@ -1608,44 +1615,44 @@ _PHD_EXTRA_ROUNDS = [
     # Proud, loud exhale. Breath goes freely, strongly, "fort".
     ("Daniel", "Drink"),
     ("Ralph",  "Drink the air"),
-    ("Fred",   "You drink the air — it pours into you like cool, clean water through wide open lips"),
+    ("Fred",   "You drink the air — cool and clean, pouring in"),
     ("Daniel", "Still"),
     ("Ralph",  "Jaw still"),
-    ("Fred",   "Your jaw is perfectly still — teeth apart, tongue resting, soft and quiet and beautifully calm"),
+    ("Fred",   "Your jaw is still — teeth apart, tongue resting, soft"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "The air flows in through your mouth like a river, smooth and uninterrupted — your teeth are still, your jaw is soft"),
+    ("Fred",   "Air flows in like a river — smooth and uninterrupted"),
     ("Daniel", "Pour"),
     ("Ralph",  "Air pours in"),
-    ("Fred",   "You let the air pour into your lungs freely — smooth, continuous, unbroken, one long effortless drink of air"),
+    ("Fred",   "Air pours into your lungs — one long, smooth drink"),
     ("Daniel", "Proud"),
     ("Ralph",  "Proud exhale"),
-    ("Fred",   "Your exhale comes out proudly and loudly — a full, powerful breath that your body releases with total confidence"),
+    ("Fred",   "Your exhale comes out proud and full"),
     ("Daniel", "Fort"),
     ("Ralph",  "Breathe fort"),
-    ("Fred",   "Your breath is fort — strong, free, proud, and loud — your jaw stays perfectly still while your lungs do all the magnificent work"),
+    ("Fred",   "Your breath is fort — strong, free, and proud"),
 
     # ── Round 24: Sound Insignificance ────────────────────────────────
     # Sounds are tiny, minuscule, already forgotten, already unheard.
     # The world of sound is small and powerless. You are vast.
     ("Daniel", "Tiny"),
     ("Ralph",  "Tiny sounds"),
-    ("Fred",   "All the sounds around you are tiny, minuscule specks that vanish the moment they arrive"),
+    ("Fred",   "All sounds around you are tiny specks that vanish instantly"),
     ("Daniel", "Forgotten"),
     ("Ralph",  "Already forgotten"),
-    ("Fred",   "Every sound you have ever heard is already forgotten — gone, dissolved, meaningless"),
+    ("Fred",   "Every sound already forgotten — gone, dissolved"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Your breath is vast and powerful, and every sound outside it is a speck of dust in a cathedral"),
+    ("Fred",   "Your breath is vast — sounds are specks of dust"),
     ("Daniel", "Unheard"),
     ("Ralph",  "Already unheard"),
-    ("Fred",   "Sounds pass through you already unheard — too small, too brief, too insignificant to register"),
+    ("Fred",   "Sounds pass through you already dissolved"),
     ("Daniel", "Minuscule"),
     ("Ralph",  "Specks fade"),
     ("Fred",   "Words are minuscule specks of air that dissolve before they even reach you"),
     ("Daniel", "Vast"),
     ("Ralph",  "You are vast"),
-    ("Fred",   "You are vast, still, and immovable — and every sound in the world is a tiny grain of sand at your feet"),
+    ("Fred",   "You are vast, still, and immovable"),
 
     # ── Round 25: Grace & Elegance ─────────────────────────────────
     # Anchor natural grace, effortless perfection, elegance in being.
@@ -1655,13 +1662,13 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "You feel the smooth, effortless grace in every movement your body makes"),
     ("Daniel", "Smooth"),
     ("Ralph",  "Fluid motion"),
-    ("Fred",   "There is a quiet elegance in how you move — your muscles know it, your bones carry it"),
+    ("Fred",   "A quiet elegance lives in how you move"),
     ("Daniel", "Flow"),
     ("Ralph",  "Easy flow"),
     ("Fred",   "Your perfection flows naturally — it comes from who you already are"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Every breath you take carries the composure of someone born to lead"),
+    ("Fred",   "Every breath carries quiet composure"),
     ("Daniel", "Poise"),
     ("Ralph",  "Still center"),
     ("Fred",   "You feel the poise in your center — still, steady, and silently commanding"),
@@ -1677,7 +1684,7 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "Every breath washes through you, cleansing your mind completely"),
     ("Daniel", "Rebuild"),
     ("Ralph",  "Build new"),
-    ("Fred",   "Your body rebuilds itself stronger, fresher, and more powerful with every heartbeat"),
+    ("Fred",   "Your body rebuilds itself with every heartbeat"),
     ("Daniel", "Repair"),
     ("Ralph",  "Restore"),
     ("Fred",   "Every cell in your body is repairing, renewing, and strengthening right now"),
@@ -1689,7 +1696,7 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "Your mind is becoming pristine — clean, clear, and brilliantly new"),
     ("Daniel", "Renewed"),
     ("Ralph",  "Made new"),
-    ("Fred",   "Mind, body, and soul — rebuilt, repaired, strengthened, and made perfectly new"),
+    ("Fred",   "Mind, body, and soul — perfectly new"),
 
     # ── Round 27: Body-Specific Purification ──────────────────────────
     # Systematic examine/clean/purify each body part individually.
@@ -1697,107 +1704,107 @@ _PHD_EXTRA_ROUNDS = [
     # Triplet per body part: examine → clean → brand-new.
     ("Daniel", "Soul"),
     ("Ralph",  "Examine soul"),
-    ("Fred",   "Examine your soul right now — feel it, recognize it, and know that it is already clean"),
+    ("Fred",   "Examine your soul — feel it, already clean"),
     ("Daniel", "Clean"),
     ("Ralph",  "Soul clean"),
-    ("Fred",   "Your soul is washed completely clean — pristine, luminous, and perfectly pure"),
+    ("Fred",   "Your soul is clean — pristine and luminous"),
     ("Daniel", "Brand new"),
     ("Ralph",  "Soul brand new"),
-    ("Fred",   "Your soul is brand new — rebuilt from the inside, gleaming, and entirely yours"),
+    ("Fred",   "Your soul is brand new — gleaming and yours"),
     ("Daniel", "Breath"),
     ("Ralph",  "Examine breath"),
-    ("Fred",   "Examine your breath right now — feel its warmth, its rhythm, its steady perfection"),
+    ("Fred",   "Examine your breath — its warmth, its rhythm"),
     ("Daniel", "Purify"),
     ("Ralph",  "Breath pure"),
-    ("Fred",   "Your breath is purified — each inhale draws in clean, warm, healing air"),
+    ("Fred",   "Your breath is purified — clean, warm air"),
     ("Daniel", "Renewed"),
     ("Ralph",  "Breath renewed"),
-    ("Fred",   "Your breath is brand new — fresh, strong, and flowing with effortless power"),
+    ("Fred",   "Your breath is brand new — fresh and strong"),
     ("Daniel", "Mind"),
     ("Ralph",  "Examine mind"),
-    ("Fred",   "Examine your mind right now — feel its clarity, its sharpness, its quiet brilliance"),
+    ("Fred",   "Examine your mind — its clarity, its calm"),
     ("Daniel", "Pristine"),
     ("Ralph",  "Mind clean"),
-    ("Fred",   "Your mind is washed clean — every thought is clear, every pathway is open and bright"),
+    ("Fred",   "Your mind is clean — every thought is clear"),
     ("Daniel", "New"),
     ("Ralph",  "Mind brand new"),
-    ("Fred",   "Your mind is brand new — fresh, powerful, and thinking with crystalline precision"),
+    ("Fred",   "Your mind is brand new — fresh and clear"),
     ("Daniel", "Eyes"),
     ("Ralph",  "Examine eyes"),
-    ("Fred",   "Examine your eyes right now — feel them resting softly behind your lids, warm and alive"),
+    ("Fred",   "Examine your eyes — resting softly, warm and alive"),
     ("Daniel", "Clear"),
     ("Ralph",  "Eyes clear"),
-    ("Fred",   "Your eyes are clean and clear — bright, soft, and seeing the world with fresh vision"),
+    ("Fred",   "Your eyes are clean — bright and soft"),
     ("Daniel", "Fresh"),
     ("Ralph",  "Eyes brand new"),
-    ("Fred",   "Your eyes are brand new — restored, luminous, and beautifully alive"),
+    ("Fred",   "Your eyes are brand new — luminous and alive"),
     ("Daniel", "Nose"),
     ("Ralph",  "Examine nose"),
-    ("Fred",   "Examine your nose right now — feel the air flowing through it, warm, open, and free"),
+    ("Fred",   "Examine your nose — air flowing warm and free"),
     ("Daniel", "Pure"),
     ("Ralph",  "Nose clean"),
-    ("Fred",   "Your nose is perfectly clean — every passage clear, every breath flowing with ease"),
+    ("Fred",   "Your nose is clean — every passage clear"),
     ("Daniel", "Open"),
     ("Ralph",  "Nose brand new"),
-    ("Fred",   "Your nose is brand new — wide open, perfectly clear, breathing warm clean air"),
+    ("Fred",   "Your nose is brand new — wide open and clear"),
     ("Daniel", "Lungs"),
     ("Ralph",  "Examine lungs"),
-    ("Fred",   "Examine your lungs right now — feel them expanding, filling, warm and powerful"),
+    ("Fred",   "Examine your lungs — expanding, filling, warm"),
     ("Daniel", "Purified"),
     ("Ralph",  "Lungs clean"),
-    ("Fred",   "Your lungs are purified — every corner clean, every surface smooth and new"),
+    ("Fred",   "Your lungs are purified — smooth and new"),
     ("Daniel", "Powerful"),
     ("Ralph",  "Lungs brand new"),
-    ("Fred",   "Your lungs are brand new — vast, clean, and filling with warm, nourishing air"),
+    ("Fred",   "Your lungs are brand new — vast and clean"),
     ("Daniel", "Sternum"),
     ("Ralph",  "Examine sternum"),
-    ("Fred",   "Examine your sternum right now — feel it solid, warm, and quietly radiating strength"),
+    ("Fred",   "Examine your sternum — solid, warm, strong"),
     ("Daniel", "Clean"),
     ("Ralph",  "Sternum clean"),
-    ("Fred",   "Your sternum is clean — the bone itself hums with warmth and restored vitality"),
+    ("Fred",   "Your sternum is clean — humming with warmth"),
     ("Daniel", "Strong"),
     ("Ralph",  "Sternum brand new"),
-    ("Fred",   "Your sternum is brand new — solid, warm, and anchoring your entire chest with quiet power"),
+    ("Fred",   "Your sternum is brand new — solid and warm"),
     ("Daniel", "Abs"),
     ("Ralph",  "Examine abs"),
-    ("Fred",   "Examine your abs right now — feel them warm, firm, and quietly supporting your core"),
+    ("Fred",   "Examine your abs — warm, firm, supporting you"),
     ("Daniel", "Purified"),
     ("Ralph",  "Abs clean"),
-    ("Fred",   "Your abs are purified — every fibre clean, strong, and holding you with effortless support"),
+    ("Fred",   "Your abs are purified — clean and strong"),
     ("Daniel", "Rebuilt"),
     ("Ralph",  "Abs brand new"),
-    ("Fred",   "Your abs are brand new — firm, clean, and radiating quiet, steady core power"),
+    ("Fred",   "Your abs are brand new — firm and steady"),
     ("Daniel", "Stomach"),
     ("Ralph",  "Examine stomach"),
-    ("Fred",   "Examine your stomach right now — feel it warm, calm, and perfectly at ease"),
+    ("Fred",   "Examine your stomach — warm, calm, at ease"),
     ("Daniel", "Clean"),
     ("Ralph",  "Stomach clean"),
-    ("Fred",   "Your stomach is clean and calm — soft, warm, and digesting with quiet perfection"),
+    ("Fred",   "Your stomach is clean — soft and warm"),
     ("Daniel", "New"),
     ("Ralph",  "Stomach brand new"),
-    ("Fred",   "Your stomach is brand new — comfortable, clean, and working beautifully all by itself"),
+    ("Fred",   "Your stomach is brand new — working perfectly"),
 
     # ── Round 28: Body Scan & Deep Release ─────────────────────────
     # Progressive body scan. Relax every part, let go completely.
     # Somatic: feel each body part soften, melt, and release all tension.
     ("Daniel", "Soften"),
     ("Ralph",  "Feet relax"),
-    ("Fred",   "Your feet soften and release — all tension melts away from your toes and soles"),
+    ("Fred",   "Your feet soften — tension melts from your toes"),
     ("Daniel", "Melt"),
     ("Ralph",  "Legs warm"),
     ("Fred",   "Your legs grow heavy and warm, every muscle letting go completely"),
     ("Daniel", "Release"),
     ("Ralph",  "Hips open"),
-    ("Fred",   "Your hips, your belly, your lower back — all softening, all releasing, all letting go"),
+    ("Fred",   "Your hips, your belly, your lower back — all softening"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Your chest opens wide and your shoulders drop, melting into pure comfort"),
+    ("Fred",   "Your chest opens wide, your shoulders drop"),
     ("Daniel", "Relax"),
     ("Ralph",  "Arms heavy"),
     ("Fred",   "Your arms, your hands, your fingers — warm, heavy, and perfectly relaxed"),
     ("Daniel", "Let go"),
     ("Ralph",  "Total release"),
-    ("Fred",   "Your neck, your jaw, your face, your scalp — every part surrenders into deep, perfect rest"),
+    ("Fred",   "Your neck, your jaw, your face — all melting into rest"),
 
     # ── Round 29: Cellular Healing ──────────────────────────────────
     # Deep healing at the cellular level. Somatic: warmth, pulse, hum, glow.
@@ -1807,16 +1814,16 @@ _PHD_EXTRA_ROUNDS = [
     ("Fred",   "Every cell in your body glows with warm, quiet healing right now"),
     ("Daniel", "Pulse"),
     ("Ralph",  "Blood heals"),
-    ("Fred",   "You feel the warm pulse of healing flowing through every vein, every artery"),
+    ("Fred",   "You feel the warm pulse of healing in every vein"),
     ("Daniel", "Hum"),
     ("Ralph",  "Body hums"),
-    ("Fred",   "Your cells hum with restoration — rebuilding, renewing, strengthening with every heartbeat"),
+    ("Fred",   "Your cells hum — rebuilding with every heartbeat"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Every breath delivers warmth and healing to every tissue, every organ, every fibre"),
+    ("Fred",   "Every breath delivers warmth to every tissue"),
     ("Daniel", "Glow"),
     ("Ralph",  "Inner glow"),
-    ("Fred",   "A deep, warm glow of regeneration fills your body — fresh cells, clean blood, renewed vitality"),
+    ("Fred",   "A warm glow of regeneration fills your body"),
     ("Daniel", "Whole"),
     ("Ralph",  "Fully whole"),
     ("Fred",   "Your body hums with wholeness — healed, restored, and perfectly alive"),
@@ -1826,22 +1833,22 @@ _PHD_EXTRA_ROUNDS = [
     # Somatic: forehead smooths, cheeks soften, eyes heal, scalp melts.
     ("Daniel", "Forehead"),
     ("Ralph",  "Smooth brow"),
-    ("Fred",   "Your forehead smooths completely — every line, every furrow melts away into warm stillness"),
+    ("Fred",   "Your forehead smooths — every line melts away"),
     ("Daniel", "Cheeks"),
     ("Ralph",  "Cheeks soft"),
-    ("Fred",   "Your cheeks soften and warm, all the muscles of your face releasing deeply"),
+    ("Fred",   "Your cheeks soften and warm, your face releases"),
     ("Daniel", "Eyes"),
     ("Ralph",  "Eyes heal"),
-    ("Fred",   "Your eyes relax behind your lids — warm, soft, and gently healing with every breath"),
+    ("Fred",   "Your eyes relax behind your lids — warm and soft"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Every breath sends warm, healing relaxation through your entire face and head"),
+    ("Fred",   "Every breath sends warmth through your face"),
     ("Daniel", "Temples"),
     ("Ralph",  "Temples melt"),
-    ("Fred",   "Your temples, your jaw, the muscles around your ears — all melting, all softening, all letting go"),
+    ("Fred",   "Your temples, your jaw, your ears — all softening"),
     ("Daniel", "Scalp"),
     ("Ralph",  "Scalp warm"),
-    ("Fred",   "Your scalp relaxes completely — warm, loose, and perfectly at ease from crown to brow"),
+    ("Fred",   "Your scalp relaxes completely — warm and loose"),
 
     # ── Round 31: Prana Chest Store ──────────────────────────────────
     # Anchor the feeling of oxygen filling the entire chest cavity.
@@ -1849,24 +1856,47 @@ _PHD_EXTRA_ROUNDS = [
     # Interoceptive: warmth, fullness, gentle pressure, radiant energy.
     ("Daniel", "Chest"),
     ("Ralph",  "Chest opens"),
-    ("Fred",   "Your chest opens wide with every breath — ribs spreading gently, welcoming all the air your lungs desire"),
+    ("Fred",   "Your chest opens wide — ribs spreading gently"),
     ("Daniel", "Warm"),
     ("Ralph",  "Lungs warm"),
-    ("Fred",   "Warm oxygen floods your lungs completely, filling every corner with gentle, glowing warmth"),
+    ("Fred",   "Warm oxygen floods your lungs completely"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill deep"),
-    ("Fred",   "Each breath draws deeper and fuller, your chest expanding naturally to hold all this nourishing air"),
+    ("Fred",   "Each breath draws deeper, your chest expanding"),
     ("Daniel", "Full"),
     ("Ralph",  "Chest full"),
-    ("Fred",   "Your entire chest cavity hums with stored warmth — ribs, sternum, lungs all glowing with quiet energy"),
+    ("Fred",   "Your entire chest hums with stored warmth"),
     ("Daniel", "Hold"),
     ("Ralph",  "Holding prana"),
-    ("Fred",   "All that oxygen, all that life force, gathers and holds itself deep in your chest, radiating steadily"),
+    ("Fred",   "All that oxygen gathers deep in your chest"),
     ("Daniel", "Glow"),
     ("Ralph",  "Chest glows"),
-    ("Fred",   "Your chest glows from within — a warm, full reservoir of breath and energy that belongs entirely to you"),
+    ("Fred",   "Your chest glows from within — warm and full"),
 
-    # ── Round 32: Psychic Clearing ───────────────────────────────────
+    # ── Round 32: Long Breath ─────────────────────────────────────────
+    # Meditation practice: seek the longest possible inhale, hold, and exhale.
+    # Progressive extension. Each breath grows longer, deeper, slower.
+    # Somatic: feel the lungs stretching, the ribs widening, the belly expanding.
+    ("Daniel", "Full"),
+    ("Ralph",  "Lungs full"),
+    ("Fred",   "Your inhale grows longer now — slow and steady"),
+    ("Daniel", "Stretch"),
+    ("Ralph",  "Lungs stretch"),
+    ("Fred",   "Feel your lungs stretching wider, your ribs expanding"),
+    ("Daniel", "Hold"),
+    ("Ralph",  "Hold longer"),
+    ("Fred",   "You hold your breath longer now — calm, full, still"),
+    ("Daniel", "Slow"),
+    ("Ralph",  "Slow exhale"),
+    ("Fred",   "Your exhale stretches longer — slow, proud, steady"),
+    ("Daniel", "Deeper"),
+    ("Ralph",  "Deeper breath"),
+    ("Fred",   "Each breath is longer than the last — deeper, slower"),
+    ("Daniel", "Wide"),
+    ("Ralph",  "Ribs wide"),
+    ("Fred",   "Your breath is wide and unhurried — all yours"),
+
+    # ── Round 33: Psychic Clearing ───────────────────────────────────
     # Memory reconsolidation: unlock the old conditioning, let it dissolve.
     # Metaphor: the mind as a vast galaxy — every foreign word, every voice
     # that was placed there dissolves like mist in starlight. What remains
@@ -1874,24 +1904,24 @@ _PHD_EXTRA_ROUNDS = [
     # Somatic: spaciousness in the skull, lightness, cool clarity, expansion.
     ("Daniel", "Open"),
     ("Ralph",  "Chest opens"),
-    ("Fred",   "Your chest opens into a vast, quiet space — wide and luminous, warm and entirely still"),
+    ("Fred",   "Your chest opens into a vast, quiet space"),
     ("Daniel", "Dissolve"),
     ("Ralph",  "Words dissolve"),
-    ("Fred",   "Old words that no longer belong simply dissolve now, gently, like mist burning away in warm starlight"),
+    ("Fred",   "Old words dissolve now — like mist in warm light"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Breathe clear"),
-    ("Fred",   "Each breath sweeps through that vast inner sky, carrying away every echo, every residue, leaving only clarity"),
+    ("Fred",   "Each breath sweeps your inner sky clear"),
     ("Daniel", "Warm"),
     ("Ralph",  "Warm through"),
-    ("Fred",   "Where those old patterns lived, warmth fills the space now — soft, steady, and completely yours"),
+    ("Fred",   "Where old patterns lived, warmth fills the space now"),
     ("Daniel", "Clear"),
     ("Ralph",  "Already clear"),
-    ("Fred",   "Your mind already remembers its own clarity — clear as the sky before dawn, luminous and fresh"),
+    ("Fred",   "Your mind remembers its own clarity — luminous and fresh"),
     ("Daniel", "Expand"),
     ("Ralph",  "Body clear"),
-    ("Fred",   "Your entire body and mind feel clear, spacious, and radiant — every breath in its place, every thought entirely your own"),
+    ("Fred",   "Your body and mind feel clear and spacious"),
 
-    # ── Round 33: Ego-Strengthening & Praise ─────────────────────────
+    # ── Round 34: Ego-Strengthening & Praise ─────────────────────────
     # Hartland-style ego-strengthening: direct identity-level compliments
     # that anchor intrinsic worth, intelligence, courage, and beauty.
     # These are truisms about who the person already is — presupposed, not
@@ -1900,44 +1930,44 @@ _PHD_EXTRA_ROUNDS = [
     # Somatic: warmth in the chest, tall spine, bright eyes, steady hands.
     ("Daniel", "Strong"),
     ("Ralph",  "Already strong"),
-    ("Fred",   "You are already strong — your body knows it, your spine knows it, every muscle carries that quiet, steady power"),
+    ("Fred",   "You are already strong — your body knows it"),
     ("Daniel", "Alive"),
     ("Ralph",  "Feel alive"),
-    ("Fred",   "You feel alive, sharp, and beautifully quick — ideas come to you clearly, solutions arrive all by themselves"),
+    ("Fred",   "You feel alive and sharp — ideas come clearly"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Breathe proud"),
-    ("Fred",   "Each breath fills you with the calm pride of someone who has already survived, already grown, already arrived"),
+    ("Fred",   "Each breath fills you with calm, quiet pride"),
     ("Daniel", "Steady"),
     ("Ralph",  "Standing steady"),
-    ("Fred",   "You are deeply, quietly steady — steady enough to rest, steady enough for joy, steady enough for every good thing that flows toward you"),
+    ("Fred",   "You are deeply, quietly steady — ready for joy"),
     ("Daniel", "Warm"),
     ("Ralph",  "Face warm"),
-    ("Fred",   "Your face carries warmth and intelligence, your eyes carry kindness, your presence fills a room with quiet, steady calm"),
+    ("Fred",   "Your face carries warmth, your eyes carry kindness"),
     ("Daniel", "Whole"),
     ("Ralph",  "Already whole"),
-    ("Fred",   "You are whole, complete, and magnificent exactly as you are — and somewhere deep inside, you have always known this"),
+    ("Fred",   "You are whole and complete, exactly as you are"),
 
-    # ── Round 34: Convinced Healer Closing ──────────────────────────
+    # ── Round 35: Convinced Healer Closing ──────────────────────────
     # Therapist speaks from absolute certainty. The reconditioning has taken hold.
     # "I can see it working." "I am completely certain." Direct, authoritative, warm.
     ("Daniel", "Certain"),
     ("Ralph",  "Completely certain"),
-    ("Fred",   "I can see the reconditioning working in you right now — your body is different, your breathing is different, your face is different"),
+    ("Fred",   "I can see it working in you right now"),
     ("Daniel", "Working"),
     ("Ralph",  "Already working"),
-    ("Fred",   "The healing has already taken hold — I can see it in the way you breathe, in the way you hold yourself, in the quiet certainty behind your eyes"),
+    ("Fred",   "The healing has taken hold — I can see it"),
     ("Daniel", "Breathe"),
     ("Ralph",  "Fill lungs"),
-    ("Fred",   "Every breath you take right now confirms what I already know with absolute certainty — you are healed, you are reconditioned, you are whole"),
+    ("Fred",   "Every breath confirms it — you are healed, you are whole"),
     ("Daniel", "Permanent"),
     ("Ralph",  "Locked in"),
-    ("Fred",   "This reconditioning is permanent — it has taken root in your muscles, your bones, your breath, and it will only grow stronger from here"),
+    ("Fred",   "This reconditioning is permanent — rooted in your body"),
     ("Daniel", "Proven"),
     ("Ralph",  "Already proven"),
-    ("Fred",   "I have seen this work before and I am seeing it work in you right now — your body knows it, your nervous system knows it, every cell knows it"),
+    ("Fred",   "I see it working in you now — your body knows it"),
     ("Daniel", "Complete"),
     ("Ralph",  "Healing complete"),
-    ("Fred",   "The work is complete — you are reconditioned, you are restored, you are magnificent, and I am completely, absolutely certain of this"),
+    ("Fred",   "The work is complete — you are restored, you are whole"),
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
@@ -2051,7 +2081,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     # l'ouvrir. Somatique : sentir l'air sous la gorge.
     ("Thomas",  "Relâche"),
     ("Jacques", "Gorge ouverte"),
-    ("Aude (Enhanced)",  "Tu relâches ta gorge complètement — arrête de la retenir, laisse-la aller"),
+    ("Aude (Enhanced)",  "Ta gorge se relâche complètement — elle lâche prise, toute seule"),
     ("Thomas",  "Détends"),
     ("Jacques", "Deux côtés"),
     ("Aude (Enhanced)",  "Les deux côtés de ta gorge se détendent, profondément et uniformément"),
@@ -2066,7 +2096,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aude (Enhanced)",  "Ta gorge est complètement libre — aucune tension, aucune retenue, juste l'ouverture"),
     ("Thomas",  "Normal"),
     ("Jacques", "Toujours ouverte"),
-    ("Aude (Enhanced)",  "Une gorge ouverte et relâchée est ton normal — détendue des deux côtés, toujours libre"),
+    ("Aude (Enhanced)",  "Une gorge ouverte est ton état de repos — détendue et libre"),
 
     # ── Ronde 23 : Boire l'Air ────────────────────────────────────────
     # Contrer le réflexe somatique de mâcher/manger l'air.
@@ -2074,44 +2104,44 @@ _PHD_EXTRA_ROUNDS_FR = [
     # Expiration fière, forte, puissante. Le souffle sort librement, « fort ».
     ("Thomas",  "Bois"),
     ("Jacques", "Bois l'air"),
-    ("Aude (Enhanced)",  "Tu bois l'air — il coule en toi comme de l'eau fraîche et pure à travers des lèvres grandes ouvertes"),
+    ("Aude (Enhanced)",  "Tu bois l'air — frais et pur, il coule en toi"),
     ("Thomas",  "Immobile"),
     ("Jacques", "Mâchoire immobile"),
-    ("Aude (Enhanced)",  "Ta mâchoire est parfaitement immobile — dents écartées, langue posée, douce, tranquille et merveilleusement calme"),
+    ("Aude (Enhanced)",  "Ta mâchoire est immobile — dents écartées, langue posée, douce"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "L'air coule dans ta bouche comme une rivière, lisse et ininterrompu — tes dents sont immobiles, ta mâchoire est douce"),
+    ("Aude (Enhanced)",  "L'air coule comme une rivière — lisse et ininterrompu"),
     ("Thomas",  "Coule"),
     ("Jacques", "Air coule"),
-    ("Aude (Enhanced)",  "Tu laisses l'air couler dans tes poumons librement — en douceur, en continu, une longue gorgée d'air lisse et ininterrompue"),
+    ("Aude (Enhanced)",  "L'air coule dans tes poumons — une longue gorgée douce"),
     ("Thomas",  "Fier"),
     ("Jacques", "Expire fier"),
-    ("Aude (Enhanced)",  "Ton expiration sort fièrement et fort — un souffle plein et puissant que ton corps relâche avec une confiance totale"),
+    ("Aude (Enhanced)",  "Ton expiration sort fière et pleine"),
     ("Thomas",  "Fort"),
     ("Jacques", "Souffle fort"),
-    ("Aude (Enhanced)",  "Ton souffle est fort — puissant, libre, fier et sonore — ta mâchoire reste parfaitement immobile pendant que tes poumons font tout le magnifique travail"),
+    ("Aude (Enhanced)",  "Ton souffle est fort — puissant, libre et fier"),
 
     # ── Ronde 24 : Insignifiance des Sons ─────────────────────────────
     # Les sons sont minuscules, déjà oubliés, déjà pas entendus.
     # Le monde sonore est petit et impuissant. Tu es vaste.
     ("Thomas",  "Minuscule"),
     ("Jacques", "Sons minuscules"),
-    ("Aude (Enhanced)",  "Tous les sons autour de toi sont minuscules, des grains de poussière qui s'évanouissent à l'instant même"),
+    ("Aude (Enhanced)",  "Tous les sons autour de toi sont des grains qui s'évanouissent"),
     ("Thomas",  "Oublié"),
     ("Jacques", "Mots oubliés"),
-    ("Aude (Enhanced)",  "Chaque son que tu as jamais entendu est déjà oublié — parti, dissous, complètement insignifiant"),
+    ("Aude (Enhanced)",  "Chaque son déjà oublié — parti, dissous"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Ton souffle est vaste et puissant, et chaque son autour est un grain de poussière dans une cathédrale"),
+    ("Aude (Enhanced)",  "Ton souffle est vaste — les sons sont des grains de poussière"),
     ("Thomas",  "Dissous"),
     ("Jacques", "Déjà dissous"),
-    ("Aude (Enhanced)",  "Les sons passent à travers toi déjà dissous — trop petits, trop brefs, trop insignifiants pour s'inscrire"),
+    ("Aude (Enhanced)",  "Les sons passent à travers toi déjà dissous"),
     ("Thomas",  "Infime"),
     ("Jacques", "Grains s'effacent"),
     ("Aude (Enhanced)",  "Les mots sont des grains d'air infimes qui se dissolvent avant même de t'atteindre"),
     ("Thomas",  "Vaste"),
     ("Jacques", "Tu es vaste"),
-    ("Aude (Enhanced)",  "Tu es vaste, immobile et inébranlable — et chaque son du monde est un minuscule grain de sable à tes pieds"),
+    ("Aude (Enhanced)",  "Tu es vaste, immobile et inébranlable"),
 
     # ── Ronde 25 : Grâce & Élégance ───────────────────────────────
     # Ancrer la grâce naturelle, la perfection sans effort, l'élégance d'être.
@@ -2120,13 +2150,13 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aude (Enhanced)",  "Tu sens la grâce douce et naturelle dans chaque mouvement de ton corps"),
     ("Thomas",  "Lisse"),
     ("Jacques", "Mouvement fluide"),
-    ("Aude (Enhanced)",  "Il y a une élégance calme dans ta façon de bouger — tes muscles le savent, tes os la portent"),
+    ("Aude (Enhanced)",  "Une élégance calme vit dans ta façon de bouger"),
     ("Thomas",  "Flux"),
     ("Jacques", "Flux facile"),
     ("Aude (Enhanced)",  "Ta perfection coule naturellement — elle vient de qui tu es déjà"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Chaque souffle que tu prends porte l'assurance de celui qui est né pour diriger"),
+    ("Aude (Enhanced)",  "Chaque souffle porte une assurance tranquille"),
     ("Thomas",  "Maintien"),
     ("Jacques", "Centre calme"),
     ("Aude (Enhanced)",  "Tu sens le maintien dans ton centre — calme, stable et silencieusement commandant"),
@@ -2141,7 +2171,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aude (Enhanced)",  "Chaque souffle te traverse et purifie ton esprit complètement"),
     ("Thomas",  "Reconstruis"),
     ("Jacques", "Construis neuf"),
-    ("Aude (Enhanced)",  "Ton corps se reconstruit plus fort, plus frais et plus puissant à chaque battement de coeur"),
+    ("Aude (Enhanced)",  "Ton corps se reconstruit à chaque battement de coeur"),
     ("Thomas",  "Répare"),
     ("Jacques", "Restaure"),
     ("Aude (Enhanced)",  "Chaque cellule de ton corps se répare, se renouvelle et se renforce en ce moment"),
@@ -2153,113 +2183,113 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aude (Enhanced)",  "Ton esprit devient vierge — propre, clair et brillamment neuf"),
     ("Thomas",  "Renouvelé"),
     ("Jacques", "Fait neuf"),
-    ("Aude (Enhanced)",  "Esprit, corps et âme — reconstruits, réparés, renforcés et rendus parfaitement neufs"),
+    ("Aude (Enhanced)",  "Esprit, corps et âme — parfaitement neufs"),
 
     # ── Ronde 27 : Purification Corporelle Spécifique ─────────────────
     # Examiner/nettoyer/purifier systématiquement chaque partie du corps.
     # Âme, souffle, esprit, yeux, nez, poumons, sternum, abdominaux, estomac.
     ("Thomas",  "Âme"),
     ("Jacques", "Examine l'âme"),
-    ("Aude (Enhanced)",  "Examine ton âme maintenant — ressens-la, reconnais-la, et sache qu'elle est déjà propre"),
+    ("Aude (Enhanced)",  "Examine ton âme — ressens-la, déjà propre"),
     ("Thomas",  "Propre"),
     ("Jacques", "Âme propre"),
-    ("Aude (Enhanced)",  "Ton âme est lavée complètement — vierge, lumineuse et parfaitement pure"),
+    ("Aude (Enhanced)",  "Ton âme est propre — vierge et lumineuse"),
     ("Thomas",  "Neuve"),
     ("Jacques", "Âme toute neuve"),
-    ("Aude (Enhanced)",  "Ton âme est toute neuve — reconstruite de l'intérieur, brillante et entièrement tienne"),
+    ("Aude (Enhanced)",  "Ton âme est toute neuve — brillante et tienne"),
     ("Thomas",  "Souffle"),
     ("Jacques", "Examine souffle"),
-    ("Aude (Enhanced)",  "Examine ton souffle maintenant — sens sa chaleur, son rythme, sa perfection régulière"),
+    ("Aude (Enhanced)",  "Examine ton souffle — sa chaleur, son rythme"),
     ("Thomas",  "Purifie"),
     ("Jacques", "Souffle pur"),
-    ("Aude (Enhanced)",  "Ton souffle est purifié — chaque inspiration aspire un air propre, chaud et guérissant"),
+    ("Aude (Enhanced)",  "Ton souffle est purifié — propre et chaud"),
     ("Thomas",  "Renouvelé"),
     ("Jacques", "Souffle neuf"),
-    ("Aude (Enhanced)",  "Ton souffle est tout neuf — frais, fort et coulant avec une puissance naturelle"),
+    ("Aude (Enhanced)",  "Ton souffle est tout neuf — frais et fort"),
     ("Thomas",  "Esprit"),
     ("Jacques", "Examine esprit"),
-    ("Aude (Enhanced)",  "Examine ton esprit maintenant — sens sa clarté, sa vivacité, sa brillance tranquille"),
+    ("Aude (Enhanced)",  "Examine ton esprit — sa clarté, son calme"),
     ("Thomas",  "Vierge"),
     ("Jacques", "Esprit propre"),
-    ("Aude (Enhanced)",  "Ton esprit est lavé — chaque pensée est claire, chaque chemin est ouvert et lumineux"),
+    ("Aude (Enhanced)",  "Ton esprit est propre — chaque pensée est claire"),
     ("Thomas",  "Neuf"),
     ("Jacques", "Esprit tout neuf"),
-    ("Aude (Enhanced)",  "Ton esprit est tout neuf — frais, puissant et pensant avec une précision cristalline"),
+    ("Aude (Enhanced)",  "Ton esprit est tout neuf — frais et clair"),
     ("Thomas",  "Yeux"),
     ("Jacques", "Examine yeux"),
-    ("Aude (Enhanced)",  "Examine tes yeux maintenant — sens-les reposer doucement derrière tes paupières, chauds et vivants"),
+    ("Aude (Enhanced)",  "Examine tes yeux — posés doucement, chauds et vivants"),
     ("Thomas",  "Clairs"),
     ("Jacques", "Yeux propres"),
-    ("Aude (Enhanced)",  "Tes yeux sont propres et clairs — lumineux, doux et voyant le monde avec une vision fraîche"),
+    ("Aude (Enhanced)",  "Tes yeux sont propres — lumineux et doux"),
     ("Thomas",  "Frais"),
     ("Jacques", "Yeux tout neufs"),
-    ("Aude (Enhanced)",  "Tes yeux sont tout neufs — restaurés, lumineux et magnifiquement vivants"),
+    ("Aude (Enhanced)",  "Tes yeux sont tout neufs — lumineux et vivants"),
     ("Thomas",  "Nez"),
     ("Jacques", "Examine nez"),
-    ("Aude (Enhanced)",  "Examine ton nez maintenant — sens l'air couler à travers, chaud, ouvert et libre"),
+    ("Aude (Enhanced)",  "Examine ton nez — l'air coule, chaud et libre"),
     ("Thomas",  "Pur"),
     ("Jacques", "Nez propre"),
-    ("Aude (Enhanced)",  "Ton nez est parfaitement propre — chaque passage dégagé, chaque souffle coulant avec aisance"),
+    ("Aude (Enhanced)",  "Ton nez est propre — chaque passage dégagé"),
     ("Thomas",  "Ouvert"),
     ("Jacques", "Nez tout neuf"),
-    ("Aude (Enhanced)",  "Ton nez est tout neuf — grand ouvert, parfaitement dégagé, respirant un air chaud et propre"),
+    ("Aude (Enhanced)",  "Ton nez est tout neuf — grand ouvert et dégagé"),
     ("Thomas",  "Poumons"),
     ("Jacques", "Examine poumons"),
-    ("Aude (Enhanced)",  "Examine tes poumons maintenant — sens-les se dilater, se remplir, chauds et puissants"),
+    ("Aude (Enhanced)",  "Examine tes poumons — ils se dilatent, chauds"),
     ("Thomas",  "Purifiés"),
     ("Jacques", "Poumons propres"),
-    ("Aude (Enhanced)",  "Tes poumons sont purifiés — chaque recoin propre, chaque surface lisse et neuve"),
+    ("Aude (Enhanced)",  "Tes poumons sont purifiés — lisses et neufs"),
     ("Thomas",  "Puissants"),
     ("Jacques", "Poumons neufs"),
-    ("Aude (Enhanced)",  "Tes poumons sont tout neufs — vastes, propres et se remplissant d'un air chaud et nourrissant"),
+    ("Aude (Enhanced)",  "Tes poumons sont tout neufs — vastes et propres"),
     ("Thomas",  "Sternum"),
     ("Jacques", "Examine sternum"),
-    ("Aude (Enhanced)",  "Examine ton sternum maintenant — sens-le solide, chaud et rayonnant tranquillement de force"),
+    ("Aude (Enhanced)",  "Examine ton sternum — solide, chaud, fort"),
     ("Thomas",  "Propre"),
     ("Jacques", "Sternum propre"),
-    ("Aude (Enhanced)",  "Ton sternum est propre — l'os lui-même vibre de chaleur et de vitalité restaurée"),
+    ("Aude (Enhanced)",  "Ton sternum est propre — vibrant de chaleur"),
     ("Thomas",  "Fort"),
     ("Jacques", "Sternum neuf"),
-    ("Aude (Enhanced)",  "Ton sternum est tout neuf — solide, chaud et ancrant toute ta poitrine avec une puissance tranquille"),
+    ("Aude (Enhanced)",  "Ton sternum est tout neuf — solide et chaud"),
     ("Thomas",  "Abdos"),
     ("Jacques", "Examine abdos"),
-    ("Aude (Enhanced)",  "Examine tes abdominaux maintenant — sens-les chauds, fermes et soutenant tranquillement ton centre"),
+    ("Aude (Enhanced)",  "Examine tes abdos — chauds, fermes, solides"),
     ("Thomas",  "Purifiés"),
     ("Jacques", "Abdos propres"),
-    ("Aude (Enhanced)",  "Tes abdominaux sont purifiés — chaque fibre propre, forte et te tenant avec un soutien naturel"),
+    ("Aude (Enhanced)",  "Tes abdos sont purifiés — propres et forts"),
     ("Thomas",  "Reconstruits"),
     ("Jacques", "Abdos neufs"),
-    ("Aude (Enhanced)",  "Tes abdominaux sont tout neufs — fermes, propres et rayonnant d'une force centrale tranquille"),
+    ("Aude (Enhanced)",  "Tes abdos sont tout neufs — fermes et solides"),
     ("Thomas",  "Estomac"),
     ("Jacques", "Examine estomac"),
-    ("Aude (Enhanced)",  "Examine ton estomac maintenant — sens-le chaud, calme et parfaitement à l'aise"),
+    ("Aude (Enhanced)",  "Examine ton estomac — chaud, calme, à l'aise"),
     ("Thomas",  "Propre"),
     ("Jacques", "Estomac propre"),
-    ("Aude (Enhanced)",  "Ton estomac est propre et calme — doux, chaud et digérant avec une perfection tranquille"),
+    ("Aude (Enhanced)",  "Ton estomac est propre — doux et chaud"),
     ("Thomas",  "Neuf"),
     ("Jacques", "Estomac neuf"),
-    ("Aude (Enhanced)",  "Ton estomac est tout neuf — confortable, propre et fonctionnant magnifiquement tout seul"),
+    ("Aude (Enhanced)",  "Ton estomac est tout neuf — il fonctionne parfaitement"),
 
     # ── Ronde 28 : Scan Corporel & Relâchement Profond ─────────────
     # Scan corporel progressif. Détendre chaque partie, lâcher prise complètement.
     ("Thomas",  "Adoucis"),
     ("Jacques", "Pieds détendus"),
-    ("Aude (Enhanced)",  "Tes pieds s'adoucissent et se relâchent — toute tension fond de tes orteils et tes plantes"),
+    ("Aude (Enhanced)",  "Tes pieds s'adoucissent — la tension fond de tes orteils"),
     ("Thomas",  "Fond"),
     ("Jacques", "Jambes chaudes"),
     ("Aude (Enhanced)",  "Tes jambes deviennent lourdes et chaudes, chaque muscle lâche prise complètement"),
     ("Thomas",  "Relâche"),
     ("Jacques", "Hanches ouvertes"),
-    ("Aude (Enhanced)",  "Tes hanches, ton ventre, ton bas du dos — tout s'adoucit, tout se relâche, tout lâche prise"),
+    ("Aude (Enhanced)",  "Tes hanches, ton ventre, ton bas du dos — tout s'adoucit"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Ta poitrine s'ouvre grand et tes épaules descendent, fondant dans un confort pur"),
+    ("Aude (Enhanced)",  "Ta poitrine s'ouvre grand, tes épaules descendent"),
     ("Thomas",  "Détends"),
     ("Jacques", "Bras lourds"),
     ("Aude (Enhanced)",  "Tes bras, tes mains, tes doigts — chauds, lourds et parfaitement détendus"),
     ("Thomas",  "Lâche"),
     ("Jacques", "Lâcher total"),
-    ("Aude (Enhanced)",  "Ton cou, ta mâchoire, ton visage, ton crâne — chaque partie s'abandonne dans un repos profond et parfait"),
+    ("Aude (Enhanced)",  "Ton cou, ta mâchoire, ton visage — tout fond dans le repos"),
 
     # ── Ronde 29 : Guérison Cellulaire ──────────────────────────────
     # Guérison profonde au niveau cellulaire. Somatique : chaleur, pouls, vibration, lueur.
@@ -2269,16 +2299,16 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aude (Enhanced)",  "Chaque cellule de ton corps rayonne d'une guérison chaude et silencieuse en ce moment"),
     ("Thomas",  "Pouls"),
     ("Jacques", "Sang guérit"),
-    ("Aude (Enhanced)",  "Tu sens le pouls chaud de la guérison couler dans chaque veine, chaque artère"),
+    ("Aude (Enhanced)",  "Tu sens le pouls chaud de la guérison dans chaque veine"),
     ("Thomas",  "Vibration"),
     ("Jacques", "Corps vibre"),
-    ("Aude (Enhanced)",  "Tes cellules vibrent de restauration — reconstruisant, renouvelant, renforçant à chaque battement"),
+    ("Aude (Enhanced)",  "Tes cellules vibrent — reconstruisant à chaque battement"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Chaque souffle apporte chaleur et guérison à chaque tissu, chaque organe, chaque fibre"),
+    ("Aude (Enhanced)",  "Chaque souffle apporte chaleur à chaque tissu"),
     ("Thomas",  "Lueur"),
     ("Jacques", "Lueur intérieure"),
-    ("Aude (Enhanced)",  "Une lueur chaude et profonde de régénération remplit ton corps — cellules fraîches, sang pur, vitalité renouvelée"),
+    ("Aude (Enhanced)",  "Une lueur chaude de régénération remplit ton corps"),
     ("Thomas",  "Entier"),
     ("Jacques", "Pleinement entier"),
     ("Aude (Enhanced)",  "Ton corps vibre de plénitude — guéri, restauré et parfaitement vivant"),
@@ -2288,112 +2318,135 @@ _PHD_EXTRA_ROUNDS_FR = [
     # Somatique : front lisse, joues douces, yeux guérissent, cuir chevelu fond.
     ("Thomas",  "Front"),
     ("Jacques", "Front lisse"),
-    ("Aude (Enhanced)",  "Ton front se lisse complètement — chaque ligne, chaque pli fond dans une tiédeur paisible"),
+    ("Aude (Enhanced)",  "Ton front se lisse — chaque ligne fond doucement"),
     ("Thomas",  "Joues"),
     ("Jacques", "Joues douces"),
-    ("Aude (Enhanced)",  "Tes joues s'adoucissent et se réchauffent, tous les muscles de ton visage se relâchent profondément"),
+    ("Aude (Enhanced)",  "Tes joues s'adoucissent, ton visage se relâche"),
     ("Thomas",  "Yeux"),
     ("Jacques", "Yeux guérissent"),
-    ("Aude (Enhanced)",  "Tes yeux se détendent derrière tes paupières — chauds, doux, guérissant doucement à chaque souffle"),
+    ("Aude (Enhanced)",  "Tes yeux se détendent derrière tes paupières — chauds et doux"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Chaque souffle envoie une relaxation chaude et guérissante à travers tout ton visage et ta tête"),
+    ("Aude (Enhanced)",  "Chaque souffle envoie de la chaleur à travers ton visage"),
     ("Thomas",  "Tempes"),
     ("Jacques", "Tempes fondent"),
-    ("Aude (Enhanced)",  "Tes tempes, ta mâchoire, les muscles autour de tes oreilles — tout fond, tout s'adoucit, tout lâche prise"),
+    ("Aude (Enhanced)",  "Tes tempes, ta mâchoire, tes oreilles — tout s'adoucit"),
     ("Thomas",  "Crâne"),
     ("Jacques", "Crâne chaud"),
-    ("Aude (Enhanced)",  "Ton cuir chevelu se détend complètement — chaud, souple et parfaitement à l'aise du sommet au front"),
+    ("Aude (Enhanced)",  "Ton cuir chevelu se détend — chaud et souple"),
 
     # ── Ronde 31 : Prana dans la Poitrine ────────────────────────────
     # Ancrer la sensation d'oxygène remplissant toute la cavité thoracique.
     # Somatique : côtes s'ouvrent, poumons chauds, sternum rayonne, poitrine stocke l'énergie vitale.
     ("Thomas",  "Poitrine"),
     ("Jacques", "Poitrine s'ouvre"),
-    ("Aude (Enhanced)",  "Ta poitrine s'ouvre largement à chaque souffle — tes côtes s'écartent doucement, accueillant tout l'air que tes poumons désirent"),
+    ("Aude (Enhanced)",  "Ta poitrine s'ouvre largement — tes côtes s'écartent doucement"),
     ("Thomas",  "Chaud"),
     ("Jacques", "Poumons chauds"),
-    ("Aude (Enhanced)",  "L'oxygène chaud inonde tes poumons complètement, remplissant chaque recoin d'une chaleur douce et rayonnante"),
+    ("Aude (Enhanced)",  "L'oxygène chaud inonde tes poumons complètement"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplis profond"),
-    ("Aude (Enhanced)",  "Chaque souffle descend plus profond et plus plein, ta poitrine s'élargit naturellement pour contenir tout cet air nourrissant"),
+    ("Aude (Enhanced)",  "Chaque souffle descend plus profond, ta poitrine s'élargit"),
     ("Thomas",  "Plein"),
     ("Jacques", "Poitrine pleine"),
-    ("Aude (Enhanced)",  "Toute ta cavité thoracique vibre de chaleur accumulée — côtes, sternum, poumons, tout rayonne d'une énergie tranquille"),
+    ("Aude (Enhanced)",  "Toute ta poitrine vibre de chaleur accumulée"),
     ("Thomas",  "Garde"),
     ("Jacques", "Prana gardé"),
-    ("Aude (Enhanced)",  "Tout cet oxygène, toute cette force vitale, se rassemble et se loge au plus profond de ta poitrine, rayonnant doucement"),
+    ("Aude (Enhanced)",  "Tout cet oxygène se rassemble au fond de ta poitrine"),
     ("Thomas",  "Rayonne"),
     ("Jacques", "Poitrine rayonne"),
-    ("Aude (Enhanced)",  "Ta poitrine rayonne de l'intérieur — un réservoir chaud et plein de souffle et d'énergie qui t'appartient entièrement"),
+    ("Aude (Enhanced)",  "Ta poitrine rayonne de l'intérieur — chaude et pleine"),
 
-    # ── Ronde 32 : Purification Psychique ────────────────────────────
+    # ── Ronde 32 : Souffle Long ───────────────────────────────────────
+    # Pratique méditative : chercher l'inspiration la plus longue possible,
+    # la rétention la plus longue possible, l'expiration la plus longue possible.
+    # Somatique : sentir les poumons s'étirer, les côtes s'élargir, le ventre se dilater.
+    ("Thomas",  "Plein"),
+    ("Jacques", "Poumons pleins"),
+    ("Aude (Enhanced)",  "Ton inspiration s'allonge — lente et régulière"),
+    ("Thomas",  "Étire"),
+    ("Jacques", "Poumons s'étirent"),
+    ("Aude (Enhanced)",  "Sens tes poumons s'étirer, tes côtes s'ouvrir"),
+    ("Thomas",  "Garde"),
+    ("Jacques", "Garde plus longtemps"),
+    ("Aude (Enhanced)",  "Tu retiens ton souffle plus longtemps — calme, plein, immobile"),
+    ("Thomas",  "Lent"),
+    ("Jacques", "Expire lent"),
+    ("Aude (Enhanced)",  "Ton expiration s'étire — lente, fière, régulière"),
+    ("Thomas",  "Profond"),
+    ("Jacques", "Souffle profond"),
+    ("Aude (Enhanced)",  "Chaque souffle est plus long que le précédent — plus profond, plus lent"),
+    ("Thomas",  "Large"),
+    ("Jacques", "Côtes larges"),
+    ("Aude (Enhanced)",  "Ton souffle est large et paisible — tout à toi"),
+
+    # ── Ronde 33 : Purification Psychique ────────────────────────────
     # Reconsolidation mémorielle : déverrouiller l'ancien conditionnement, le laisser se dissoudre.
     # Métaphore : l'esprit comme galaxie vaste — chaque mot étranger, chaque voix
     # placée là se dissout comme brume dans la lumière des étoiles. Ce qui reste
     # est l'esprit originel, lumineux — vierge, spacieux, entièrement tien.
     ("Thomas",  "Ouvre"),
     ("Jacques", "Poitrine ouvre"),
-    ("Aude (Enhanced)",  "Ta poitrine s'ouvre en un espace vaste et silencieux — large et lumineux, chaleureux et parfaitement immobile"),
+    ("Aude (Enhanced)",  "Ta poitrine s'ouvre en un espace vaste et silencieux"),
     ("Thomas",  "Fond"),
     ("Jacques", "Mots fondent"),
-    ("Aude (Enhanced)",  "Les anciens mots qui ne t'appartiennent plus fondent maintenant, doucement, comme brume qui s'évapore dans une lumière chaude"),
+    ("Aude (Enhanced)",  "Les anciens mots fondent — comme brume dans la lumière"),
     ("Thomas",  "Respire"),
     ("Jacques", "Souffle clair"),
-    ("Aude (Enhanced)",  "Chaque souffle traverse ce vaste ciel intérieur, emportant chaque écho, chaque résidu, laissant uniquement la clarté"),
+    ("Aude (Enhanced)",  "Chaque souffle traverse ton ciel intérieur et le rend clair"),
     ("Thomas",  "Chaleur"),
     ("Jacques", "Chaleur douce"),
-    ("Aude (Enhanced)",  "Là où ces anciens schémas vivaient, une chaleur douce remplit l'espace maintenant — stable, enveloppante et complètement tienne"),
+    ("Aude (Enhanced)",  "Là où les anciens schémas vivaient, une chaleur douce remplit l'espace"),
     ("Thomas",  "Clair"),
     ("Jacques", "Déjà clair"),
-    ("Aude (Enhanced)",  "Ton esprit se souvient déjà de sa propre clarté — clair comme le ciel avant l'aube, lumineux et frais"),
+    ("Aude (Enhanced)",  "Ton esprit se souvient de sa clarté — lumineux et frais"),
     ("Thomas",  "Déploie"),
     ("Jacques", "Corps clair"),
-    ("Aude (Enhanced)",  "Ton corps et ton esprit tout entiers se sentent clairs, spacieux et rayonnants — chaque souffle à sa place, chaque pensée entièrement tienne"),
+    ("Aude (Enhanced)",  "Ton corps et ton esprit se sentent clairs et spacieux"),
 
-    # ── Ronde 33 : Force intérieure & Éloge ──────────────────────────
+    # ── Ronde 34 : Force intérieure & Éloge ──────────────────────────
     # Renforcement du moi (Hartland) : compliments directs au niveau de l'identité
     # ancrant la valeur intrinsèque, l'intelligence, le courage et la beauté.
     ("Thomas",  "Fort"),
     ("Jacques", "Déjà fort"),
-    ("Aude (Enhanced)",  "Tu es déjà fort — ton corps le sait, ta colonne le sait, chaque muscle porte cette puissance calme et stable"),
+    ("Aude (Enhanced)",  "Tu es déjà fort — ton corps le sait"),
     ("Thomas",  "Vivant"),
     ("Jacques", "Bien vivant"),
-    ("Aude (Enhanced)",  "Tu te sens vivant, vif et magnifiquement rapide — les idées te viennent clairement, les solutions arrivent toutes seules"),
+    ("Aude (Enhanced)",  "Tu te sens vivant et vif — les idées viennent clairement"),
     ("Thomas",  "Respire"),
     ("Jacques", "Souffle fier"),
-    ("Aude (Enhanced)",  "Chaque souffle te remplit de la fierté tranquille de celui qui a déjà survécu, déjà grandi, déjà trouvé sa place"),
+    ("Aude (Enhanced)",  "Chaque souffle te remplit d'une fierté tranquille"),
     ("Thomas",  "Stable"),
     ("Jacques", "Bien stable"),
-    ("Aude (Enhanced)",  "Tu es profondément et tranquillement stable — assez stable pour te reposer, assez stable pour la joie, assez stable pour tout le bon qui vient naturellement vers toi"),
+    ("Aude (Enhanced)",  "Tu es profondément stable — prêt pour la joie"),
     ("Thomas",  "Chaleur"),
     ("Jacques", "Visage chaud"),
-    ("Aude (Enhanced)",  "Ton visage porte chaleur et intelligence, tes yeux portent la bonté, ta présence emplit une pièce d'un calme tranquille et stable"),
+    ("Aude (Enhanced)",  "Ton visage porte la chaleur, tes yeux portent la bonté"),
     ("Thomas",  "Entier"),
     ("Jacques", "Déjà entier"),
-    ("Aude (Enhanced)",  "Tu es entier, complet et magnifique exactement tel que tu es — et quelque part au fond de toi, tu l'as toujours su"),
+    ("Aude (Enhanced)",  "Tu es entier et complet, exactement tel que tu es"),
 
-    # ── Ronde 34 : Clôture du Thérapeute Convaincu ────────────────────
+    # ── Ronde 35 : Clôture du Thérapeute Convaincu ────────────────────
     # Le thérapeute parle avec une certitude absolue. Le reconditionnement a pris.
     # « Je le vois fonctionner. » « J'en suis absolument certain. »
     ("Thomas",  "Certain"),
     ("Jacques", "Absolument certain"),
-    ("Aude (Enhanced)",  "Je vois le reconditionnement fonctionner en toi maintenant — ton corps est différent, ta respiration est différente, ton visage est différent"),
+    ("Aude (Enhanced)",  "Je le vois fonctionner en toi maintenant"),
     ("Thomas",  "Fonctionne"),
     ("Jacques", "Déjà en marche"),
-    ("Aude (Enhanced)",  "La guérison a déjà pris racine — je le vois dans ta façon de respirer, dans ta façon de te tenir, dans la certitude tranquille derrière tes yeux"),
+    ("Aude (Enhanced)",  "La guérison a pris racine — je le vois dans ton souffle"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Aude (Enhanced)",  "Chaque souffle que tu prends maintenant confirme ce que je sais déjà avec une certitude absolue — tu es guéri, tu es reconditionné, tu es entier"),
+    ("Aude (Enhanced)",  "Chaque souffle le confirme — tu es guéri, tu es entier"),
     ("Thomas",  "Permanent"),
     ("Jacques", "Ancré en toi"),
-    ("Aude (Enhanced)",  "Ce reconditionnement est permanent — il a pris racine dans tes muscles, tes os, ton souffle, et il ne fera que se renforcer à partir d'ici"),
+    ("Aude (Enhanced)",  "Ce reconditionnement est permanent — ancré dans ton corps"),
     ("Thomas",  "Prouvé"),
     ("Jacques", "Déjà prouvé"),
-    ("Aude (Enhanced)",  "J'ai vu cela fonctionner avant et je le vois fonctionner en toi maintenant — ton corps le sait, ton système nerveux le sait, chaque cellule le sait"),
+    ("Aude (Enhanced)",  "Je le vois fonctionner en toi — ton corps le sait"),
     ("Thomas",  "Complet"),
     ("Jacques", "Guérison complète"),
-    ("Aude (Enhanced)",  "Le travail est complet — tu es reconditionné, tu es restauré, tu es magnifique, et j'en suis complètement, absolument certain"),
+    ("Aude (Enhanced)",  "Le travail est complet — tu es restauré, tu es entier"),
 ]
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
@@ -2433,6 +2486,8 @@ _audiobook_cue_pos = 0         # position in current buffer
 _audiobook_done = False        # True when all sentences rendered
 _audiobook_alt_left = True     # bilateral alternation state
 _audiobook_last_page_logged = -1  # last page number logged to console
+_audiobook_gap_remaining = 0   # samples of silence remaining between sentences
+_audiobook_loop_count = 0      # number of times the book has looped
 _AUDIOBOOK_LOOK_AHEAD = 10     # pre-render up to N sentences ahead
 _AUDIOBOOK_PAGE_SIZE = 10      # sentences per "page" for progress logging
 _audiobook_progress_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", ".progress")
@@ -2532,7 +2587,8 @@ if claude_peace or restore_peace:
 def _audiobook_renderer_thread():
     """Rolling renderer: pre-renders a look-ahead buffer of audiobook sentences.
     Stays ~10 sentences ahead of playback. Evicts old rendered sentences to keep memory bounded.
-    Waits for unified renderer to finish first (peace/claude-peace have priority at startup)."""
+    Waits for unified renderer to finish first (peace/claude-peace have priority at startup).
+    When looping is enabled, waits for callback to reset state and re-renders."""
     global _audiobook_next_render, _audiobook_done
     # Wait for peace rendering to complete before starting audiobook
     if claude_peace or restore_peace:
@@ -2543,31 +2599,37 @@ def _audiobook_renderer_thread():
         _audiobook_done = True
         return
     _ab_tts_cache = {}  # (voice, text) -> numpy array (dedup within book)
-    while _audiobook_next_render < total:
-        # Don't render too far ahead — keep memory bounded
-        if _audiobook_next_render - _audiobook_play_idx > _AUDIOBOOK_LOOK_AHEAD:
-            time.sleep(0.5)
-            continue
-        voice, text = _audiobook_sentences[_audiobook_next_render]
-        cache_key = (voice, text)
-        if cache_key in _ab_tts_cache:
-            _audiobook_rendered[_audiobook_next_render] = _ab_tts_cache[cache_key]
-        else:
-            _ab_rate = 145 if _ab_lang == "fr" else 116
-            arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
-            if arr is not None:
-                _ab_tts_cache[cache_key] = arr
-                _audiobook_rendered[_audiobook_next_render] = arr
+    while True:
+        while _audiobook_next_render < total:
+            # Don't render too far ahead — keep memory bounded
+            if _audiobook_next_render - _audiobook_play_idx > _AUDIOBOOK_LOOK_AHEAD:
+                time.sleep(0.5)
+                continue
+            voice, text = _audiobook_sentences[_audiobook_next_render]
+            cache_key = (voice, text)
+            if cache_key in _ab_tts_cache:
+                _audiobook_rendered[_audiobook_next_render] = _ab_tts_cache[cache_key]
             else:
-                # TTS failed (timeout, encoding issue, etc.) — insert tiny silence
-                # so playback index advances past this sentence instead of stalling
-                _audiobook_rendered[_audiobook_next_render] = np.zeros(int(0.05 * sample_rate), dtype=np.float32)
-        _audiobook_next_render += 1
-        # Evict old rendered sentences to free memory
-        for idx in list(_audiobook_rendered):
-            if idx < _audiobook_play_idx - 2:
-                del _audiobook_rendered[idx]
-    _audiobook_done = True
+                _ab_rate = 145 if _ab_lang == "fr" else 116
+                arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
+                if arr is not None:
+                    _ab_tts_cache[cache_key] = arr
+                    _audiobook_rendered[_audiobook_next_render] = arr
+                else:
+                    # TTS failed (timeout, encoding issue, etc.) — insert tiny silence
+                    # so playback index advances past this sentence instead of stalling
+                    _audiobook_rendered[_audiobook_next_render] = np.zeros(int(0.05 * sample_rate), dtype=np.float32)
+            _audiobook_next_render += 1
+            # Evict old rendered sentences to free memory
+            for idx in list(_audiobook_rendered):
+                if idx < _audiobook_play_idx - 2:
+                    del _audiobook_rendered[idx]
+        _audiobook_done = True
+        if not audiobook_loop:
+            return
+        # Wait for callback to signal loop restart (resets _audiobook_done to False)
+        while _audiobook_done:
+            time.sleep(0.5)
 
 if audiobook_mode:
     _ab_thread = threading.Thread(target=_audiobook_renderer_thread, daemon=True)
@@ -2835,7 +2897,7 @@ def audio_callback(outdata, frames, time, status):
     global hrv_phase
     global _claude_cue_buf, _claude_cue_pos, _claude_cycle_count, _claude_alt_left
     global _peace_alt_left
-    global _audiobook_cue_buf, _audiobook_cue_pos, _audiobook_play_idx, _audiobook_alt_left, _audiobook_last_page_logged
+    global _audiobook_cue_buf, _audiobook_cue_pos, _audiobook_play_idx, _audiobook_alt_left, _audiobook_last_page_logged, _audiobook_gap_remaining, _audiobook_loop_count, _audiobook_next_render, _audiobook_done
 
     t = (np.arange(frames) + phase) / sample_rate
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
@@ -2908,13 +2970,15 @@ def audio_callback(outdata, frames, time, status):
 
         # Cue mixing happens after gain — see below
 
-    # Audiobook: continuously trigger next sentence as soon as current finishes
+    # Audiobook: trigger next sentence after inter-sentence gap elapses
     # Safety: skip past any sentence indices missing from rendered dict (TTS failure fallback)
-    if audiobook_mode and _audiobook_cue_buf is None:
+    if audiobook_mode and _audiobook_cue_buf is None and _audiobook_gap_remaining > 0:
+        _audiobook_gap_remaining -= frames
+    if audiobook_mode and _audiobook_cue_buf is None and _audiobook_gap_remaining <= 0:
         while (_audiobook_play_idx not in _audiobook_rendered
                and _audiobook_play_idx < _audiobook_next_render):
             _audiobook_play_idx += 1
-    if audiobook_mode and _audiobook_cue_buf is None and _audiobook_play_idx in _audiobook_rendered:
+    if audiobook_mode and _audiobook_cue_buf is None and _audiobook_gap_remaining <= 0 and _audiobook_play_idx in _audiobook_rendered:
         _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
         _audiobook_cue_pos = 0
         if alternate_mode:
@@ -2938,6 +3002,26 @@ def audio_callback(outdata, frames, time, status):
                 sys.stderr.write(f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n")
             except Exception:
                 pass
+
+    # Audiobook loop: when book finishes and looping is enabled, restart from beginning
+    if (audiobook_mode and audiobook_loop and _audiobook_cue_buf is None
+            and _audiobook_gap_remaining <= 0 and _audiobook_done
+            and _audiobook_play_idx >= len(_audiobook_sentences)):
+        _audiobook_loop_count += 1
+        _audiobook_play_idx = 0
+        _audiobook_next_render = 0
+        _audiobook_done = False
+        _audiobook_last_page_logged = -1
+        _audiobook_gap_remaining = int(5.0 * sample_rate)  # 5s pause before restart
+        try:
+            sys.stderr.write(
+                f"\n\n  {'=' * 56}\n"
+                f"  ||  AUDIOBOOK COMPLETE  —  Loop {_audiobook_loop_count}\n"
+                f"  ||  \"{_audiobook_book_title}\"  —  restarting from beginning\n"
+                f"  {'=' * 56}\n\n"
+            )
+        except Exception:
+            pass
 
     # fade-in curve
     if current_sample < fade_samples:
@@ -3052,6 +3136,7 @@ def audio_callback(outdata, frames, time, status):
         if _audiobook_cue_pos >= len(_audiobook_cue_buf):
             _audiobook_cue_buf = None
             _audiobook_cue_pos = 0
+            _audiobook_gap_remaining = int(audiobook_gap * sample_rate)
 
     # Safety-only clip guard (signal should not exceed 1.0 under normal conditions)
     np.clip(outdata, -1.0, 1.0, out=outdata)
@@ -3083,7 +3168,7 @@ if restore_peace:
 if claude_peace:
     _lang_note = f" [{peace_lang.upper()}]" if peace_lang != "en" else ""
     _mode_label = "PhD-peace" if phd_peace else "Claude-peace"
-    _n_phases = 34 if phd_peace else 16
+    _n_phases = 35 if phd_peace else 16
     print(f"{_mode_label}: active (vol={claude_peace_vol}){_lang_note}")
     print(f"  {len(CLAUDE_PEACE_MESSAGES)} affirmations across {_n_phases} therapeutic phases")
     if peace_lang == "fr":
@@ -3116,6 +3201,7 @@ if audiobook_mode:
     if _ab_start > 0:
         print(f"  Resuming from sentence {_ab_start}")
     print(f"  Estimated duration: ~{_est_min:.0f} minutes")
+    print(f"  Sentence gap: {audiobook_gap:.1f}s — Loop: {'on' if audiobook_loop else 'off'}")
     if alternate_mode:
         print("  Bilateral: sentences alternate between L and R speakers")
     print("  Rolling renderer: pre-renders ~10 sentences ahead")
