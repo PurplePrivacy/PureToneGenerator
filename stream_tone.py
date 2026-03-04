@@ -2763,20 +2763,62 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # Insert rhythmic pauses: every ~10 characters + after punctuation
+            # ── Human-like rhythmic pauses ──────────────────────────
+            # Cycling threshold (10→15→20→repeat) creates wave-like cadence.
+            # Punctuation hierarchy: comma 150ms, semicolon/colon 250ms,
+            # dash 200ms, period/!/? 400ms. Glue words (articles,
+            # prepositions, determiners) never get a pause after them.
             if audiobook_word_gap > 0:
-                _slnc_ms = int(audiobook_word_gap * 1000)
-                _slnc_tag = f" [[slnc {_slnc_ms}]]"
+                _base_ms = int(audiobook_word_gap * 1000)
+                _PUNCT_PAUSE = {
+                    ',': 150, ';': 250, ':': 250,
+                    '.': 400, '!': 400, '?': 400,
+                    '-': 200, '\u2014': 200, '\u2013': 200,
+                }
+                _CYCLE = [10, 15, 20]
+                _cycle_idx = 0
+                _GLUE = frozenset({
+                    'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
+                    'for', 'is', 'it', 'or', 'as', 'and', 'but', 'this',
+                    'that', 'with', 'from', 'into', 'her', 'his', 'its',
+                    'our', 'my', 'your', 'their', 'we', 'he', 'she', 'they',
+                    'was', 'are', 'were', 'has', 'had', 'been', 'will',
+                    'would', 'could', 'should', 'can', 'may', 'not', 'all',
+                    'each', 'every',
+                    'le', 'la', 'les', 'un', 'une', 'de', 'du', 'des',
+                    '\u00e0', 'en', 'au', 'aux', 'et', 'ou', 'par', 'pour',
+                    'sur', 'est', 'ce', 'se', 'ne', 'qui', 'que', 'son',
+                    'sa', 'ses', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
+                    'leur', 'leurs',
+                })
                 _words = text.split()
                 _parts = []
                 _char_count = 0
-                for _w in _words:
+                for _i, _w in enumerate(_words):
                     _parts.append(_w)
-                    _char_count += len(_w) + 1  # +1 for space
-                    _has_punct = bool(re.search(r'[,;:!?\.\-\—\–]$', _w))
-                    if _has_punct or _char_count >= 10:
-                        _parts.append(_slnc_tag)
+                    _char_count += len(_w) + 1
+                    _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
+                    _punct_match = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
+                    # Never pause after glue words
+                    if _bare in _GLUE:
+                        continue
+                    # Punctuation-hierarchy pause (overrides char threshold)
+                    if _punct_match:
+                        _p_ms = _PUNCT_PAUSE.get(_punct_match.group(1), _base_ms)
+                        _parts.append(f" [[slnc {_p_ms}]]")
                         _char_count = 0
+                        _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
+                        continue
+                    # Cycling character-threshold pause
+                    if _char_count >= _CYCLE[_cycle_idx]:
+                        # Look-ahead: don't orphan a short glue word after pause
+                        if _i + 1 < len(_words):
+                            _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_i + 1]).lower()
+                            if _next_bare in _GLUE and len(_next_bare) <= 3:
+                                continue
+                        _parts.append(f" [[slnc {_base_ms}]]")
+                        _char_count = 0
+                        _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                 _ab_text = " ".join(_parts)
             else:
                 _ab_text = text
