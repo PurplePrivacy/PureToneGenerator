@@ -2763,10 +2763,18 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # Insert silence after punctuation using macOS say's [[slnc]] command
+            # Insert rhythmic pauses: after every 3 words + after punctuation
             if audiobook_word_gap > 0:
                 _slnc_ms = int(audiobook_word_gap * 1000)
-                _ab_text = re.sub(r'([,;:!?\.\-\—\–])\s', rf'\1 [[slnc {_slnc_ms}]] ', text)
+                _slnc_tag = f" [[slnc {_slnc_ms}]]"
+                _words = text.split()
+                _parts = []
+                for _wi, _w in enumerate(_words):
+                    _parts.append(_w)
+                    _has_punct = bool(re.search(r'[,;:!?\.\-\—\–]$', _w))
+                    if _has_punct or (_wi + 1) % 3 == 0:
+                        _parts.append(_slnc_tag)
+                _ab_text = " ".join(_parts)
             else:
                 _ab_text = text
             cache_key = (voice, _ab_text)
