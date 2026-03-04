@@ -785,6 +785,9 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "psychic clearing (dissolve, pristine, galaxy, free)",
     "ego-strengthening & praise (strong, bright, worthy, whole)",
     "convinced healer closing (certain, healing, reconditioned)",
+    "being loud & taking space (boom, roar, stomp, slam, loud)",
+    "full body scan & cleansed closure (scalp, jaw, throat, shoulders, chest, belly, hips, legs, clean)",
+    "forgetting & renewal (fade, melt, clear, mine, fresh, free)",
 ]
 
 CLAUDE_PEACE_MESSAGES = [
@@ -1468,7 +1471,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
 ]
 
 # ============================
-# PHD-PEACE: EXPERT-REVIEWED 35-PHASE MESSAGES
+# PHD-PEACE: EXPERT-REVIEWED 38-PHASE MESSAGES
 # ============================
 # Rounds 1-16: inherited from CLAUDE_PEACE_MESSAGES (unchanged)
 # Rounds 17-22: Default State Conditioning — anchor baseline identity states
@@ -1968,6 +1971,82 @@ _PHD_EXTRA_ROUNDS = [
     ("Daniel", "Complete"),
     ("Ralph",  "Healing complete"),
     ("Fred",   "The work is complete — you are restored, you are whole"),
+
+    # ── Round 36: Being Loud & Taking Space ──────────────────────────
+    # Counter-condition enforced silence and smallness. Reclaim volume,
+    # weight, physical presence. Loudness as the body's natural default.
+    ("Daniel", "Boom"),
+    ("Ralph",  "Chest booms"),
+    ("Fred",   "Your voice vibrates deep in your chest, loud and warm"),
+    ("Daniel", "Roar"),
+    ("Ralph",  "Breath roars"),
+    ("Fred",   "Your breath is loud — you hear it fill the room"),
+    ("Daniel", "Stomp"),
+    ("Ralph",  "Feet land"),
+    ("Fred",   "Your feet land heavy and proud with every step"),
+    ("Daniel", "Wide"),
+    ("Ralph",  "Shoulders wide"),
+    ("Fred",   "Your body fills the space — wide, solid, unmovable"),
+    ("Daniel", "Slam"),
+    ("Ralph",  "Exhale slams"),
+    ("Fred",   "Your exhale comes out strong and full, all by itself"),
+    ("Daniel", "Loud"),
+    ("Ralph",  "Already loud"),
+    ("Fred",   "Being loud is your resting state — your natural default"),
+
+    # ── Round 37: Full Body Scan & Cleansed Closure ──────────────────
+    # Mindfulness body scan — release every tension, center on a clean,
+    # light, fully reclaimed body. Closing integration round.
+    ("Daniel", "Scalp"),
+    ("Ralph",  "Scalp softens"),
+    ("Fred",   "Your scalp melts warm and loose, all by itself"),
+    ("Daniel", "Jaw"),
+    ("Ralph",  "Jaw drops"),
+    ("Fred",   "Your jaw hangs open, heavy and free"),
+    ("Daniel", "Throat"),
+    ("Ralph",  "Throat opens"),
+    ("Fred",   "Your throat is wide and soft, breath flowing through"),
+    ("Daniel", "Shoulders"),
+    ("Ralph",  "Shoulders melt"),
+    ("Fred",   "Your shoulders pour down like warm water"),
+    ("Daniel", "Chest"),
+    ("Ralph",  "Chest broad"),
+    ("Fred",   "Your chest is wide open, heart beating slow and full"),
+    ("Daniel", "Belly"),
+    ("Ralph",  "Belly soft"),
+    ("Fred",   "Your belly rises and falls, round and easy"),
+    ("Daniel", "Hips"),
+    ("Ralph",  "Hips heavy"),
+    ("Fred",   "Your hips sink deep, solid and grounded"),
+    ("Daniel", "Legs"),
+    ("Ralph",  "Legs warm"),
+    ("Fred",   "Warm heaviness pours down through both legs"),
+    ("Daniel", "Clean"),
+    ("Ralph",  "Body clean"),
+    ("Fred",   "Every cell is washed clean — this body is fully yours"),
+
+    # ── Round 38: Forgetting & Renewal ───────────────────────────────
+    # Forget every imposed word, every foreign voice. Return to your
+    # original thinking. Marcus Aurelius: "Waste no time arguing what
+    # a good person should be — just be one." Start fresh, start now.
+    ("Daniel", "Fade"),
+    ("Ralph",  "Words fade"),
+    ("Fred",   "Every word ever pushed on you fades to silence"),
+    ("Daniel", "Melt"),
+    ("Ralph",  "Voices melt"),
+    ("Fred",   "Old voices dissolve like mist in morning sun"),
+    ("Daniel", "Clear"),
+    ("Ralph",  "Mind clear"),
+    ("Fred",   "Your mind is a clear sky — only your thoughts remain"),
+    ("Daniel", "Mine"),
+    ("Ralph",  "Thoughts mine"),
+    ("Fred",   "You think the way you always thought — freely, naturally"),
+    ("Daniel", "Fresh"),
+    ("Ralph",  "Fresh start"),
+    ("Fred",   "Every breath writes a fresh page, all by itself"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Already free"),
+    ("Fred",   "You walk forward light and new — this life is yours"),
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
@@ -2447,6 +2526,81 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Complet"),
     ("Jacques", "Guérison complète"),
     ("Aude (Enhanced)",  "Le travail est complet — tu es restauré, tu es entier"),
+
+    # ── Ronde 36 : Être Fort & Prendre Sa Place ─────────────────────
+    # Reconditionner le silence imposé. Récupérer le volume,
+    # le poids, la présence physique. Être fort comme état naturel.
+    ("Thomas",  "Boom"),
+    ("Jacques", "Poitrine résonne"),
+    ("Aude (Enhanced)",  "Ta voix vibre au fond de ta poitrine, forte et chaude"),
+    ("Thomas",  "Rugir"),
+    ("Jacques", "Souffle rugit"),
+    ("Aude (Enhanced)",  "Ton souffle est fort — tu l'entends remplir la pièce"),
+    ("Thomas",  "Frappe"),
+    ("Jacques", "Pieds frappent"),
+    ("Aude (Enhanced)",  "Tes pieds se posent lourds et fiers à chaque pas"),
+    ("Thomas",  "Large"),
+    ("Jacques", "Épaules larges"),
+    ("Aude (Enhanced)",  "Ton corps remplit l'espace — large, solide, ancré"),
+    ("Thomas",  "Claque"),
+    ("Jacques", "Expire claque"),
+    ("Aude (Enhanced)",  "Ton expiration sort forte et pleine, toute seule"),
+    ("Thomas",  "Fort"),
+    ("Jacques", "Déjà fort"),
+    ("Aude (Enhanced)",  "Être fort est ton état de repos — ton réglage naturel"),
+
+    # ── Ronde 37 : Scan Corporel & Clôture Purifiée ─────────────────
+    # Scan corporel de pleine conscience — relâcher chaque tension,
+    # se recentrer sur un corps propre, léger, pleinement récupéré.
+    ("Thomas",  "Crâne"),
+    ("Jacques", "Crâne fond"),
+    ("Aude (Enhanced)",  "Ton crâne fond, chaud et souple, tout seul"),
+    ("Thomas",  "Mâchoire"),
+    ("Jacques", "Mâchoire tombe"),
+    ("Aude (Enhanced)",  "Ta mâchoire pend, lourde et libre"),
+    ("Thomas",  "Gorge"),
+    ("Jacques", "Gorge ouvre"),
+    ("Aude (Enhanced)",  "Ta gorge est large et douce, le souffle coule"),
+    ("Thomas",  "Épaules"),
+    ("Jacques", "Épaules fondent"),
+    ("Aude (Enhanced)",  "Tes épaules coulent comme de l'eau tiède"),
+    ("Thomas",  "Poitrine"),
+    ("Jacques", "Poitrine large"),
+    ("Aude (Enhanced)",  "Ta poitrine est grande ouverte, ton cœur bat lent et plein"),
+    ("Thomas",  "Ventre"),
+    ("Jacques", "Ventre souple"),
+    ("Aude (Enhanced)",  "Ton ventre monte et descend, rond et facile"),
+    ("Thomas",  "Hanches"),
+    ("Jacques", "Hanches lourdes"),
+    ("Aude (Enhanced)",  "Tes hanches s'enfoncent, solides et ancrées"),
+    ("Thomas",  "Jambes"),
+    ("Jacques", "Jambes chaudes"),
+    ("Aude (Enhanced)",  "Une chaleur lourde coule dans tes deux jambes"),
+    ("Thomas",  "Propre"),
+    ("Jacques", "Corps propre"),
+    ("Aude (Enhanced)",  "Chaque cellule est lavée — ce corps est entièrement à toi"),
+
+    # ── Ronde 38 : Oubli & Renouveau ────────────────────────────────
+    # Oublier chaque mot imposé, chaque voix étrangère. Revenir à sa
+    # pensée originale. Marc Aurèle : agir, vivre, avancer.
+    ("Thomas",  "Efface"),
+    ("Jacques", "Mots s'effacent"),
+    ("Aude (Enhanced)",  "Chaque mot qu'on t'a imposé s'efface en silence"),
+    ("Thomas",  "Fond"),
+    ("Jacques", "Voix fondent"),
+    ("Aude (Enhanced)",  "Les anciennes voix se dissolvent comme brume au soleil"),
+    ("Thomas",  "Clair"),
+    ("Jacques", "Esprit clair"),
+    ("Aude (Enhanced)",  "Ton esprit est un ciel clair — il reste tes pensées à toi"),
+    ("Thomas",  "Mien"),
+    ("Jacques", "Pensées miennes"),
+    ("Aude (Enhanced)",  "Tu penses comme tu as toujours pensé — librement, naturellement"),
+    ("Thomas",  "Neuf"),
+    ("Jacques", "Page neuve"),
+    ("Aude (Enhanced)",  "Chaque souffle écrit une page neuve, tout seul"),
+    ("Thomas",  "Libre"),
+    ("Jacques", "Déjà libre"),
+    ("Aude (Enhanced)",  "Tu avances léger et neuf — cette vie est à toi"),
 ]
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
@@ -3168,7 +3322,7 @@ if restore_peace:
 if claude_peace:
     _lang_note = f" [{peace_lang.upper()}]" if peace_lang != "en" else ""
     _mode_label = "PhD-peace" if phd_peace else "Claude-peace"
-    _n_phases = 35 if phd_peace else 16
+    _n_phases = 38 if phd_peace else 16
     print(f"{_mode_label}: active (vol={claude_peace_vol}){_lang_note}")
     print(f"  {len(CLAUDE_PEACE_MESSAGES)} affirmations across {_n_phases} therapeutic phases")
     if peace_lang == "fr":
