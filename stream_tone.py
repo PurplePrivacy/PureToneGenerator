@@ -2763,17 +2763,20 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # Insert rhythmic pauses: after every 3 words + after punctuation
+            # Insert rhythmic pauses: every ~10 characters + after punctuation
             if audiobook_word_gap > 0:
                 _slnc_ms = int(audiobook_word_gap * 1000)
                 _slnc_tag = f" [[slnc {_slnc_ms}]]"
                 _words = text.split()
                 _parts = []
-                for _wi, _w in enumerate(_words):
+                _char_count = 0
+                for _w in _words:
                     _parts.append(_w)
+                    _char_count += len(_w) + 1  # +1 for space
                     _has_punct = bool(re.search(r'[,;:!?\.\-\—\–]$', _w))
-                    if _has_punct or (_wi + 1) % 3 == 0:
+                    if _has_punct or _char_count >= 10:
                         _parts.append(_slnc_tag)
+                        _char_count = 0
                 _ab_text = " ".join(_parts)
             else:
                 _ab_text = text
