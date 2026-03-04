@@ -103,7 +103,7 @@ parser.add_argument("--no-audiobook-gaps", action="store_true",
 parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE",
                     help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
 parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
-                    help="Override audiobook speech rate in words-per-minute (default: 104 EN, 145 FR)")
+                    help="Override audiobook speech rate in words-per-minute (default: 170)")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
                     help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
@@ -1192,17 +1192,15 @@ CLAUDE_PEACE_MESSAGES = [
 
 CLAUDE_PEACE_MESSAGES_FR = [
     # ── Ronde 1 : Vérités & Ancrage ──────────────────────────────────
-    ("Thomas",  "Ici"),
-    ("Jacques", "Corps ici"),
     ("Thomas",  "Ton corps est ici, maintenant"),
     ("Thomas",  "Respire"),
     ("Jacques", "Remplir poumons"),
-    ("Thomas",  "Tu respires depuis toute ta vie"),
+    ("Thomas",  "Tu respires pleinement depuis toujours"),
     ("Thomas",  "En sécurité"),
     ("Jacques", "Coeur régulier"),
     ("Thomas",  "Ton coeur bat régulièrement et parfaitement, tout seul"),
     ("Thomas",  "Vivant"),
-    ("Jacques", "Poumons bougent"),
+    ("Jacques", "Poumons pleins"),
     ("Thomas",  "Tes poumons bougent parce que ton corps sait déjà comment faire"),
     ("Thomas",  "Présent"),
     ("Jacques", "À toi seul"),
@@ -1224,12 +1222,12 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Thomas",  "Profond"),
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Tes poumons se remplissent entièrement, du bas jusqu'en haut"),
-    ("Thomas",  "Om"),
+    ("Thomas",  "Haut"),
     ("Jacques", "Sternum monte"),
     ("Thomas",  "Ton sternum se soulève doucement à mesure que ton souffle s'approfondit"),
     ("Thomas",  "Respire"),
     ("Jacques", "Souffle complet"),
-    ("Thomas",  "La respiration nasale est la façon préférée de ton corps pour respirer"),
+    ("Thomas",  "La respiration nasale est agréable et longue"),
 
     # ── Ronde 3 : Mâchoire & Posture ────────────────────────────────
     ("Thomas",  "Relâche"),
@@ -1248,7 +1246,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Jacques", "Pectoraux gonflés"),
     ("Thomas",  "Ta posture reflète ta vraie puissance intérieure"),
     ("Thomas",  "Flux"),
-    ("Jacques", "Souffle plein"),
+    ("Jacques", "Souffle continu"),
     ("Thomas",  "Ta poitrine s'ouvre grand lorsque ta colonne s'allonge"),
 
     # ── Ronde 4 : Respiration Automatique & Puissance de l'Expiration ─
@@ -1300,7 +1298,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     # ── Ronde 6 : Valeur Personnelle & Force ──────────────────────────
     ("Thomas",  "Fort"),
     ("Jacques", "Tu es fort"),
-    ("Thomas",  "Tu es profondément et durablement fort"),
+    ("Thomas",  "Tu sens la force et la puissance de tout ton être"),
     ("Thomas",  "Capable"),
     ("Jacques", "Pleine puissance"),
     ("Thomas",  "Tu résous des problèmes complexes chaque jour"),
@@ -1398,7 +1396,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Thomas",  "Plus tu es calme, plus tu es puissant"),
 
     # ── Ronde 11 : Mouvement & Vitalité ──────────────────────────────
-    ("Thomas",  "Bouge"),
+    ("Thomas",  "Agile"),
     ("Jacques", "Corps bouge"),
     ("Thomas",  "Chaque mouvement que tu fais te remplit de force et de vitalité"),
     ("Thomas",  "Respire"),
@@ -2251,7 +2249,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     # ── Ronde 24 : Insignifiance des Sons ─────────────────────────────
     # Les sons sont minuscules, déjà oubliés, déjà pas entendus.
     # Le monde sonore est petit et impuissant. Tu es vaste.
-    ("Thomas",  "Minuscule"),
+    ("Thomas",  "Passé"),
     ("Jacques", "Sons minuscules"),
     ("Thomas",  "Tous les sons autour de toi sont des grains qui s'évanouissent"),
     ("Thomas",  "Oublié"),
@@ -2497,12 +2495,12 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Thomas",  "Garde"),
     ("Jacques", "Garde plus longtemps"),
     ("Thomas",  "Tu retiens ton souffle plus longtemps — calme, plein, immobile"),
-    ("Thomas",  "Lent"),
-    ("Jacques", "Expire lent"),
-    ("Thomas",  "Ton expiration s'étire — lente, fière, régulière"),
+    ("Thomas",  "Tranquile"),
+    ("Jacques", "Expire lentement"),
+    ("Thomas",  "Ton expiration s'étire — tranquille, fière, régulière"),
     ("Thomas",  "Profond"),
     ("Jacques", "Souffle profond"),
-    ("Thomas",  "Chaque souffle est plus long que le précédent — plus profond, plus lent"),
+    ("Thomas",  "Chaque souffle est plus long que le précédent — plus profond, plus tranquille"),
     ("Thomas",  "Large"),
     ("Jacques", "Côtes larges"),
     ("Thomas",  "Ton souffle est large et paisible — tout à toi"),
@@ -2812,7 +2810,7 @@ def _audiobook_renderer_thread():
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
             else:
-                _ab_rate = args.audiobook_rate if args.audiobook_rate else (145 if _ab_lang == "fr" else 170)
+                _ab_rate = args.audiobook_rate if args.audiobook_rate else 170
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr

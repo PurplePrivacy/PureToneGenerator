@@ -1,4 +1,4 @@
-"""Audiobook catalog — 155 books (70 French + 85 English), all public domain.
+"""Audiobook catalog — 183 books (98 French + 85 English), all public domain.
 
 Each entry maps a short CLI name to metadata used by stream_tone.py and fetch_books.py.
 Voice is auto-selected by language: Aude (Enhanced) (fr) or Samantha (en).
@@ -1330,6 +1330,250 @@ BOOK_CATALOG = {
         "language": "fr",
         "category": "French Mindfulness & Wisdom",
     },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  FRENCH SCIENCE-FICTION (11)
+    # ══════════════════════════════════════════════════════════════════
+
+    "terre-lune": {
+        "title": "De la terre à la lune",
+        "author": "Jules Verne",
+        "gutenberg_id": 799,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "autour-lune": {
+        "title": "Autour de la lune",
+        "author": "Jules Verne",
+        "gutenberg_id": 46111,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "robur-conquerant": {
+        "title": "Robur-le-conquérant",
+        "author": "Jules Verne",
+        "gutenberg_id": 5126,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "cinq-cents-millions": {
+        "title": "Les cinq cents millions de la Bégum",
+        "author": "Jules Verne",
+        "gutenberg_id": 4968,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "etats-empires-lune": {
+        "title": "L'autre monde ou les États et Empires de la Lune",
+        "author": "Cyrano de Bergerac",
+        "gutenberg_id": 51338,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "guerre-mondes-fr": {
+        "title": "La guerre des mondes",
+        "author": "H. G. Wells (trad. Davray)",
+        "gutenberg_id": 60656,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "mort-terre": {
+        "title": "La mort de la Terre",
+        "author": "J.-H. Rosny aîné",
+        "gutenberg_id": 57687,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "vie-electrique": {
+        "title": "Le vingtième siècle: La vie électrique",
+        "author": "Albert Robida",
+        "gutenberg_id": 35103,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "guerre-feu": {
+        "title": "La guerre du feu",
+        "author": "J.-H. Rosny aîné",
+        "gutenberg_id": 61274,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "xipehuz": {
+        "title": "Les Xipéhuz",
+        "author": "J.-H. Rosny aîné",
+        "gutenberg_id": 65845,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+    "frankenstein-fr": {
+        "title": "Frankenstein, ou le Prométhée moderne",
+        "author": "Mary Shelley (trad.)",
+        "gutenberg_id": 62404,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Science-Fiction",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  FRENCH AVENTURE (5)
+    # ══════════════════════════════════════════════════════════════════
+
+    "cinq-semaines": {
+        "title": "Cinq semaines en ballon",
+        "author": "Jules Verne",
+        "gutenberg_id": 4548,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Aventure",
+    },
+    "michel-strogoff": {
+        "title": "Michel Strogoff",
+        "author": "Jules Verne",
+        "gutenberg_id": 7442,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Aventure",
+    },
+    "enfants-capitaine-grant": {
+        "title": "Les enfants du capitaine Grant",
+        "author": "Jules Verne",
+        "gutenberg_id": 14163,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Aventure",
+    },
+    "vingt-ans-apres": {
+        "title": "Vingt ans après",
+        "author": "Alexandre Dumas",
+        "gutenberg_id": 13952,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Aventure",
+    },
+    "monte-cristo-2": {
+        "title": "Le comte de Monte-Cristo, Tome II",
+        "author": "Alexandre Dumas",
+        "gutenberg_id": 17990,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Aventure",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  FRENCH LITTÉRATURE (9)
+    # ══════════════════════════════════════════════════════════════════
+
+    "dernier-jour-condamne": {
+        "title": "Le dernier jour d'un condamné",
+        "author": "Victor Hugo",
+        "gutenberg_id": 6838,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "miserables-cosette": {
+        "title": "Les misérables, Tome II: Cosette",
+        "author": "Victor Hugo",
+        "gutenberg_id": 17493,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "bonheur-dames": {
+        "title": "Au bonheur des dames",
+        "author": "Émile Zola",
+        "gutenberg_id": 16852,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "salammbo": {
+        "title": "Salammbô",
+        "author": "Gustave Flaubert",
+        "gutenberg_id": 48881,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "trois-contes": {
+        "title": "Trois contes",
+        "author": "Gustave Flaubert",
+        "gutenberg_id": 12065,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "peau-chagrin": {
+        "title": "La peau de chagrin",
+        "author": "Honoré de Balzac",
+        "gutenberg_id": 71773,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "comedie-humaine-9": {
+        "title": "La Comédie humaine -- Scènes de la vie parisienne",
+        "author": "Honoré de Balzac",
+        "gutenberg_id": 55860,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "fort-comme-mort": {
+        "title": "Fort comme la mort",
+        "author": "Guy de Maupassant",
+        "gutenberg_id": 11450,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Littérature",
+    },
+    "contemplations": {
+        "title": "Les contemplations: Autrefois, 1830-1843",
+        "author": "Victor Hugo",
+        "gutenberg_id": 29843,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Poésie",
+    },
+
+    # ══════════════════════════════════════════════════════════════════
+    #  FRENCH PHILOSOPHIE (3)
+    # ══════════════════════════════════════════════════════════════════
+
+    "essais-montaigne-2": {
+        "title": "Essais de Montaigne, Volume II",
+        "author": "Michel de Montaigne",
+        "gutenberg_id": 49168,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Philosophie",
+    },
+    "essais-montaigne-3": {
+        "title": "Essais de Montaigne, Volume III",
+        "author": "Michel de Montaigne",
+        "gutenberg_id": 58801,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Philosophie",
+    },
+    "pensees-pascal": {
+        "title": "Notes sur les Pensées de Pascal",
+        "author": "Voltaire / Condorcet / Pascal",
+        "gutenberg_id": 29772,
+        "voice": "Aude (Enhanced)",
+        "language": "fr",
+        "category": "French Philosophie",
+    },
 }
 
 # Ordered category list for display
@@ -1368,4 +1612,10 @@ BOOK_CATEGORIES = [
     "Mental Power & New Thought",
     "Stoic Wisdom (additional)",
     "French Mindfulness & Wisdom",
+    # New French categories
+    "French Science-Fiction",
+    "French Aventure",
+    "French Littérature",
+    "French Poésie",
+    "French Philosophie",
 ]
