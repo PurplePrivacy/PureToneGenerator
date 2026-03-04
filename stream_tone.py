@@ -94,8 +94,8 @@ parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
 parser.add_argument("--audiobook-gap", type=float, default=2.0, metavar="SEC",
                     help="Silence gap between audiobook sentences in seconds (default: 2.0)")
-parser.add_argument("--audiobook-word-gap", type=float, default=0.0, metavar="SEC",
-                    help="Silence pause after punctuation marks in seconds (default: 0.0, disabled)")
+parser.add_argument("--audiobook-word-gap", type=float, default=1.5, metavar="MULT",
+                    help="Extend natural TTS pauses by this multiplier (default: 1.5, 0=disabled)")
 parser.add_argument("--no-audiobook-loop", action="store_true",
                     help="Disable audiobook looping (by default, the book replays when finished)")
 parser.add_argument("--no-audiobook-gaps", action="store_true",
@@ -2808,59 +2808,6 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # ── Human-like rhythmic pauses (post-processing) ─────────
-            # Compute pause positions as character fractions, render clean
-            # text via TTS, then splice silence into the numpy audio.
-            # This avoids [[slnc]] TTS artifacts from Enhanced/neural voices.
-            _pause_plan = []   # list of (char_fraction, pause_ms)
-            if audiobook_word_gap > 0:
-                _base_ms = int(audiobook_word_gap * 1000)
-                _PUNCT_PAUSE = {
-                    ',': 300, ';': 450, ':': 450,
-                    '.': 650, '!': 650, '?': 650,
-                    '-': 350, '\u2014': 350, '\u2013': 350,
-                }
-                _CYCLE = [20, 28, 36]
-                _cycle_idx = 0
-                _GLUE = frozenset({
-                    'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
-                    'for', 'is', 'it', 'or', 'as', 'and', 'but', 'this',
-                    'that', 'with', 'from', 'into', 'her', 'his', 'its',
-                    'our', 'my', 'your', 'their', 'we', 'he', 'she', 'they',
-                    'was', 'are', 'were', 'has', 'had', 'been', 'will',
-                    'would', 'could', 'should', 'can', 'may', 'not', 'all',
-                    'each', 'every',
-                    'le', 'la', 'les', 'un', 'une', 'de', 'du', 'des',
-                    '\u00e0', 'en', 'au', 'aux', 'et', 'ou', 'par', 'pour',
-                    'sur', 'est', 'ce', 'se', 'ne', 'qui', 'que', 'son',
-                    'sa', 'ses', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
-                    'leur', 'leurs',
-                })
-                _words = text.split()
-                _total_chars = sum(len(w) for w in _words) + max(0, len(_words) - 1)
-                _char_pos = 0
-                _char_count = 0
-                for _i, _w in enumerate(_words):
-                    _char_pos += len(_w) + (1 if _i > 0 else 0)
-                    _char_count += len(_w) + 1
-                    _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
-                    _punct_match = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
-                    if _bare in _GLUE:
-                        continue
-                    if _punct_match:
-                        _p_ms = _PUNCT_PAUSE.get(_punct_match.group(1), _base_ms)
-                        _pause_plan.append((_char_pos / max(_total_chars, 1), _p_ms))
-                        _char_count = 0
-                        _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
-                        continue
-                    if _char_count >= _CYCLE[_cycle_idx]:
-                        if _i + 1 < len(_words):
-                            _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_i + 1]).lower()
-                            if _next_bare in _GLUE and len(_next_bare) <= 3:
-                                continue
-                        _pause_plan.append((_char_pos / max(_total_chars, 1), _base_ms))
-                        _char_count = 0
-                        _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
             cache_key = (voice, text)
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
@@ -2869,44 +2816,46 @@ def _audiobook_renderer_thread():
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
-            if arr is not None and _pause_plan and not audiobook_no_gaps:
-                # Splice silence into rendered audio at computed positions.
-                # Work backwards so earlier insertions don't shift later positions.
-                # Only splice at natural low-energy gaps — skip if speech is continuous.
-                _xfade_n = min(int(0.050 * sample_rate), 2200)   # 50ms cosine crossfade
-                _rms_full = np.sqrt(np.mean(arr ** 2)) if len(arr) > 0 else 0.0
-                _energy_gate = _rms_full * 0.15   # splice only where energy < 15% of sentence RMS
-                for _frac, _ms in reversed(_pause_plan):
-                    _pos = int(_frac * len(arr))
-                    _pos = max(_xfade_n, min(_pos, len(arr) - _xfade_n))
-                    # Find nearest low-energy point within ±120ms to avoid cutting mid-phoneme
-                    _search = int(0.120 * sample_rate)
-                    _lo = max(0, _pos - _search)
-                    _hi = min(len(arr), _pos + _search)
-                    _win_len = 2 * _xfade_n
-                    _window_energy = np.convolve(arr[_lo:_hi] ** 2,
-                                                  np.ones(_win_len) / _win_len,
-                                                  mode='same')
-                    _best_local = np.argmin(_window_energy)
-                    _best_energy = np.sqrt(_window_energy[_best_local])
-                    _best = _lo + _best_local
-                    _best = max(_xfade_n, min(_best, len(arr) - _xfade_n))
-                    # Skip this splice if the best point is still mid-speech
-                    if _best_energy > _energy_gate:
-                        continue
-                    # Build: fade-out + silence + fade-in
-                    _sil_samples = int(_ms * sample_rate / 1000)
-                    _fade_out = (1 + np.cos(np.linspace(0, np.pi, _xfade_n))) / 2
-                    _fade_in  = (1 - np.cos(np.linspace(0, np.pi, _xfade_n))) / 2
-                    _left = arr[:_best].copy()
-                    _right = arr[_best:].copy()
-                    if len(_left) >= _xfade_n:
-                        _left[-_xfade_n:] *= _fade_out.astype(np.float32)
-                    if len(_right) >= _xfade_n:
-                        _right[:_xfade_n] *= _fade_in.astype(np.float32)
-                    arr = np.concatenate([_left,
-                                          np.zeros(_sil_samples, dtype=np.float32),
-                                          _right])
+            if arr is not None and audiobook_word_gap > 0 and not audiobook_no_gaps:
+                # ── Natural pause extension ────────────────────────────
+                # Find silences the TTS already placed (commas, periods, word
+                # gaps) and stretch them.  Never cuts into speech — only
+                # inserts extra silence inside existing quiet regions.
+                _gap_mult = audiobook_word_gap       # multiplier (default 1.5)
+                _win_ms  = 10                        # energy-analysis window (ms)
+                _win_n   = int(_win_ms / 1000 * sample_rate)
+                _min_gap = int(0.025 * sample_rate)  # ignore gaps < 25ms (consonant closures)
+                # Compute short-time energy (RMS per window)
+                _n_wins = len(arr) // _win_n
+                if _n_wins > 2:
+                    _trimmed = arr[:_n_wins * _win_n].reshape(_n_wins, _win_n)
+                    _rms = np.sqrt(np.mean(_trimmed ** 2, axis=1))
+                    _thresh = np.median(_rms) * 0.10  # silence = below 10% of median RMS
+                    # Find contiguous silence runs
+                    _is_sil = _rms < _thresh
+                    _gaps = []     # (start_sample, end_sample)
+                    _in_gap = False
+                    _gap_start = 0
+                    for _wi in range(len(_is_sil)):
+                        if _is_sil[_wi] and not _in_gap:
+                            _gap_start = _wi * _win_n
+                            _in_gap = True
+                        elif not _is_sil[_wi] and _in_gap:
+                            _gap_end = _wi * _win_n
+                            if _gap_end - _gap_start >= _min_gap:
+                                _gaps.append((_gap_start, _gap_end))
+                            _in_gap = False
+                    # Extend gaps by inserting silence at the midpoint of each.
+                    # Work backwards to preserve positions.
+                    for _gs, _ge in reversed(_gaps):
+                        _gap_dur = _ge - _gs
+                        _extra = int(_gap_dur * _gap_mult)
+                        if _extra < int(0.020 * sample_rate):
+                            continue   # skip trivially short extensions
+                        _mid = (_gs + _ge) // 2
+                        arr = np.concatenate([arr[:_mid],
+                                              np.zeros(_extra, dtype=np.float32),
+                                              arr[_mid:]])
             if arr is not None:
                 _audiobook_rendered[_audiobook_next_render] = arr
             else:
