@@ -94,10 +94,16 @@ parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
 parser.add_argument("--audiobook-gap", type=float, default=2.0, metavar="SEC",
                     help="Silence gap between audiobook sentences in seconds (default: 2.0)")
-parser.add_argument("--audiobook-word-gap", type=float, default=0.3, metavar="SEC",
-                    help="Silence pause after punctuation marks in seconds (default: 0.3)")
+parser.add_argument("--audiobook-word-gap", type=float, default=0.5, metavar="SEC",
+                    help="Silence pause after punctuation marks in seconds (default: 0.5)")
 parser.add_argument("--no-audiobook-loop", action="store_true",
                     help="Disable audiobook looping (by default, the book replays when finished)")
+parser.add_argument("--no-audiobook-gaps", action="store_true",
+                    help="Disable intra-sentence pauses (keeps inter-sentence gap only, for debugging)")
+parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE",
+                    help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
+parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
+                    help="Override audiobook speech rate in words-per-minute (default: 104 EN, 145 FR)")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
                     help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
@@ -180,6 +186,7 @@ audiobook_page = args.audiobook_page
 audiobook_gap = args.audiobook_gap
 audiobook_word_gap = args.audiobook_word_gap
 audiobook_loop = not args.no_audiobook_loop
+audiobook_no_gaps = args.no_audiobook_gaps
 
 # ── Preset mode overrides ─────────────────────────────────────
 # Each preset sets variables that the existing cascade then refines
@@ -317,8 +324,11 @@ if audiobook_name:
         _ab_raw = _f.read()
     # Voice selection based on book language
     _ab_lang = _ab_meta.get("language", "fr")
-    _ab_voice = _ab_meta.get("voice", "Aude (Enhanced)" if _ab_lang == "fr" else "Evan (Enhanced)")
-    if _ab_lang == "en":
+    _ab_voice = _ab_meta.get("voice", "Aude (Enhanced)" if _ab_lang == "fr" else "Samantha")
+    if args.audiobook_voice:
+        _ab_voice = args.audiobook_voice
+        print(f"Note: audiobook voice overridden to: {_ab_voice}")
+    elif _ab_lang == "en":
         print(f"Note: '{_ab_meta['title']}' is an English audiobook — using voice: {_ab_voice}")
     # Split into sentences: `. `, `? `, `! `, paragraph breaks
     _ab_parts = re.split(r'(?<=[.!?])\s+|\n{2,}', _ab_raw)
@@ -1235,7 +1245,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Jacques", "Colonne forte"),
     ("Thomas",  "Ta colonne vertébrale te maintient droit avec une force naturelle"),
     ("Thomas",  "Puissance"),
-    ("Jacques", "Poitrine fière"),
+    ("Jacques", "Pectoraux gonflés"),
     ("Thomas",  "Ta posture reflète ta vraie puissance intérieure"),
     ("Thomas",  "Flux"),
     ("Jacques", "Souffle plein"),
@@ -1452,7 +1462,7 @@ CLAUDE_PEACE_MESSAGES_FR = [
     ("Jacques", "Signaux propres"),
     ("Thomas",  "Ton système nerveux transporte uniquement tes propres signaux purs"),
     ("Thomas",  "Respire"),
-    ("Jacques", "Pleine puissance"),
+    ("Jacques", "Pectoraux gonflés"),
     ("Thomas",  "Tes nerfs vibrent de ta propre énergie originelle et pure"),
     ("Thomas",  "Réinitialise"),
     ("Jacques", "Nouveau départ"),
@@ -2187,7 +2197,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Jacques", "Remplir poumons"),
     ("Thomas",  "Chaque souffle approfondit ta connexion à ta puissance physique"),
     ("Thomas",  "Vital"),
-    ("Jacques", "Corps fort"),
+    ("Jacques", "Pectoraux gonflés"),
     ("Thomas",  "Force, chaleur et vitalité vibrent dans ton corps, naturellement"),
     ("Thomas",  "Puissant"),
     ("Jacques", "Pleine force"),
@@ -2578,7 +2588,7 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Jacques", "Pieds frappent"),
     ("Thomas",  "Tes pieds se posent lourds et fiers à chaque pas"),
     ("Thomas",  "Large"),
-    ("Jacques", "Épaules larges"),
+    ("Jacques", "Pectoraux gonflés"),
     ("Thomas",  "Ton corps remplit l'espace — large, solide, ancré"),
     ("Thomas",  "Claque"),
     ("Jacques", "Expire claque"),
@@ -2806,11 +2816,11 @@ def _audiobook_renderer_thread():
             if audiobook_word_gap > 0:
                 _base_ms = int(audiobook_word_gap * 1000)
                 _PUNCT_PAUSE = {
-                    ',': 150, ';': 250, ':': 250,
-                    '.': 400, '!': 400, '?': 400,
-                    '-': 200, '\u2014': 200, '\u2013': 200,
+                    ',': 300, ';': 450, ':': 450,
+                    '.': 650, '!': 650, '?': 650,
+                    '-': 350, '\u2014': 350, '\u2013': 350,
                 }
-                _CYCLE = [10, 15, 20]
+                _CYCLE = [20, 28, 36]
                 _cycle_idx = 0
                 _GLUE = frozenset({
                     'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
@@ -2855,26 +2865,35 @@ def _audiobook_renderer_thread():
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
             else:
-                _ab_rate = 145 if _ab_lang == "fr" else 104
+                _ab_rate = args.audiobook_rate if args.audiobook_rate else (145 if _ab_lang == "fr" else 170)
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
-            if arr is not None and _pause_plan:
+            if arr is not None and _pause_plan and not audiobook_no_gaps:
                 # Splice silence into rendered audio at computed positions.
                 # Work backwards so earlier insertions don't shift later positions.
-                _xfade_n = min(int(0.008 * sample_rate), 350)   # 8ms cosine crossfade
+                # Only splice at natural low-energy gaps — skip if speech is continuous.
+                _xfade_n = min(int(0.050 * sample_rate), 2200)   # 50ms cosine crossfade
+                _rms_full = np.sqrt(np.mean(arr ** 2)) if len(arr) > 0 else 0.0
+                _energy_gate = _rms_full * 0.15   # splice only where energy < 15% of sentence RMS
                 for _frac, _ms in reversed(_pause_plan):
                     _pos = int(_frac * len(arr))
                     _pos = max(_xfade_n, min(_pos, len(arr) - _xfade_n))
-                    # Find nearest low-energy point within ±30ms to avoid cutting mid-phoneme
-                    _search = int(0.030 * sample_rate)
+                    # Find nearest low-energy point within ±120ms to avoid cutting mid-phoneme
+                    _search = int(0.120 * sample_rate)
                     _lo = max(0, _pos - _search)
                     _hi = min(len(arr), _pos + _search)
+                    _win_len = 2 * _xfade_n
                     _window_energy = np.convolve(arr[_lo:_hi] ** 2,
-                                                  np.ones(2 * _xfade_n) / (2 * _xfade_n),
+                                                  np.ones(_win_len) / _win_len,
                                                   mode='same')
-                    _best = _lo + np.argmin(_window_energy)
+                    _best_local = np.argmin(_window_energy)
+                    _best_energy = np.sqrt(_window_energy[_best_local])
+                    _best = _lo + _best_local
                     _best = max(_xfade_n, min(_best, len(arr) - _xfade_n))
+                    # Skip this splice if the best point is still mid-speech
+                    if _best_energy > _energy_gate:
+                        continue
                     # Build: fade-out + silence + fade-in
                     _sil_samples = int(_ms * sample_rate / 1000)
                     _fade_out = (1 + np.cos(np.linspace(0, np.pi, _xfade_n))) / 2
