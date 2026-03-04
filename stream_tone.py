@@ -688,28 +688,63 @@ def _render_peace_voice(text, voice, rate=140, trim_silence=False):
                 check=True, timeout=15,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
-        data, sr = sf.read(tmp.name, dtype="float32")
+        # Resample to target rate using macOS CoreAudio (afconvert) —
+        # avoids FFT spectral leakage that adds HF harshness to speech.
+        _needs_resample = False
+        _probe_data, _probe_sr = sf.read(tmp.name, dtype="float32")
+        if _probe_sr != sample_rate:
+            _needs_resample = True
+        if _needs_resample:
+            tmp2 = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+            tmp2.close()
+            try:
+                subprocess.run(
+                    ["afconvert", "-f", "WAVE", "-d", f"LEF32@{sample_rate}",
+                     tmp.name, tmp2.name],
+                    check=True, timeout=10,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                )
+                data, sr = sf.read(tmp2.name, dtype="float32")
+            except Exception:
+                data, sr = _probe_data, _probe_sr
+            finally:
+                try:
+                    os.unlink(tmp2.name)
+                except Exception:
+                    pass
+        else:
+            data, sr = _probe_data, _probe_sr
         os.unlink(tmp.name)
         if data.ndim > 1:
             data = data.mean(axis=1)
+        # Fallback: if afconvert failed or was unavailable, resample in Python
         if sr != sample_rate:
-            indices = np.linspace(0, len(data) - 1, int(len(data) * sample_rate / sr))
-            data = np.interp(indices, np.arange(len(data)), data)
+            n_in = len(data)
+            n_out = int(n_in * sample_rate / sr)
+            if n_out > 0:
+                indices = np.linspace(0, len(data) - 1, n_out)
+                data = np.interp(indices, np.arange(len(data)), data).astype(np.float32)
+        # Remove DC offset (prevents low-freq thumps at sentence boundaries)
+        data = data - np.mean(data)
+        # Peak-normalize to consistent level (TTS output varies per sentence)
+        peak = np.max(np.abs(data)) if len(data) > 0 else 0.0
+        if peak > 0.01:
+            gain = min(0.85 / peak, 3.0)
+            data = data * gain
         # Trim leading/trailing silence (threshold-based)
         if trim_silence and len(data) > 0:
-            threshold = 0.005
+            threshold = 0.003
             above = np.where(np.abs(data) > threshold)[0]
             if len(above) > 0:
-                # Keep a tiny pad (50ms) on each side for naturalness
-                pad = int(0.05 * sample_rate)
+                pad = int(0.08 * sample_rate)
                 start = max(0, above[0] - pad)
                 end = min(len(data), above[-1] + pad)
                 data = data[start:end]
-        # Smooth fade-in/out to prevent clicks
-        fade_n = min(int(0.015 * sample_rate), len(data) // 4)
+        # Smooth cosine fade-in/out to prevent clicks (25ms)
+        fade_n = min(int(0.025 * sample_rate), len(data) // 4)
         if fade_n > 0:
-            data[:fade_n] *= np.linspace(0, 1, fade_n)
-            data[-fade_n:] *= np.linspace(1, 0, fade_n)
+            data[:fade_n] *= (1 - np.cos(np.linspace(0, np.pi, fade_n))) / 2
+            data[-fade_n:] *= (1 + np.cos(np.linspace(0, np.pi, fade_n))) / 2
         return data.astype(np.float32)
     except Exception:
         return None
@@ -3152,14 +3187,14 @@ def audio_callback(outdata, frames, time, status):
                 msg_idx = _peace_message_order[_peace_cycle_count % len(_peace_message_order)]
                 msg_text = PEACE_MESSAGES[msg_idx]
                 if msg_text in _peace_rendered:
-                    _peace_cue_buf = _peace_rendered[msg_text].copy()
+                    _peace_cue_buf = _peace_rendered[msg_text]  # ref only — buffer is read-only in mixer
                     _peace_cue_pos = 0
                 if alternate_mode:
                     _peace_alt_left = (_peace_cycle_count % 2 == 0)
                 _peace_side = "L" if alternate_mode and _peace_alt_left else "R" if alternate_mode else ""
                 _peace_side_tag = f" [{_peace_side}]" if _peace_side else ""
                 try:
-                    sys.stderr.write(f"\n  ~ {msg_text}{_peace_side_tag}\n")
+                    os.write(2, f"\n  ~ {msg_text}{_peace_side_tag}\n".encode())
                 except Exception:
                     pass
                 _peace_cycle_count += 1
@@ -3168,7 +3203,7 @@ def audio_callback(outdata, frames, time, status):
             if claude_peace and _claude_trigger:
                 ci = _claude_cycle_count % len(CLAUDE_PEACE_MESSAGES)
                 if ci in _claude_rendered:
-                    _claude_cue_buf = _claude_rendered[ci].copy()
+                    _claude_cue_buf = _claude_rendered[ci]  # ref only — buffer is read-only in mixer
                     _claude_cue_pos = 0
                 if alternate_mode:
                     _claude_alt_left = (_claude_cycle_count % 2 == 0)
@@ -3176,7 +3211,7 @@ def audio_callback(outdata, frames, time, status):
                 _claude_side = "L" if alternate_mode and _claude_alt_left else "R" if alternate_mode else ""
                 _claude_side_tag = f" [{_claude_side}]" if _claude_side else ""
                 try:
-                    sys.stderr.write(f"\n  ~ [{_cv}] {_ct}{_claude_side_tag}\n")
+                    os.write(2, f"\n  ~ [{_cv}] {_ct}{_claude_side_tag}\n".encode())
                 except Exception:
                     pass
                 _claude_cycle_count += 1
@@ -3195,17 +3230,17 @@ def audio_callback(outdata, frames, time, status):
                and _audiobook_play_idx < _audiobook_next_render):
             _audiobook_play_idx += 1
     if audiobook_mode and _audiobook_cue_buf is None and _audiobook_gap_remaining <= 0 and _audiobook_play_idx in _audiobook_rendered:
-        _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx].copy()
+        _audiobook_cue_buf = _audiobook_rendered[_audiobook_play_idx]  # ref only, no copy — avoid alloc in callback
         _audiobook_cue_pos = 0
         if alternate_mode:
             _audiobook_alt_left = (_audiobook_play_idx % 2 == 0)
         _audiobook_play_idx += 1
-        # Log the sentence text in real time so user can read along
+        # Log sentence text via low-level non-blocking write (avoid Python I/O layer in callback)
         _ab_sent_idx = _audiobook_play_idx - 1
         try:
             _, _ab_sent_text = _audiobook_sentences[_ab_sent_idx]
             _ab_display = _ab_sent_text[:120] + ("..." if len(_ab_sent_text) > 120 else "")
-            sys.stderr.write(f"\n  > {_ab_display}\n")
+            os.write(2, f"\n  > {_ab_display}\n".encode())
         except Exception:
             pass
         # Page progress logging (every _AUDIOBOOK_PAGE_SIZE sentences)
@@ -3215,7 +3250,7 @@ def audio_callback(outdata, frames, time, status):
             _ab_total_pages = (len(_audiobook_sentences) + _AUDIOBOOK_PAGE_SIZE - 1) // _AUDIOBOOK_PAGE_SIZE
             _ab_lang_tag = "FR" if _audiobook_sentences[0][0] in ("Thomas", "Jacques", "Aude (Enhanced)") else "EN"
             try:
-                sys.stderr.write(f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n")
+                os.write(2, f"\n  [{_audiobook_book_title}] [{_ab_lang_tag}] page {_ab_page + 1}/{_ab_total_pages}\n".encode())
             except Exception:
                 pass
 
@@ -3230,12 +3265,12 @@ def audio_callback(outdata, frames, time, status):
         _audiobook_last_page_logged = -1
         _audiobook_gap_remaining = int(5.0 * sample_rate)  # 5s pause before restart
         try:
-            sys.stderr.write(
+            os.write(2, (
                 f"\n\n  {'=' * 56}\n"
                 f"  ||  AUDIOBOOK COMPLETE  —  Loop {_audiobook_loop_count}\n"
                 f"  ||  \"{_audiobook_book_title}\"  —  restarting from beginning\n"
                 f"  {'=' * 56}\n\n"
-            )
+            ).encode())
         except Exception:
             pass
 
