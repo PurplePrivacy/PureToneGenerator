@@ -2798,11 +2798,11 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # ── Human-like rhythmic pauses ──────────────────────────
-            # Cycling threshold (10→15→20→repeat) creates wave-like cadence.
-            # Punctuation hierarchy: comma 150ms, semicolon/colon 250ms,
-            # dash 200ms, period/!/? 400ms. Glue words (articles,
-            # prepositions, determiners) never get a pause after them.
+            # ── Human-like rhythmic pauses (post-processing) ─────────
+            # Compute pause positions as character fractions, render clean
+            # text via TTS, then splice silence into the numpy audio.
+            # This avoids [[slnc]] TTS artifacts from Enhanced/neural voices.
+            _pause_plan = []   # list of (char_fraction, pause_ms)
             if audiobook_word_gap > 0:
                 _base_ms = int(audiobook_word_gap * 1000)
                 _PUNCT_PAUSE = {
@@ -2827,49 +2827,72 @@ def _audiobook_renderer_thread():
                     'leur', 'leurs',
                 })
                 _words = text.split()
-                _parts = []
+                _total_chars = sum(len(w) for w in _words) + max(0, len(_words) - 1)
+                _char_pos = 0
                 _char_count = 0
                 for _i, _w in enumerate(_words):
-                    _parts.append(_w)
+                    _char_pos += len(_w) + (1 if _i > 0 else 0)
                     _char_count += len(_w) + 1
                     _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
                     _punct_match = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
-                    # Never pause after glue words
                     if _bare in _GLUE:
                         continue
-                    # Punctuation-hierarchy pause (overrides char threshold)
                     if _punct_match:
                         _p_ms = _PUNCT_PAUSE.get(_punct_match.group(1), _base_ms)
-                        _parts.append(f" [[slnc {_p_ms}]]")
+                        _pause_plan.append((_char_pos / max(_total_chars, 1), _p_ms))
                         _char_count = 0
                         _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                         continue
-                    # Cycling character-threshold pause
                     if _char_count >= _CYCLE[_cycle_idx]:
-                        # Look-ahead: don't orphan a short glue word after pause
                         if _i + 1 < len(_words):
                             _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_i + 1]).lower()
                             if _next_bare in _GLUE and len(_next_bare) <= 3:
                                 continue
-                        _parts.append(f" [[slnc {_base_ms}]]")
+                        _pause_plan.append((_char_pos / max(_total_chars, 1), _base_ms))
                         _char_count = 0
                         _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
-                _ab_text = " ".join(_parts)
-            else:
-                _ab_text = text
-            cache_key = (voice, _ab_text)
+            cache_key = (voice, text)
             if cache_key in _ab_tts_cache:
-                _audiobook_rendered[_audiobook_next_render] = _ab_tts_cache[cache_key]
+                arr = _ab_tts_cache[cache_key]
             else:
                 _ab_rate = 145 if _ab_lang == "fr" else 104
-                arr = _render_peace_voice(_ab_text, voice, rate=_ab_rate, trim_silence=True)
+                arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
-                    _audiobook_rendered[_audiobook_next_render] = arr
-                else:
-                    # TTS failed (timeout, encoding issue, etc.) — insert tiny silence
-                    # so playback index advances past this sentence instead of stalling
-                    _audiobook_rendered[_audiobook_next_render] = np.zeros(int(0.05 * sample_rate), dtype=np.float32)
+            if arr is not None and _pause_plan:
+                # Splice silence into rendered audio at computed positions.
+                # Work backwards so earlier insertions don't shift later positions.
+                _xfade_n = min(int(0.008 * sample_rate), 350)   # 8ms cosine crossfade
+                for _frac, _ms in reversed(_pause_plan):
+                    _pos = int(_frac * len(arr))
+                    _pos = max(_xfade_n, min(_pos, len(arr) - _xfade_n))
+                    # Find nearest low-energy point within ±30ms to avoid cutting mid-phoneme
+                    _search = int(0.030 * sample_rate)
+                    _lo = max(0, _pos - _search)
+                    _hi = min(len(arr), _pos + _search)
+                    _window_energy = np.convolve(arr[_lo:_hi] ** 2,
+                                                  np.ones(2 * _xfade_n) / (2 * _xfade_n),
+                                                  mode='same')
+                    _best = _lo + np.argmin(_window_energy)
+                    _best = max(_xfade_n, min(_best, len(arr) - _xfade_n))
+                    # Build: fade-out + silence + fade-in
+                    _sil_samples = int(_ms * sample_rate / 1000)
+                    _fade_out = (1 + np.cos(np.linspace(0, np.pi, _xfade_n))) / 2
+                    _fade_in  = (1 - np.cos(np.linspace(0, np.pi, _xfade_n))) / 2
+                    _left = arr[:_best].copy()
+                    _right = arr[_best:].copy()
+                    if len(_left) >= _xfade_n:
+                        _left[-_xfade_n:] *= _fade_out.astype(np.float32)
+                    if len(_right) >= _xfade_n:
+                        _right[:_xfade_n] *= _fade_in.astype(np.float32)
+                    arr = np.concatenate([_left,
+                                          np.zeros(_sil_samples, dtype=np.float32),
+                                          _right])
+            if arr is not None:
+                _audiobook_rendered[_audiobook_next_render] = arr
+            else:
+                # TTS failed — insert tiny silence so playback index advances
+                _audiobook_rendered[_audiobook_next_render] = np.zeros(int(0.05 * sample_rate), dtype=np.float32)
             _audiobook_next_render += 1
             # Evict old rendered sentences to free memory
             for idx in list(_audiobook_rendered):
