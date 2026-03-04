@@ -94,8 +94,8 @@ parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
 parser.add_argument("--audiobook-gap", type=float, default=2.0, metavar="SEC",
                     help="Silence gap between audiobook sentences in seconds (default: 2.0)")
-parser.add_argument("--audiobook-word-gap", type=float, default=0.5, metavar="SEC",
-                    help="Silence pause after punctuation marks in seconds (default: 0.5)")
+parser.add_argument("--audiobook-word-gap", type=float, default=0.0, metavar="SEC",
+                    help="Silence pause after punctuation marks in seconds (default: 0.0, disabled)")
 parser.add_argument("--no-audiobook-loop", action="store_true",
                     help="Disable audiobook looping (by default, the book replays when finished)")
 parser.add_argument("--no-audiobook-gaps", action="store_true",
