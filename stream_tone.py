@@ -94,8 +94,8 @@ parser.add_argument("--audiobook-page", type=int, default=None, metavar="N",
                     help="Start audiobook from page N (each page = ~10 sentences)")
 parser.add_argument("--audiobook-gap", type=float, default=2.0, metavar="SEC",
                     help="Silence gap between audiobook sentences in seconds (default: 2.0)")
-parser.add_argument("--audiobook-word-gap", type=float, default=0.1, metavar="SEC",
-                    help="Silence pause between each word in seconds (default: 0.1)")
+parser.add_argument("--audiobook-word-gap", type=float, default=0.3, metavar="SEC",
+                    help="Silence pause after punctuation marks in seconds (default: 0.3)")
 parser.add_argument("--no-audiobook-loop", action="store_true",
                     help="Disable audiobook looping (by default, the book replays when finished)")
 # ── Presets: one-flag therapeutic modes ────────────────────────
@@ -2763,10 +2763,10 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            # Insert silence between words using macOS say's [[slnc]] command
+            # Insert silence after punctuation using macOS say's [[slnc]] command
             if audiobook_word_gap > 0:
                 _slnc_ms = int(audiobook_word_gap * 1000)
-                _ab_text = f" [[slnc {_slnc_ms}]] ".join(text.split())
+                _ab_text = re.sub(r'([,;:!?\.\-\—\–])\s', rf'\1 [[slnc {_slnc_ms}]] ', text)
             else:
                 _ab_text = text
             cache_key = (voice, _ab_text)
