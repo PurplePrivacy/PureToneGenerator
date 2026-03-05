@@ -2870,16 +2870,33 @@ def _audiobook_renderer_thread():
                     _total_chars = max(sum(len(w) + 1 for w in _words), 1)
                     _char_pos = 0
                     _pause_map = []   # (fraction, ms)  — expected pauses
+                    _CYCLE = [12, 18, 25]   # cycling character threshold
+                    _cycle_idx = 0
+                    _chars_since_pause = 0
                     for _wi_idx, _w in enumerate(_words):
                         _char_pos += len(_w) + 1
+                        _chars_since_pause += len(_w) + 1
                         _frac = _char_pos / _total_chars
-                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
-                        # Skip glue words — they shouldn't trigger pauses
-                        if _bare in _GLUE:
+                        # Skip trailing period (fraction ~1.0) — no audio gap there
+                        if _frac > 0.95:
                             continue
+                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
                         _punct_m = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
                         if _punct_m:
+                            # Punctuation pause — strongest signal
                             _pause_map.append((_frac, _PUNCT_MS.get(_punct_m.group(1), 150)))
+                            _chars_since_pause = 0
+                            _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
+                        elif _bare not in _GLUE and _chars_since_pause >= _CYCLE[_cycle_idx]:
+                            # Cycling character-threshold pause (weaker, 100ms)
+                            # Look-ahead: don't orphan a short glue word
+                            if _wi_idx + 1 < len(_words):
+                                _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
+                                if _next_bare in _GLUE and len(_next_bare) <= 3:
+                                    continue
+                            _pause_map.append((_frac, int(100 * _lang_mult)))
+                            _chars_since_pause = 0
+                            _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                     _rhythm_scores = _pause_map
                     _max_added = int(1.5 * sample_rate)  # cap total added silence per sentence
 
