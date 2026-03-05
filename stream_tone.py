@@ -2828,7 +2828,7 @@ def _audiobook_renderer_thread():
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
                 _min_gap = int((0.040 if reading_rhythm else 0.025) * sample_rate)
-                _max_ext = int(0.500 * sample_rate)  # cap extension at 500ms
+                _max_ext = int(0.900 * sample_rate)  # cap extension at 900ms
 
                 # ── Reading rhythm: text-aware pause scoring ──────────
                 # Analyze punctuation positions in the text so we can give
@@ -2839,12 +2839,12 @@ def _audiobook_renderer_thread():
                 if reading_rhythm:
                     _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
                     _PUNCT_MS = {
-                        ',': int(150 * _lang_mult), ';': int(250 * _lang_mult),
-                        ':': int(250 * _lang_mult),
-                        '.': int(450 * _lang_mult), '!': int(450 * _lang_mult),
-                        '?': int(450 * _lang_mult),
-                        '-': int(180 * _lang_mult), '\u2014': int(180 * _lang_mult),
-                        '\u2013': int(180 * _lang_mult),
+                        ',': int(300 * _lang_mult), ';': int(500 * _lang_mult),
+                        ':': int(500 * _lang_mult),
+                        '.': int(800 * _lang_mult), '!': int(800 * _lang_mult),
+                        '?': int(800 * _lang_mult),
+                        '-': int(350 * _lang_mult), '\u2014': int(350 * _lang_mult),
+                        '\u2013': int(350 * _lang_mult),
                     }
                     _GLUE = frozenset({
                         'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
@@ -2894,11 +2894,11 @@ def _audiobook_renderer_thread():
                                 _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
                                 if _next_bare in _GLUE and len(_next_bare) <= 3:
                                     continue
-                            _pause_map.append((_frac, int(100 * _lang_mult)))
+                            _pause_map.append((_frac, int(200 * _lang_mult)))
                             _chars_since_pause = 0
                             _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                     _rhythm_scores = _pause_map
-                    _max_added = int(1.5 * sample_rate)  # cap total added silence per sentence
+                    _max_added = int(3.0 * sample_rate)  # cap total added silence per sentence
 
                 # Compute short-time energy (RMS per window)
                 _n_wins = len(arr) // _win_n
@@ -2949,7 +2949,7 @@ def _audiobook_renderer_thread():
                                 _extra = min(int(_best_ms / 1000 * sample_rate), _max_ext)
                             elif _gap_dur >= int(0.060 * sample_rate):
                                 # Unmatched but significant gap — small fixed extension
-                                _extra = int(0.070 * sample_rate)  # 70ms
+                                _extra = int(0.150 * sample_rate)  # 150ms
                             else:
                                 continue
                             # Aggregate cap: don't add more than 1.5s per sentence
