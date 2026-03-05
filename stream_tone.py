@@ -104,6 +104,8 @@ parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE"
                     help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
 parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
                     help="Override audiobook speech rate in words-per-minute (default: 170)")
+parser.add_argument("--reading-rhythm", action="store_true",
+                    help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
                     help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
@@ -185,6 +187,9 @@ audiobook_resume = args.audiobook_resume
 audiobook_page = args.audiobook_page
 audiobook_gap = args.audiobook_gap
 audiobook_word_gap = args.audiobook_word_gap
+reading_rhythm = args.reading_rhythm
+if reading_rhythm and "--audiobook-word-gap" not in sys.argv:
+    audiobook_word_gap = 2.0
 audiobook_loop = not args.no_audiobook_loop
 audiobook_no_gaps = args.no_audiobook_gaps
 
@@ -2822,7 +2827,62 @@ def _audiobook_renderer_thread():
                 _gap_mult = audiobook_word_gap       # multiplier (default 1.5)
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
-                _min_gap = int(0.025 * sample_rate)  # ignore gaps < 25ms (consonant closures)
+                _min_gap = int((0.040 if reading_rhythm else 0.025) * sample_rate)
+                _max_ext = int(0.500 * sample_rate)  # cap extension at 500ms
+
+                # ── Reading rhythm: text-aware pause scoring ──────────
+                # Analyze punctuation positions in the text so we can give
+                # each detected audio gap a context-aware extension instead
+                # of a flat multiplier.  Gaps near periods get more silence
+                # than gaps near commas; gaps after glue words get none.
+                _rhythm_scores = None   # None = flat multiplier mode
+                if reading_rhythm:
+                    _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
+                    _PUNCT_MS = {
+                        ',': int(150 * _lang_mult), ';': int(250 * _lang_mult),
+                        ':': int(250 * _lang_mult),
+                        '.': int(450 * _lang_mult), '!': int(450 * _lang_mult),
+                        '?': int(450 * _lang_mult),
+                        '-': int(180 * _lang_mult), '\u2014': int(180 * _lang_mult),
+                        '\u2013': int(180 * _lang_mult),
+                    }
+                    _GLUE = frozenset({
+                        'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
+                        'for', 'is', 'it', 'or', 'as', 'and', 'but', 'this',
+                        'that', 'with', 'from', 'into', 'her', 'his', 'its',
+                        'our', 'my', 'your', 'their', 'we', 'he', 'she', 'they',
+                        'was', 'are', 'were', 'has', 'had', 'been', 'will',
+                        'would', 'could', 'should', 'can', 'may', 'not', 'all',
+                        'each', 'every', 'no', 'so', 'if', 'then', 'when',
+                        'than', 'just', 'still', 'yet', 'much', 'very', 'too',
+                        'also', 'even', 'both', 'nor', 'do', 'did', 'does', 'am',
+                        'le', 'la', 'les', 'un', 'une', 'de', 'du', 'des',
+                        '\u00e0', 'en', 'au', 'aux', 'et', 'ou', 'par', 'pour',
+                        'sur', 'est', 'ce', 'se', 'ne', 'qui', 'que', 'son',
+                        'sa', 'ses', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
+                        'leur', 'leurs', 'il', 'elle', 'ils', 'elles', 'on',
+                        'nous', 'vous', 'je', 'tu', 'ni', 'si', 'y', 'dont',
+                        'dans', 'mais', 'car', 'pas', 'plus', 'bien', 'tout',
+                        'cette', 'ces', 'peu',
+                    })
+                    # Build list of (char_fraction, pause_ms) for each word boundary
+                    _words = text.split()
+                    _total_chars = max(sum(len(w) + 1 for w in _words), 1)
+                    _char_pos = 0
+                    _pause_map = []   # (fraction, ms)  — expected pauses
+                    for _wi_idx, _w in enumerate(_words):
+                        _char_pos += len(_w) + 1
+                        _frac = _char_pos / _total_chars
+                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
+                        # Skip glue words — they shouldn't trigger pauses
+                        if _bare in _GLUE:
+                            continue
+                        _punct_m = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
+                        if _punct_m:
+                            _pause_map.append((_frac, _PUNCT_MS.get(_punct_m.group(1), 150)))
+                    _rhythm_scores = _pause_map
+                    _max_added = int(1.5 * sample_rate)  # cap total added silence per sentence
+
                 # Compute short-time energy (RMS per window)
                 _n_wins = len(arr) // _win_n
                 if _n_wins > 2:
@@ -2843,11 +2903,44 @@ def _audiobook_renderer_thread():
                             if _gap_end - _gap_start >= _min_gap:
                                 _gaps.append((_gap_start, _gap_end))
                             _in_gap = False
+                    _total_samp = len(arr)
+                    # Tolerance: ~2 word-durations scaled to fraction of audio
+                    _tol = 2.0 * (60.0 / 170) / max(_total_samp / sample_rate, 0.1)
+                    _tol = max(_tol, 0.05)   # floor at 5%
                     # Extend gaps by inserting silence at the midpoint of each.
                     # Work backwards to preserve positions.
+                    _added_total = 0
+                    _used_punct = set()  # dedup: each punctuation matches at most one gap
                     for _gs, _ge in reversed(_gaps):
                         _gap_dur = _ge - _gs
-                        _extra = int(_gap_dur * _gap_mult)
+                        if _rhythm_scores is not None and _rhythm_scores:
+                            # Match this audio gap to nearest text punctuation
+                            _gap_frac = (_gs + _ge) / 2 / _total_samp
+                            _best_ms = 0
+                            _best_dist = 1.0
+                            _best_idx = -1
+                            for _pi, (_pf, _pms) in enumerate(_rhythm_scores):
+                                if _pi in _used_punct:
+                                    continue
+                                _d = abs(_pf - _gap_frac)
+                                if _d < _best_dist:
+                                    _best_dist = _d
+                                    _best_ms = _pms
+                                    _best_idx = _pi
+                            if _best_dist <= _tol and _best_idx >= 0:
+                                _used_punct.add(_best_idx)
+                                _extra = min(int(_best_ms / 1000 * sample_rate), _max_ext)
+                            elif _gap_dur >= int(0.060 * sample_rate):
+                                # Unmatched but significant gap — small fixed extension
+                                _extra = int(0.070 * sample_rate)  # 70ms
+                            else:
+                                continue
+                            # Aggregate cap: don't add more than 1.5s per sentence
+                            if _added_total + _extra > _max_added:
+                                continue
+                            _added_total += _extra
+                        else:
+                            _extra = min(int(_gap_dur * _gap_mult), _max_ext)
                         if _extra < int(0.020 * sample_rate):
                             continue   # skip trivially short extensions
                         _mid = (_gs + _ge) // 2

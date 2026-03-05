@@ -14,7 +14,7 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
-**155-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, the Yoga Sutras, the Bhagavad-Gita, Zen Buddhism, the Science of Breath, and 145 more classics read aloud during your sessions. 70 French, 85 English. Page tracking, resume support, and real-time subtitles.
+**183-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, the Yoga Sutras, the Bhagavad-Gita, Zen Buddhism, the Science of Breath, and 170+ more classics read aloud during your sessions. 98 French, 85 English. Page tracking, resume support, and real-time subtitles.
 
 **20 One-Flag Presets** — From `--sleep` to `--emdr-session` to `--morning-energy`, each preset is a complete therapeutic session in a single command. No configuration needed.
 
@@ -47,7 +47,7 @@ pip install numpy sounddevice soundfile
 # Voice setup (macOS — checks required TTS voices)
 ./setup_voices.sh
 
-# Download audiobook library (155 books, run once)
+# Download audiobook library (183 books, run once)
 python books/fetch_books.py
 ```
 
@@ -168,10 +168,11 @@ python stream_tone.py --full-restore
 ### Audiobook
 ```
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
---audiobook-list     List all 155 available audiobooks and exit
+--audiobook-list     List all 183 available audiobooks and exit
 --audiobook-vol FL   Voice volume (default: 0.40)
 --audiobook-resume   Resume from saved position
 --audiobook-page N   Start from page N (each page = 10 sentences)
+--reading-rhythm     Enhanced pacing — punctuation-aware pause hierarchy
 ```
 
 ### Preset Modes
@@ -251,6 +252,9 @@ python stream_tone.py --audiobook miserables --audiobook-resume
 
 # Jump to a specific page
 python stream_tone.py --audiobook miserables --audiobook-page 42
+
+# Enhanced reading rhythm — deliberate, narrator-like pacing
+python stream_tone.py --audiobook meditations --reading-rhythm
 ```
 
 ### Real-Time Text Display
@@ -273,7 +277,7 @@ Every 10 sentences, page progress is logged. On Ctrl-C, you get a resume command
 
 With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 
-### Book Library (155 books)
+### Book Library (183 books)
 
 **Philosophy & Wisdom:**
 - `meditations` — Meditations (Marcus Aurelius) [EN]
