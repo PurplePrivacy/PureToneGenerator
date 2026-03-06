@@ -2823,7 +2823,7 @@ def _audiobook_renderer_thread():
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
-            if arr is not None and audiobook_word_gap > 0 and not audiobook_no_gaps:
+            if arr is not None and reading_rhythm and not audiobook_no_gaps:
                 # ── Natural pause extension ────────────────────────────
                 # Find silences the TTS already placed (commas, periods, word
                 # gaps) and stretch them.  Never cuts into speech — only
