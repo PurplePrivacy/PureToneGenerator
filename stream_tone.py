@@ -103,7 +103,7 @@ parser.add_argument("--no-audiobook-gaps", action="store_true",
 parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE",
                     help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
 parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
-                    help="Override audiobook speech rate in words-per-minute (default: 170)")
+                    help="Override audiobook speech rate in words-per-minute (default: 135)")
 parser.add_argument("--rhythm", action="store_true",
                     help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel")
 # ── Presets: one-flag therapeutic modes ────────────────────────
@@ -2819,7 +2819,7 @@ def _audiobook_renderer_thread():
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
             else:
-                _ab_rate = args.audiobook_rate if args.audiobook_rate else 170
+                _ab_rate = args.audiobook_rate if args.audiobook_rate else 135
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
@@ -2903,6 +2903,23 @@ def _audiobook_renderer_thread():
                             _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                     _rhythm_scores = _pause_map
                     _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
+                    # Word-count rhythm: 0.5s breath pauses at word positions 1,3,5,9 (cycling)
+                    _WORD_RHYTHM = [1, 3, 5, 9]
+                    _WR_PAUSE_MS = 500
+                    _wr_cycle_idx = 0
+                    _wr_countdown = _WORD_RHYTHM[0]
+                    _wr_word_idx = 0
+                    _wr_positions = set()   # char-fractions where 1s pauses go
+                    for _wi_idx2, _w2 in enumerate(_words):
+                        _wr_word_idx += 1
+                        if _wr_word_idx >= _wr_countdown:
+                            _cp2 = sum(len(_words[j]) + 1 for j in range(_wi_idx2 + 1))
+                            _frac2 = _cp2 / _total_chars
+                            if _frac2 < 0.95:
+                                _wr_positions.add(_frac2)
+                            _wr_word_idx = 0
+                            _wr_cycle_idx = (_wr_cycle_idx + 1) % len(_WORD_RHYTHM)
+                            _wr_countdown = _WORD_RHYTHM[_wr_cycle_idx]
 
                 # Compute short-time energy (RMS per window)
                 _n_wins = len(arr) // _win_n
@@ -2932,6 +2949,7 @@ def _audiobook_renderer_thread():
                     # Work backwards to preserve positions.
                     _added_total = 0
                     _used_punct = set()  # dedup: each punctuation matches at most one gap
+                    _min_wr_gap = int(0.030 * sample_rate)  # word-rhythm needs >=30ms confirmed silence
                     for _gs, _ge in reversed(_gaps):
                         _gap_dur = _ge - _gs
                         if _rhythm_scores is not None and _rhythm_scores:
@@ -2948,9 +2966,21 @@ def _audiobook_renderer_thread():
                                     _best_dist = _d
                                     _best_ms = _pms
                                     _best_idx = _pi
+                            # Check word-count rhythm positions (only for real gaps)
+                            _wr_match = False
+                            if _wr_positions and _gap_dur >= _min_wr_gap:
+                                for _wrf in _wr_positions:
+                                    if abs(_wrf - _gap_frac) <= _tol:
+                                        _wr_match = True
+                                        break
                             if _best_dist <= _tol and _best_idx >= 0:
                                 _used_punct.add(_best_idx)
-                                _extra = min(int(_best_ms / 1000 * sample_rate), _max_ext)
+                                _pms = _best_ms
+                                if _wr_match:
+                                    _pms = max(_pms, _WR_PAUSE_MS)
+                                _extra = min(int(_pms / 1000 * sample_rate), _max_ext)
+                            elif _wr_match:
+                                _extra = min(int(_WR_PAUSE_MS / 1000 * sample_rate), _max_ext)
                             elif _gap_dur >= int(0.060 * sample_rate):
                                 # Unmatched but significant gap — small fixed extension
                                 _extra = int(0.070 * sample_rate)  # 70ms
@@ -2964,7 +2994,14 @@ def _audiobook_renderer_thread():
                             _extra = min(int(_gap_dur * _gap_mult), _max_ext)
                         if _extra < int(0.020 * sample_rate):
                             continue   # skip trivially short extensions
-                        _mid = (_gs + _ge) // 2
+                        # Insert at the center of the gap with safety margins
+                        # so we never touch speech at the edges
+                        _margin = min(int(0.010 * sample_rate), _gap_dur // 4)  # 10ms or 25% of gap
+                        _safe_start = _gs + _margin
+                        _safe_end = _ge - _margin
+                        if _safe_start >= _safe_end:
+                            continue   # gap too narrow for safe insertion
+                        _mid = (_safe_start + _safe_end) // 2
                         # Crossfade around insertion to avoid clicks
                         _xf_n = min(int(0.005 * sample_rate), _mid, len(arr) - _mid)  # 5ms
                         if _xf_n > 1:

@@ -1,0 +1,7 @@
+# Personal reading plan (not part of the project)
+.claude/reading-plan.md
+.claude/reading-progress.md
+.claude/agents/reading-plan-agent.md
+
+# Temporary catalog build files
+books/new_catalog_entries.py
