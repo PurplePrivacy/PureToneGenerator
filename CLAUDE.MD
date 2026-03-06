@@ -12,7 +12,7 @@ pip install numpy sounddevice soundfile
 
 # Run (basic)
 python stream_tone.py                              # 528 Hz pure tone
-python stream_tone.py --phd-peace --alternate      # 21-phase therapeutic session
+python stream_tone.py --phd-peace --alternate      # 38-phase therapeutic session
 python stream_tone.py --audiobook meditations      # audiobook mode
 
 # Download audiobook library (run once)
@@ -25,7 +25,7 @@ No test suite or linter exists. Python 3.14 with venv. Dependencies: `numpy`, `s
 
 ## Architecture
 
-**Single-file application**: `stream_tone.py` (~2400 lines) is the entire program. No classes — it's a linear script with module-level state and functions.
+**Single-file application**: `stream_tone.py` (~2500 lines) is the entire program. No classes — it's a linear script with module-level state and functions.
 
 **Layout of stream_tone.py** (top to bottom):
 1. **Argument parsing** (~lines 1–130) — all CLI flags
@@ -47,12 +47,13 @@ No test suite or linter exists. Python 3.14 with venv. Dependencies: `numpy`, `s
 ### Audio Signal Chain (inside `audio_callback`)
 
 ```
-sine(freq) → iso pulse → HRV envelope → fade-in → long fade → gain(5.0x)
+sine(freq) → iso pulse → HRV envelope → fade-in → long fade → gain(4.5x)
          → ABS stereo split → outdata
-         → breath cues mixed post-gain (not amplified 5x)
+         → breath cues mixed post-gain (not amplified 4.5x)
          → peace voice mixed post-gain
          → claude/phd voice mixed post-gain
          → audiobook voice mixed post-gain
+         → soft limiter
 ```
 
 ### Key Patterns

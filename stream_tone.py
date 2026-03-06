@@ -104,7 +104,7 @@ parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE"
                     help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
 parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
                     help="Override audiobook speech rate in words-per-minute (default: 170)")
-parser.add_argument("--reading-rhythm", action="store_true",
+parser.add_argument("--rhythm", action="store_true",
                     help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
@@ -187,7 +187,7 @@ audiobook_resume = args.audiobook_resume
 audiobook_page = args.audiobook_page
 audiobook_gap = args.audiobook_gap
 audiobook_word_gap = args.audiobook_word_gap
-reading_rhythm = args.reading_rhythm
+reading_rhythm = args.rhythm
 if reading_rhythm and "--audiobook-word-gap" not in sys.argv:
     audiobook_word_gap = 2.0
 audiobook_loop = not args.no_audiobook_loop
@@ -387,6 +387,10 @@ phase = 0.0
 fade_samples = int(fade_seconds * sample_rate)
 current_sample = 0
 hrv_phase = 0
+
+# Soft limiter constants — transparent below threshold, tanh compression above
+_SOFT_THRESHOLD = 0.92
+_SOFT_HEADROOM = 1.0 - _SOFT_THRESHOLD  # 0.08
 
 # ============================
 # HRV ENVELOPE LOOKUP TABLE
@@ -2828,7 +2832,7 @@ def _audiobook_renderer_thread():
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
                 _min_gap = int((0.040 if reading_rhythm else 0.025) * sample_rate)
-                _max_ext = int(0.900 * sample_rate)  # cap extension at 900ms
+                _max_ext = int(0.500 * sample_rate)  # cap extension at 500ms
 
                 # ── Reading rhythm: text-aware pause scoring ──────────
                 # Analyze punctuation positions in the text so we can give
@@ -2839,12 +2843,12 @@ def _audiobook_renderer_thread():
                 if reading_rhythm:
                     _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
                     _PUNCT_MS = {
-                        ',': int(300 * _lang_mult), ';': int(500 * _lang_mult),
-                        ':': int(500 * _lang_mult),
-                        '.': int(800 * _lang_mult), '!': int(800 * _lang_mult),
-                        '?': int(800 * _lang_mult),
-                        '-': int(350 * _lang_mult), '\u2014': int(350 * _lang_mult),
-                        '\u2013': int(350 * _lang_mult),
+                        ',': int(150 * _lang_mult), ';': int(250 * _lang_mult),
+                        ':': int(250 * _lang_mult),
+                        '.': int(450 * _lang_mult), '!': int(450 * _lang_mult),
+                        '?': int(450 * _lang_mult),
+                        '-': int(180 * _lang_mult), '\u2014': int(180 * _lang_mult),
+                        '\u2013': int(180 * _lang_mult),
                     }
                     _GLUE = frozenset({
                         'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
@@ -2894,11 +2898,11 @@ def _audiobook_renderer_thread():
                                 _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
                                 if _next_bare in _GLUE and len(_next_bare) <= 3:
                                     continue
-                            _pause_map.append((_frac, int(200 * _lang_mult)))
+                            _pause_map.append((_frac, int(100 * _lang_mult)))
                             _chars_since_pause = 0
                             _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                     _rhythm_scores = _pause_map
-                    _max_added = int(3.0 * sample_rate)  # cap total added silence per sentence
+                    _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
 
                 # Compute short-time energy (RMS per window)
                 _n_wins = len(arr) // _win_n
@@ -2949,10 +2953,10 @@ def _audiobook_renderer_thread():
                                 _extra = min(int(_best_ms / 1000 * sample_rate), _max_ext)
                             elif _gap_dur >= int(0.060 * sample_rate):
                                 # Unmatched but significant gap — small fixed extension
-                                _extra = int(0.150 * sample_rate)  # 150ms
+                                _extra = int(0.070 * sample_rate)  # 70ms
                             else:
                                 continue
-                            # Aggregate cap: don't add more than 1.5s per sentence
+                            # Aggregate cap: don't add more than 2s per sentence
                             if _added_total + _extra > _max_added:
                                 continue
                             _added_total += _extra
@@ -2961,9 +2965,22 @@ def _audiobook_renderer_thread():
                         if _extra < int(0.020 * sample_rate):
                             continue   # skip trivially short extensions
                         _mid = (_gs + _ge) // 2
-                        arr = np.concatenate([arr[:_mid],
-                                              np.zeros(_extra, dtype=np.float32),
-                                              arr[_mid:]])
+                        # Crossfade around insertion to avoid clicks
+                        _xf_n = min(int(0.005 * sample_rate), _mid, len(arr) - _mid)  # 5ms
+                        if _xf_n > 1:
+                            _xf_out = np.linspace(1.0, 0.0, _xf_n, dtype=np.float32)
+                            _xf_in  = np.linspace(0.0, 1.0, _xf_n, dtype=np.float32)
+                            _left  = arr[:_mid].copy()
+                            _right = arr[_mid:].copy()
+                            _left[-_xf_n:]  *= _xf_out
+                            _right[:_xf_n]  *= _xf_in
+                            arr = np.concatenate([_left,
+                                                  np.zeros(_extra, dtype=np.float32),
+                                                  _right])
+                        else:
+                            arr = np.concatenate([arr[:_mid],
+                                                  np.zeros(_extra, dtype=np.float32),
+                                                  arr[_mid:]])
             if arr is not None:
                 _audiobook_rendered[_audiobook_next_render] = arr
             else:
@@ -3408,7 +3425,14 @@ def audio_callback(outdata, frames, time, status):
             except Exception:
                 pass
 
-    gain = 5.0  # global output gain multiplier
+    gain = 4.5  # output gain — tone peaks at 0.90, limiter only engages during voice mix
+
+    # Duck tone when voices are active so limiter barely engages
+    _n_voices = ((_peace_cue_buf is not None)
+                 + (_claude_cue_buf is not None)
+                 + (_audiobook_cue_buf is not None))
+    if _n_voices:
+        gain *= (1.0 - 0.15 * _n_voices)  # 0.85x per voice layer
 
     if abs_mode:
         # Floor at 0.2 so neither ear fully mutes — smoother lateralization
@@ -3488,8 +3512,12 @@ def audio_callback(outdata, frames, time, status):
             _audiobook_cue_pos = 0
             _audiobook_gap_remaining = int(audiobook_gap * sample_rate)
 
-    # Safety-only clip guard (signal should not exceed 1.0 under normal conditions)
-    np.clip(outdata, -1.0, 1.0, out=outdata)
+    # Soft limiter — linear below threshold, tanh saturation above (no harsh clipping)
+    _abs_out = np.abs(outdata)
+    _over = _abs_out - _SOFT_THRESHOLD
+    _compressed = _SOFT_THRESHOLD + _SOFT_HEADROOM * np.tanh(_over / _SOFT_HEADROOM)
+    outdata[:] = np.where(_abs_out > _SOFT_THRESHOLD,
+                          np.sign(outdata) * _compressed, outdata)
 
 
 # ============================

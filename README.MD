@@ -14,7 +14,7 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
-**183-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, the Yoga Sutras, the Bhagavad-Gita, Zen Buddhism, the Science of Breath, and 170+ more classics read aloud during your sessions. 98 French, 85 English. Page tracking, resume support, and real-time subtitles.
+**739-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, H.G. Wells, Proust, Balzac, Austen, Dickens, Shakespeare, Herodotus, Gibbon, Michelet, and 700+ more classics read aloud during your sessions. 277 French, 462 English — covering philosophy, sci-fi, fantasy, classics, history, and personal improvement. Page tracking, resume support, and real-time subtitles.
 
 **20 One-Flag Presets** — From `--sleep` to `--emdr-session` to `--morning-energy`, each preset is a complete therapeutic session in a single command. No configuration needed.
 
@@ -47,7 +47,7 @@ pip install numpy sounddevice soundfile
 # Voice setup (macOS — checks required TTS voices)
 ./setup_voices.sh
 
-# Download audiobook library (183 books, run once)
+# Download audiobook library (739 books, run once)
 python books/fetch_books.py
 ```
 
@@ -168,11 +168,11 @@ python stream_tone.py --full-restore
 ### Audiobook
 ```
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
---audiobook-list     List all 183 available audiobooks and exit
+--audiobook-list     List all 739 available audiobooks and exit
 --audiobook-vol FL   Voice volume (default: 0.40)
 --audiobook-resume   Resume from saved position
 --audiobook-page N   Start from page N (each page = 10 sentences)
---reading-rhythm     Enhanced pacing — punctuation-aware pause hierarchy
+--rhythm     Enhanced pacing — punctuation-aware pause hierarchy
 ```
 
 ### Preset Modes
@@ -254,7 +254,7 @@ python stream_tone.py --audiobook miserables --audiobook-resume
 python stream_tone.py --audiobook miserables --audiobook-page 42
 
 # Enhanced reading rhythm — deliberate, narrator-like pacing
-python stream_tone.py --audiobook meditations --reading-rhythm
+python stream_tone.py --audiobook meditations --rhythm
 ```
 
 ### Real-Time Text Display
@@ -277,7 +277,7 @@ Every 10 sentences, page progress is logged. On Ctrl-C, you get a resume command
 
 With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 
-### Book Library (183 books)
+### Book Library (739 books)
 
 **Philosophy & Wisdom:**
 - `meditations` — Meditations (Marcus Aurelius) [EN]
@@ -465,6 +465,60 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `tresor-humbles` — Le trésor des humbles (Maeterlinck) [FR]
 - `sentiers-montagne` — Les sentiers dans la montagne (Maeterlinck) [FR]
 - `aphorismes-sagesse` — Aphorismes sur la sagesse dans la vie (Schopenhauer) [FR]
+
+Use `--audiobook-list` for the full catalog of 739 books including Sci-Fi, Fantasy, English Classics, Philosophy, History, Personal Improvement, and more.
+
+### Series Reading Order
+
+For books that are part of a series, read them in this order:
+
+**Barsoom Series** (Edgar Rice Burroughs) [EN]:
+`princess-of-mars` → `gods-of-mars` → `warlord-of-mars` → `thuvia-maid-of-mars` → `chessmen-of-mars` → `master-mind-of-mars` → `fighting-man-of-mars`
+
+**Pellucidar Series** (Edgar Rice Burroughs) [EN]:
+`at-earths-core` → `pellucidar` → `tanar-of-pellucidar`
+
+**Lensman Series** (E.E. "Doc" Smith) [EN]:
+`triplanetary` → `first-lensman` → `galactic-patrol` → `gray-lensman` → `second-stage-lensman` → `children-of-the-lens` → `vortex-blaster`
+
+**Oz Series** (L. Frank Baum) [EN]:
+`wonderful-wizard-of-oz` → `marvelous-land-of-oz` → `ozma-of-oz` → `dorothy-and-wizard-in-oz` → `road-to-oz` → `emerald-city-of-oz` → `patchwork-girl-of-oz` → `tik-tok-of-oz` → `scarecrow-of-oz` → `rinkitink-in-oz` → `lost-princess-of-oz` → `tin-woodman-of-oz` → `magic-of-oz` → `glinda-of-oz`
+
+**Andrew Lang Fairy Books** [EN]:
+`blue-fairy-book` → `red-fairy-book` → `green-fairy-book` → `yellow-fairy-book` → `pink-fairy-book` → `grey-fairy-book` → `violet-fairy-book` → `crimson-fairy-book` → `brown-fairy-book` → `orange-fairy-book` → `olive-fairy-book` → `lilac-fairy-book`
+
+**Les Trois Mousquetaires** (Alexandre Dumas) [FR]:
+`trois-mousquetaires` → `vingt-ans-apres` → `vicomte-bragelonne-1` → `vicomte-bragelonne-2` → `vicomte-bragelonne-3` → `vicomte-bragelonne-4`
+
+**Le Comte de Monte-Cristo** (Alexandre Dumas) [FR]:
+`monte-cristo` → `monte-cristo-2` → `monte-cristo-3` → `monte-cristo-4`
+
+**La Reine Margot** (Alexandre Dumas) [FR]:
+`reine-margot-1` → `reine-margot-2`
+
+**À la recherche du temps perdu** (Marcel Proust) [FR]:
+`du-cote-de-chez-swann` → `jeunes-filles-1` → `jeunes-filles-2` → `jeunes-filles-3` → `guermantes-1` → `guermantes-2` → `guermantes-3` → `sodome-gomorrhe-1` → `sodome-gomorrhe-2` → `prisonniere-proust` → `albertine-disparue-1` → `albertine-disparue-2` → `temps-retrouve-1` → `temps-retrouve-2`
+
+**La Comédie humaine** (Honoré de Balzac) [FR]:
+`comedie-humaine-1` through `comedie-humaine-16` (volumes 1-8, 9-12, 15-16)
+
+**Les Rougon-Macquart** (Émile Zola) [FR] — suggested reading:
+`la-curee` → `ventre-paris` → `conquete-plassans` → `faute-abbe-mouret` → `son-excellence-rougon` → `assommoir` → `page-amour` → `nana` → `pot-bouille` → `bonheur-dames` → `germinal` → `loeuvre-zola` → `la-terre` → `le-reve-zola` → `bete-humaine` → `argent-zola` → `la-debacle` → `docteur-pascal`
+
+**Les Misérables** (Victor Hugo) [FR]:
+`miserables` → `miserables-cosette` → `miserables-3-marius` → `miserables-4-idylle` → `miserables-5-valjean`
+
+**Decline and Fall of the Roman Empire** (Edward Gibbon) [EN]:
+`decline-fall-rome-1` → `decline-fall-rome-2` → `decline-fall-rome-3`
+
+**Histoire de la Révolution française** (Adolphe Thiers) [FR]:
+`revolution-francaise-thiers-1` through `revolution-francaise-thiers-7`
+
+**Histoire des Croisades** (Joseph François Michaud) [FR]:
+`histoire-croisades-michaud-1` through `histoire-croisades-michaud-6`
+
+**Mémoires d'Outre-Tombe** (Chateaubriand) [FR]:
+`memoires-outre-tombe-1` through `memoires-outre-tombe-5`
 
 ---
 
