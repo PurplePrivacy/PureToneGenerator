@@ -104,8 +104,10 @@ parser.add_argument("--audiobook-voice", type=str, default=None, metavar="VOICE"
                     help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
 parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
                     help="Override audiobook speech rate in words-per-minute (default: 135)")
-parser.add_argument("--rhythm", action="store_true",
-                    help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel")
+parser.add_argument("--rhythm", action="store_true", default=True,
+                    help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel (default: on)")
+parser.add_argument("--no-rhythm", action="store_true",
+                    help="Disable reading rhythm — use raw TTS pacing with no pause extension")
 # ── Presets: one-flag therapeutic modes ────────────────────────
 parser.add_argument("--peaceful-vibe", action="store_true",
                     help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
@@ -187,7 +189,7 @@ audiobook_resume = args.audiobook_resume
 audiobook_page = args.audiobook_page
 audiobook_gap = args.audiobook_gap
 audiobook_word_gap = args.audiobook_word_gap
-reading_rhythm = args.rhythm
+reading_rhythm = args.rhythm and not args.no_rhythm
 if reading_rhythm and "--audiobook-word-gap" not in sys.argv:
     audiobook_word_gap = 2.0
 audiobook_loop = not args.no_audiobook_loop

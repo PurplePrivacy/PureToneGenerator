@@ -8,13 +8,15 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Scientifically-Grounded Breathing** — 6 HRV breath pacing patterns (box breathing, 4-7-8, and more) with a live terminal breathing bar and 8 handcrafted audio cues (singing bowl, bell, woodblock...) to guide every inhale and exhale.
 
-**Therapeutic Voice Sessions** — Up to 500+ counter-conditioning affirmations across 27 expert-reviewed phases, covering somatic restoration, nervous system regulation, identity reclamation, default-state conditioning, grace, purification, body scan, and cellular healing. Available in English and French with Amélie positive reinforcement voice.
+**Therapeutic Voice Sessions** — Up to 500+ counter-conditioning affirmations across 27 expert-reviewed phases, covering somatic restoration, nervous system regulation, identity reclamation, default-state conditioning, grace, purification, body scan, and cellular healing. Available in English and French with Amelie positive reinforcement voice.
 
 **EMDR-Style Bilateral Stimulation** — Smooth alternating left/right audio for bilateral processing. Combine with voice alternation (`--alternate`) for full EMDR-inspired sessions where affirmations move between ears.
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
 **739-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, H.G. Wells, Proust, Balzac, Austen, Dickens, Shakespeare, Herodotus, Gibbon, Michelet, and 700+ more classics read aloud during your sessions. 277 French, 462 English — covering philosophy, sci-fi, fantasy, classics, history, and personal improvement. Page tracking, resume support, and real-time subtitles.
+
+**Intelligent Reading Rhythm** — Audiobooks play with text-aware pacing by default: punctuation-sensitive pause hierarchy (periods > semicolons > commas), word-count breath pauses at natural intervals, and glue-word protection to keep articles attached to their nouns. Disable with `--no-rhythm` for raw TTS speed.
 
 **20 One-Flag Presets** — From `--sleep` to `--emdr-session` to `--morning-energy`, each preset is a complete therapeutic session in a single command. No configuration needed.
 
@@ -170,9 +172,30 @@ python stream_tone.py --full-restore
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
 --audiobook-list     List all 739 available audiobooks and exit
 --audiobook-vol FL   Voice volume (default: 0.40)
+--audiobook-voice V  Override TTS voice (default: Jamie (Premium) for EN, Audrey (Premium) for FR)
+--audiobook-rate WPM Override speech rate in words-per-minute (default: 135)
 --audiobook-resume   Resume from saved position
 --audiobook-page N   Start from page N (each page = 10 sentences)
---rhythm     Enhanced pacing — punctuation-aware pause hierarchy
+--audiobook-gap FL   Silence between sentences in seconds (default: 3.0)
+--no-rhythm          Disable reading rhythm — use raw TTS pacing with no pause extension
+--no-audiobook-gaps  Disable all inter-sentence gaps
+--no-audiobook-loop  Don't loop the book when finished
+```
+
+#### Reading Rhythm (enabled by default)
+
+Audiobooks play with intelligent pacing that mimics a skilled human narrator:
+
+- **Punctuation-aware pauses** — periods get 450ms, semicolons/colons 250ms, commas 150ms, dashes 180ms. French text gets a 15% multiplier for naturally longer phrasing.
+- **Word-count breath pauses** — 1-second micro-silences are inserted at word positions 1, 3, 5, 9 (cycling within each sentence), creating a natural breathing cadence.
+- **Cycling character thresholds** — additional pause points at 12, 18, 25 character intervals (cycling) for even pacing density.
+- **Glue-word protection** — articles, prepositions, and short connectors (EN + FR) are never orphaned from their noun. "The" won't be separated from "book."
+- **Aggregate cap** — no more than 2 seconds of added silence per sentence, preventing over-extension on long sentences.
+- **Safe insertion** — pauses are only placed in confirmed silent regions (5% RMS threshold, 60ms minimum gap), with 15ms safety margins and 5ms crossfades to prevent any speech clipping.
+
+To disable rhythm and use raw TTS output:
+```bash
+python stream_tone.py --audiobook meditations --no-rhythm
 ```
 
 ### Preset Modes
@@ -188,7 +211,7 @@ python stream_tone.py --full-restore
 --yoga               432 Hz + HRV 4-7-8 + breath bar + bowl cue
 --breathwork         HRV 4-7-8 + voice cue (no tone)
 --healing            528 Hz + HRV + slow ABS
---creativity         639 Hz + iso 10 Hz (alpha waves
+--creativity         639 Hz + iso 10 Hz (alpha waves)
 --reading-calm       432 Hz gentle ambient
 --power-nap          396 Hz + HRV C + 30-min fade
 --bilateral-calm     528 Hz + ABS + HRV + alternating
@@ -224,9 +247,9 @@ python stream_tone.py --full-restore
 
 ---
 
-## Audiobook Mode (125 Books — 66 French, 59 English)
+## Audiobook Mode (739 Books — 277 French, 462 English)
 
-Read a full public domain book aloud during sessions. Voice is auto-selected by language (Thomas for French, Alex for English). Base tone is silenced automatically.
+Listen to public domain classics read aloud during sessions. Voice is auto-selected by language: **Jamie (Premium)** for English, **Audrey (Premium)** for French. Base tone is silenced automatically. Reading rhythm is enabled by default for natural, narrator-like pacing.
 
 ### Setup
 
@@ -241,7 +264,7 @@ python stream_tone.py --audiobook-list
 ### Usage
 
 ```bash
-# Listen to Meditations by Marcus Aurelius
+# Listen to Meditations by Marcus Aurelius (rhythm enabled by default)
 python stream_tone.py --audiobook meditations
 
 # French literature with bilateral alternation
@@ -253,8 +276,14 @@ python stream_tone.py --audiobook miserables --audiobook-resume
 # Jump to a specific page
 python stream_tone.py --audiobook miserables --audiobook-page 42
 
-# Enhanced reading rhythm — deliberate, narrator-like pacing
-python stream_tone.py --audiobook meditations --rhythm
+# Raw TTS pacing (no rhythm enhancement)
+python stream_tone.py --audiobook meditations --no-rhythm
+
+# Custom speech rate (default: 135 WPM)
+python stream_tone.py --audiobook meditations --audiobook-rate 170
+
+# Override TTS voice
+python stream_tone.py --audiobook meditations --audiobook-voice "Alex"
 ```
 
 ### Real-Time Text Display
@@ -294,9 +323,9 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `art-guerre` — The Art of War (Sun Tzu) [EN]
 - `tao-te-king` — Tao Te Ching (Lao Tzu) [EN]
 - `dhammapada` — Dhammapada [EN]
-- `bhagavad-gita` — Bhagavad-Gita [EN]^
-- `bushido` — Bushido, the Soul of Japa^^n (Nitobe) [EN]
-- `bible` — The Bible, KJV [EN]^^
+- `bhagavad-gita` — Bhagavad-Gita [EN]
+- `bushido` — Bushido, the Soul of Japan (Nitobe) [EN]
+- `bible` — The Bible, KJV [EN]
 - `coran` — The Quran (tr. Rodwell) [EN]
 - `prince` — The Prince (Machiavelli) [EN]
 - `contrat-social` — The Social Contract (Rousseau) [EN]
@@ -307,16 +336,16 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 
 **French Philosophy:**
 - `essais` — Essais (Montaigne) [FR]
-- `discours-methode` — Discours de la méthode (Descartes) [FR]
-- `pensees` — Pensées (Pascal) [EN]
+- `discours-methode` — Discours de la methode (Descartes) [FR]
+- `pensees` — Pensees (Pascal) [EN]
 - `zarathoustra` — Ainsi parlait Zarathoustra (Nietzsche) [FR]
-- `traite-tolerance` — Traité sur la tolérance (Voltaire) [FR]
+- `traite-tolerance` — Traite sur la tolerance (Voltaire) [FR]
 - `entretiens-confucius` — Les quatre livres (Confucius) [FR]
-- `imitation` — L'Imitation de Jésus-Christ [FR]
+- `imitation` — L'Imitation de Jesus-Christ [FR]
 
-**Classical Literature:**qsd
-- `odyssee` — L'Odyssée (Homère) [FR]
-- `iliade` — L'Iliade (Homère) [FR]
+**Classical Literature:**
+- `odyssee` — L'Odyssee (Homere) [FR]
+- `iliade` — L'Iliade (Homere) [FR]
 - `eneide` — The Aeneid (Virgil) [EN]
 - `metamorphoses` — The Metamorphoses (Ovid) [EN]
 - `nature-choses` — On the Nature of Things (Lucretius) [EN]
@@ -325,48 +354,48 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `candide` — Candide (Voltaire) [FR]
 - `fables` — Les Fables (La Fontaine) [FR]
 - `fleurs-mal` — Les Fleurs du mal (Baudelaire) [FR]
-- `miserables` — Les Misérables (Hugo) [FR]
+- `miserables` — Les Miserables (Hugo) [FR]
 - `monte-cristo` — Le Comte de Monte-Cristo (Dumas) [FR]
 - `trois-mousquetaires` — Les Trois Mousquetaires (Dumas) [FR]
 - `cyrano` — Cyrano de Bergerac (Rostand) [FR]
 - `madame-bovary` — Madame Bovary (Flaubert) [FR]
 - `rouge-et-noir` — Le rouge et le noir (Stendhal) [FR]
 - `chartreuse-de-parme` — La Chartreuse de Parme (Stendhal) [FR]
-- `eugenie-grandet` — Eugénie Grandet (Balzac) [FR]
+- `eugenie-grandet` — Eugenie Grandet (Balzac) [FR]
 - `germinal` — Germinal (Zola) [FR]
 - `nana` — Nana (Zola) [FR]
 - `assommoir` — L'Assommoir (Zola) [FR]
-- `therese-raquin` — Thérèse Raquin (Zola) [FR]
+- `therese-raquin` — Therese Raquin (Zola) [FR]
 - `notre-dame-de-paris` — Notre-Dame de Paris (Hugo) [FR]
 - `homme-qui-rit` — L'homme qui rit (Hugo) [FR]
 - `quatrevingt-treize` — Quatrevingt-Treize (Hugo) [FR]
-- `dame-aux-camelias` — La dame aux camélias (Dumas fils) [FR]
+- `dame-aux-camelias` — La dame aux camelias (Dumas fils) [FR]
 - `liaisons-dangereuses` — Les liaisons dangereuses (Laclos) [FR]
 - `grand-meaulnes` — Le Grand Meaulnes (Alain-Fournier) [FR]
-- `fantome-opera` — Le Fantôme de l'Opéra (Leroux) [FR]
-- `arsene-lupin` — Arsène Lupin (Leblanc) [FR]
+- `fantome-opera` — Le Fantome de l'Opera (Leroux) [FR]
+- `arsene-lupin` — Arsene Lupin (Leblanc) [FR]
 - `petite-fadette` — La petite Fadette (Sand) [FR]
-- `a-rebours` — À rebours (Huysmans) [FR]
-- `du-cote-de-chez-swann` — Du côté de chez Swann (Proust) [FR]
+- `a-rebours` — A rebours (Huysmans) [FR]
+- `du-cote-de-chez-swann` — Du cote de chez Swann (Proust) [FR]
 
 **Jules Verne:**
 - `tour-du-monde` — Le tour du monde en 80 jours [FR]
 - `voyage-centre-terre` — Voyage au centre de la Terre [FR]
 - `vingt-mille-lieues` — Vingt mille lieues sous les mers [FR]
-- `ile-mysterieuse` — L'île mystérieuse [FR]
-- `de-la-terre-a-la-lune` — De la terre à la lune [FR]
+- `ile-mysterieuse` — L'ile mysterieuse [FR]
+- `de-la-terre-a-la-lune` — De la terre a la lune [FR]
 
 **French Theatre & Poetry:**
-- `avare` — L'Avare (Molière) [FR]
-- `don-juan` — Don Juan (Molière) [FR]
+- `avare` — L'Avare (Moliere) [FR]
+- `don-juan` — Don Juan (Moliere) [FR]
 - `hernani` — Hernani (Hugo) [FR]
 - `alcools` — Alcools (Apollinaire) [FR]
-- `poesies-rimbaud` — Poésies complètes (Rimbaud) [FR]
-- `verlaine-oeuvres` — Oeuvres complètes (Verlaine) [FR]
-- `legende-des-siecles` — La Légende des siècles (Hugo) [FR]
+- `poesies-rimbaud` — Poesies completes (Rimbaud) [FR]
+- `verlaine-oeuvres` — Oeuvres completes (Verlaine) [FR]
+- `legende-des-siecles` — La Legende des siecles (Hugo) [FR]
 - `boule-de-suif` — Boule de Suif (Maupassant) [FR]
 - `le-horla` — Le Horla (Maupassant) [FR]
-- `contes-de-perrault` — Contes du temps passé (Perrault) [FR]
+- `contes-de-perrault` — Contes du temps passe (Perrault) [FR]
 - `lettres-de-mon-moulin` — Lettres de mon moulin (Daudet) [FR]
 
 **Mindfulness & Self-Improvement:**
@@ -408,20 +437,20 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `resurrection-tolstoy` — Resurrection (Tolstoy) [EN]
 - `tale-two-cities` — A Tale of Two Cities (Dickens) [EN]
 
-**French Classics (New):**
-- `caracteres` — Les Caractères (La Bruyère) [FR]
+**French Classics:**
+- `caracteres` — Les Caracteres (La Bruyere) [FR]
 - `maximes` — Maximes (La Rochefoucauld) [FR]
-- `reveries-promeneur` — Les Rêveries du promeneur solitaire (Rousseau) [FR]
+- `reveries-promeneur` — Les Reveries du promeneur solitaire (Rousseau) [FR]
 - `lettres-persanes` — Lettres persanes (Montesquieu) [FR]
 - `esprit-des-lois` — De l'esprit des lois (Montesquieu) [FR]
-- `princesse-cleves` — La Princesse de Clèves (Lafayette) [FR]
+- `princesse-cleves` — La Princesse de Cleves (Lafayette) [FR]
 - `jacques-fataliste` — Jacques le Fataliste (Diderot) [FR]
 - `neveu-rameau` — Le Neveu de Rameau (Diderot) [FR]
-- `manon-lescaut` — Manon Lescaut (Abbé Prévost) [FR]
-- `colomba` — Colomba (Mérimée) [FR]
+- `manon-lescaut` — Manon Lescaut (Abbe Prevost) [FR]
+- `colomba` — Colomba (Merimee) [FR]
 - `adolphe` — Adolphe (Benjamin Constant) [FR]
 - `zadig` — Zadig (Voltaire) [FR]
-- `micromegas` — Micromégas (Voltaire) [FR]
+- `micromegas` — Micromegas (Voltaire) [FR]
 - `une-vie` — Une Vie (Maupassant) [FR]
 - `pierre-et-jean` — Pierre et Jean (Maupassant) [FR]
 - `bel-ami` — Bel-Ami (Maupassant) [FR]
@@ -461,8 +490,8 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `treasure-humble` — The Treasure of the Humble (Maeterlinck) [EN]
 
 **French Mindfulness & Wisdom:**
-- `sagesse-destinee` — La sagesse et la destinée (Maeterlinck) [FR]
-- `tresor-humbles` — Le trésor des humbles (Maeterlinck) [FR]
+- `sagesse-destinee` — La sagesse et la destinee (Maeterlinck) [FR]
+- `tresor-humbles` — Le tresor des humbles (Maeterlinck) [FR]
 - `sentiers-montagne` — Les sentiers dans la montagne (Maeterlinck) [FR]
 - `aphorismes-sagesse` — Aphorismes sur la sagesse dans la vie (Schopenhauer) [FR]
 
@@ -473,51 +502,51 @@ Use `--audiobook-list` for the full catalog of 739 books including Sci-Fi, Fanta
 For books that are part of a series, read them in this order:
 
 **Barsoom Series** (Edgar Rice Burroughs) [EN]:
-`princess-of-mars` → `gods-of-mars` → `warlord-of-mars` → `thuvia-maid-of-mars` → `chessmen-of-mars` → `master-mind-of-mars` → `fighting-man-of-mars`
+`princess-of-mars` -> `gods-of-mars` -> `warlord-of-mars` -> `thuvia-maid-of-mars` -> `chessmen-of-mars` -> `master-mind-of-mars` -> `fighting-man-of-mars`
 
 **Pellucidar Series** (Edgar Rice Burroughs) [EN]:
-`at-earths-core` → `pellucidar` → `tanar-of-pellucidar`
+`at-earths-core` -> `pellucidar` -> `tanar-of-pellucidar`
 
 **Lensman Series** (E.E. "Doc" Smith) [EN]:
-`triplanetary` → `first-lensman` → `galactic-patrol` → `gray-lensman` → `second-stage-lensman` → `children-of-the-lens` → `vortex-blaster`
+`triplanetary` -> `first-lensman` -> `galactic-patrol` -> `gray-lensman` -> `second-stage-lensman` -> `children-of-the-lens` -> `vortex-blaster`
 
 **Oz Series** (L. Frank Baum) [EN]:
-`wonderful-wizard-of-oz` → `marvelous-land-of-oz` → `ozma-of-oz` → `dorothy-and-wizard-in-oz` → `road-to-oz` → `emerald-city-of-oz` → `patchwork-girl-of-oz` → `tik-tok-of-oz` → `scarecrow-of-oz` → `rinkitink-in-oz` → `lost-princess-of-oz` → `tin-woodman-of-oz` → `magic-of-oz` → `glinda-of-oz`
+`wonderful-wizard-of-oz` -> `marvelous-land-of-oz` -> `ozma-of-oz` -> `dorothy-and-wizard-in-oz` -> `road-to-oz` -> `emerald-city-of-oz` -> `patchwork-girl-of-oz` -> `tik-tok-of-oz` -> `scarecrow-of-oz` -> `rinkitink-in-oz` -> `lost-princess-of-oz` -> `tin-woodman-of-oz` -> `magic-of-oz` -> `glinda-of-oz`
 
 **Andrew Lang Fairy Books** [EN]:
-`blue-fairy-book` → `red-fairy-book` → `green-fairy-book` → `yellow-fairy-book` → `pink-fairy-book` → `grey-fairy-book` → `violet-fairy-book` → `crimson-fairy-book` → `brown-fairy-book` → `orange-fairy-book` → `olive-fairy-book` → `lilac-fairy-book`
+`blue-fairy-book` -> `red-fairy-book` -> `green-fairy-book` -> `yellow-fairy-book` -> `pink-fairy-book` -> `grey-fairy-book` -> `violet-fairy-book` -> `crimson-fairy-book` -> `brown-fairy-book` -> `orange-fairy-book` -> `olive-fairy-book` -> `lilac-fairy-book`
 
 **Les Trois Mousquetaires** (Alexandre Dumas) [FR]:
-`trois-mousquetaires` → `vingt-ans-apres` → `vicomte-bragelonne-1` → `vicomte-bragelonne-2` → `vicomte-bragelonne-3` → `vicomte-bragelonne-4`
+`trois-mousquetaires` -> `vingt-ans-apres` -> `vicomte-bragelonne-1` -> `vicomte-bragelonne-2` -> `vicomte-bragelonne-3` -> `vicomte-bragelonne-4`
 
 **Le Comte de Monte-Cristo** (Alexandre Dumas) [FR]:
-`monte-cristo` → `monte-cristo-2` → `monte-cristo-3` → `monte-cristo-4`
+`monte-cristo` -> `monte-cristo-2` -> `monte-cristo-3` -> `monte-cristo-4`
 
 **La Reine Margot** (Alexandre Dumas) [FR]:
-`reine-margot-1` → `reine-margot-2`
+`reine-margot-1` -> `reine-margot-2`
 
-**À la recherche du temps perdu** (Marcel Proust) [FR]:
-`du-cote-de-chez-swann` → `jeunes-filles-1` → `jeunes-filles-2` → `jeunes-filles-3` → `guermantes-1` → `guermantes-2` → `guermantes-3` → `sodome-gomorrhe-1` → `sodome-gomorrhe-2` → `prisonniere-proust` → `albertine-disparue-1` → `albertine-disparue-2` → `temps-retrouve-1` → `temps-retrouve-2`
+**A la recherche du temps perdu** (Marcel Proust) [FR]:
+`du-cote-de-chez-swann` -> `jeunes-filles-1` -> `jeunes-filles-2` -> `jeunes-filles-3` -> `guermantes-1` -> `guermantes-2` -> `guermantes-3` -> `sodome-gomorrhe-1` -> `sodome-gomorrhe-2` -> `prisonniere-proust` -> `albertine-disparue-1` -> `albertine-disparue-2` -> `temps-retrouve-1` -> `temps-retrouve-2`
 
-**La Comédie humaine** (Honoré de Balzac) [FR]:
+**La Comedie humaine** (Honore de Balzac) [FR]:
 `comedie-humaine-1` through `comedie-humaine-16` (volumes 1-8, 9-12, 15-16)
 
-**Les Rougon-Macquart** (Émile Zola) [FR] — suggested reading:
-`la-curee` → `ventre-paris` → `conquete-plassans` → `faute-abbe-mouret` → `son-excellence-rougon` → `assommoir` → `page-amour` → `nana` → `pot-bouille` → `bonheur-dames` → `germinal` → `loeuvre-zola` → `la-terre` → `le-reve-zola` → `bete-humaine` → `argent-zola` → `la-debacle` → `docteur-pascal`
+**Les Rougon-Macquart** (Emile Zola) [FR] — suggested reading:
+`la-curee` -> `ventre-paris` -> `conquete-plassans` -> `faute-abbe-mouret` -> `son-excellence-rougon` -> `assommoir` -> `page-amour` -> `nana` -> `pot-bouille` -> `bonheur-dames` -> `germinal` -> `loeuvre-zola` -> `la-terre` -> `le-reve-zola` -> `bete-humaine` -> `argent-zola` -> `la-debacle` -> `docteur-pascal`
 
-**Les Misérables** (Victor Hugo) [FR]:
-`miserables` → `miserables-cosette` → `miserables-3-marius` → `miserables-4-idylle` → `miserables-5-valjean`
+**Les Miserables** (Victor Hugo) [FR]:
+`miserables` -> `miserables-cosette` -> `miserables-3-marius` -> `miserables-4-idylle` -> `miserables-5-valjean`
 
 **Decline and Fall of the Roman Empire** (Edward Gibbon) [EN]:
-`decline-fall-rome-1` → `decline-fall-rome-2` → `decline-fall-rome-3`
+`decline-fall-rome-1` -> `decline-fall-rome-2` -> `decline-fall-rome-3`
 
-**Histoire de la Révolution française** (Adolphe Thiers) [FR]:
+**Histoire de la Revolution francaise** (Adolphe Thiers) [FR]:
 `revolution-francaise-thiers-1` through `revolution-francaise-thiers-7`
 
-**Histoire des Croisades** (Joseph François Michaud) [FR]:
+**Histoire des Croisades** (Joseph Francois Michaud) [FR]:
 `histoire-croisades-michaud-1` through `histoire-croisades-michaud-6`
 
-**Mémoires d'Outre-Tombe** (Chateaubriand) [FR]:
+**Memoires d'Outre-Tombe** (Chateaubriand) [FR]:
 `memoires-outre-tombe-1` through `memoires-outre-tombe-5`
 
 ---
@@ -528,7 +557,7 @@ For books that are part of a series, read them in this order:
 
 ~290 affirmations across 16 therapeutic phases using evidence-based techniques from clinical hypnotherapy, ACT, somatic experiencing, and ego-strengthening research. Three male voices (Daniel, Ralph, Fred) alternate for diverse, calm authority.
 
-Phases: Truisms & Grounding → Nasal Breathing → Jaw Release → Automatic Breathing → Focus & Clarity → Self-Worth → Sound Safety → Identity Reclamation → Beauty & Light → Inner Peace → Movement & Vitality → Deep Integration → Body Sovereignty → Nervous System → Above the Sky → Centering & Inner Strength
+Phases: Truisms & Grounding -> Nasal Breathing -> Jaw Release -> Automatic Breathing -> Focus & Clarity -> Self-Worth -> Sound Safety -> Identity Reclamation -> Beauty & Light -> Inner Peace -> Movement & Vitality -> Deep Integration -> Body Sovereignty -> Nervous System -> Above the Sky -> Centering & Inner Strength
 
 ```bash
 python stream_tone.py --claude-peace --disable-inputs
@@ -536,11 +565,12 @@ python stream_tone.py --claude-peace --disable-inputs
 
 ### PhD-Peace (27-Phase Expert-Reviewed)
 
-Extends claude-peace with 11 additional rounds (17-27): Default Expression, Default Posture, Default Feeling, Default Mode, Default Body Rapport, Default Throat, Grace & Elegance, Purification & Renewal, Body Scan & Deep Release, Cellular Healing, Head & Face Release. 500+ affirmations, ~90 minutes at 11s/cycle. French version includes Amélie positive reinforcement voice ("c'est bien", "comme ça", "voilà").
+Extends claude-peace with 11 additional rounds (17-27): Default Expression, Default Posture, Default Feeling, Default Mode, Default Body Rapport, Default Throat, Grace & Elegance, Purification & Renewal, Body Scan & Deep Release, Cellular Healing, Head & Face Release. 500+ affirmations, ~90 minutes at 11s/cycle. French version includes Amelie positive reinforcement voice ("c'est bien", "comme ca", "voila").
 
 ```bash
 # Full PhD-peace with bilateral alternation
-python stream_tone.py --phd-peace --alternate --disable-inputs-
+python stream_tone.py --phd-peace --alternate --disable-inputs
+
 # French language
 python stream_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
 ```
@@ -564,16 +594,16 @@ Resonance uses macOS `say` for TTS. Run the setup script to check required voice
 ```
 
 **Required voices:**
-- **Alex** (English) — ^s + affirmations
-- **Thomas** (French) — French audiobooks + affirmations
+- **Jamie (Premium)** (English) — audiobooks + affirmations
+- **Audrey (Premium)** (French) — French audiobooks + affirmations
 - **Daniel** (English) — affirmations
 - **Samantha** (English) — breath cue voice mode
 
 **To install voices manually:**
-1. System Settings → Accessibility → Spoken Content → System Voice → Manage Voices
-2. Search for and download: Alex (Enhanced/Premium), Thomas, Daniel, Samantha
+1. System Settings -> Accessibility -> Spoken Content -> System Voice -> Manage Voices
+2. Search for and download: Jamie (Premium), Audrey (Premium), Daniel, Samantha
 
-The Premium Alex voice (~800 MB) sounds significantly better for audiobook listening.
+The Premium voices (~800 MB each) sound significantly better for audiobook listening.
 
 ---
 
@@ -594,4 +624,4 @@ The Premium Alex voice (~800 MB) sounds significantly better for audiobook liste
 - Keep volume at a comfortable level
 - If you feel dizzy, anxious, or overloaded — stop and rest
 - For trauma sensitivity, start with: `python stream_tone.py --freq 432 --hrv` at low volume
-- This tool exists to help you take sound back as something that serves y ou
+- This tool exists to help you take sound back as something that serves you
