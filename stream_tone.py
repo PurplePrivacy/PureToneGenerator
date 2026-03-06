@@ -2831,8 +2831,8 @@ def _audiobook_renderer_thread():
                 _gap_mult = audiobook_word_gap       # multiplier (default 1.5)
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
-                _min_gap = int((0.040 if reading_rhythm else 0.025) * sample_rate)
-                _max_ext = int(0.500 * sample_rate)  # cap extension at 500ms
+                _min_gap = int((0.060 if reading_rhythm else 0.025) * sample_rate)
+                _max_ext = int(1.000 * sample_rate)  # cap extension at 1s
 
                 # ── Reading rhythm: text-aware pause scoring ──────────
                 # Analyze punctuation positions in the text so we can give
@@ -2903,9 +2903,9 @@ def _audiobook_renderer_thread():
                             _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
                     _rhythm_scores = _pause_map
                     _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
-                    # Word-count rhythm: 0.5s breath pauses at word positions 1,3,5,9 (cycling)
+                    # Word-count rhythm: 1s breath pauses at word positions 1,3,5,9 (cycling)
                     _WORD_RHYTHM = [1, 3, 5, 9]
-                    _WR_PAUSE_MS = 500
+                    _WR_PAUSE_MS = 1000
                     _wr_cycle_idx = 0
                     _wr_countdown = _WORD_RHYTHM[0]
                     _wr_word_idx = 0
@@ -2926,7 +2926,7 @@ def _audiobook_renderer_thread():
                 if _n_wins > 2:
                     _trimmed = arr[:_n_wins * _win_n].reshape(_n_wins, _win_n)
                     _rms = np.sqrt(np.mean(_trimmed ** 2, axis=1))
-                    _thresh = np.median(_rms) * 0.10  # silence = below 10% of median RMS
+                    _thresh = np.median(_rms) * 0.05  # silence = below 5% of median RMS
                     # Find contiguous silence runs
                     _is_sil = _rms < _thresh
                     _gaps = []     # (start_sample, end_sample)
@@ -2996,7 +2996,7 @@ def _audiobook_renderer_thread():
                             continue   # skip trivially short extensions
                         # Insert at the center of the gap with safety margins
                         # so we never touch speech at the edges
-                        _margin = min(int(0.010 * sample_rate), _gap_dur // 4)  # 10ms or 25% of gap
+                        _margin = min(int(0.015 * sample_rate), _gap_dur // 4)  # 15ms or 25% of gap
                         _safe_start = _gs + _margin
                         _safe_end = _ge - _margin
                         if _safe_start >= _safe_end:
