@@ -6780,6 +6780,199 @@ BOOK_CATALOG = {
         "language": "fr",
         "category": "Histoire — Nature",
     },
+
+
+    # ══════════════════════════════════════════════════════════════════
+    #  COMBAT & PHYSICAL CULTURE — "I know kung fu."
+    # ══════════════════════════════════════════════════════════════════
+
+    # ── Warrior Philosophy ─────────────────────────────────────────
+    "tales-samurai": {
+        "title": "Tales of the Samurai",
+        "author": "Asataro Miyamori",
+        "gutenberg_id": 67650,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "strenuous-life": {
+        "title": "The Strenuous Life",
+        "author": "Theodore Roosevelt",
+        "gutenberg_id": 58821,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+
+    # ── Physical Culture & Strength ────────────────────────────────
+    "strength-sandow": {
+        "title": "Strength and How to Obtain It",
+        "author": "Eugen Sandow",
+        "gutenberg_id": 65987,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "vitality-supreme": {
+        "title": "Vitality Supreme",
+        "author": "Bernarr Macfadden",
+        "gutenberg_id": 19208,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "how-to-get-strong": {
+        "title": "How to Get Strong and How to Stay So",
+        "author": "William Blaikie",
+        "gutenberg_id": 36557,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "keeping-fit": {
+        "title": "Keeping Fit All the Way",
+        "author": "Walter Camp",
+        "gutenberg_id": 13574,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "practical-training": {
+        "title": "Practical Training for Running, Wrestling, Boxing & All Athletic Feats",
+        "author": "Ed. James",
+        "gutenberg_id": 56398,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+
+    # ── Boxing & Combat Fiction ────────────────────────────────────
+    "the-game-london": {
+        "title": "The Game",
+        "author": "Jack London",
+        "gutenberg_id": 1160,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "abysmal-brute": {
+        "title": "The Abysmal Brute",
+        "author": "Jack London",
+        "gutenberg_id": 55948,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "burning-daylight": {
+        "title": "Burning Daylight",
+        "author": "Jack London",
+        "gutenberg_id": 746,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "gladiator-wylie": {
+        "title": "Gladiator",
+        "author": "Philip Wylie",
+        "gutenberg_id": 42914,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+
+    # ── French Combat & Adventure ──────────────────────────────────
+    "pardaillan-1": {
+        "title": "Les Pardaillan — Tome 01",
+        "author": "Michel Zévaco",
+        "gutenberg_id": 13207,
+        "voice": "Audrey (Premium)",
+        "language": "fr",
+        "category": "Combat & Physical Culture",
+    },
+    "pardaillan-2": {
+        "title": "Les Pardaillan — Tome 02: L'Épopée d'amour",
+        "author": "Michel Zévaco",
+        "gutenberg_id": 13460,
+        "voice": "Audrey (Premium)",
+        "language": "fr",
+        "category": "Combat & Physical Culture",
+    },
+    "pardaillan-3": {
+        "title": "Les Pardaillan — Tome 03: Fausta",
+        "author": "Michel Zévaco",
+        "gutenberg_id": 13472,
+        "voice": "Audrey (Premium)",
+        "language": "fr",
+        "category": "Combat & Physical Culture",
+    },
+    "pardaillan-4": {
+        "title": "Les Pardaillan — Tome 04: Fausta Vaincue",
+        "author": "Michel Zévaco",
+        "gutenberg_id": 13523,
+        "voice": "Audrey (Premium)",
+        "language": "fr",
+        "category": "Combat & Physical Culture",
+    },
+
+    # ── Boxing Fiction ─────────────────────────────────────────────
+    "rodney-stone": {
+        "title": "Rodney Stone",
+        "author": "Arthur Conan Doyle",
+        "gutenberg_id": 5148,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "croxley-master": {
+        "title": "The Croxley Master: A Great Tale of the Prize Ring",
+        "author": "Arthur Conan Doyle",
+        "gutenberg_id": 38443,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "cashel-byrons-profession": {
+        "title": "Cashel Byron's Profession",
+        "author": "Bernard Shaw",
+        "gutenberg_id": 5872,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "knuckles-and-gloves": {
+        "title": "Knuckles and Gloves",
+        "author": "Bohun Lynch",
+        "gutenberg_id": 57329,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+
+    # ── Swordsmanship & Self-Defence Manuals ───────────────────────
+    "broadsword-singlestick": {
+        "title": "Broad-Sword and Single-Stick (with Self-Defence chapters)",
+        "author": "R.G. Allanson-Winn & C. Phillipps-Wolley",
+        "gutenberg_id": 31214,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "lessons-sabre": {
+        "title": "Lessons in Sabre, Singlestick, Sabre & Bayonet, and Sword Feats",
+        "author": "J.M. Waite",
+        "gutenberg_id": 67257,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
+    "secrets-of-the-sword": {
+        "title": "Secrets of the Sword",
+        "author": "Baron de Bazancourt",
+        "gutenberg_id": 46093,
+        "voice": "Jamie (Premium)",
+        "language": "en",
+        "category": "Combat & Physical Culture",
+    },
 }
 
 # Books using archaic English formulations (thou, thee, thy, hath, doth, etc.)
@@ -6902,4 +7095,5 @@ BOOK_CATEGORIES = [
     "Histoire — Pensée politique",
     "Histoire — Abolition",
     "Histoire — Nature",
+    "Combat & Physical Culture",
 ]
