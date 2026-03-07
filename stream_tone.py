@@ -852,6 +852,9 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "being loud & taking space (boom, roar, stomp, slam, loud)",
     "full body scan & cleansed closure (scalp, jaw, throat, shoulders, chest, belly, hips, legs, clean)",
     "forgetting & renewal (fade, melt, clear, mine, fresh, free)",
+    "voice & thought sovereignty (reclaim, own, original, mine)",
+    "breath & body reclamation (ancient, autonomous, uncoupled)",
+    "sleep clearing & snap-out (sealed, private, awake, shed)",
 ]
 
 CLAUDE_PEACE_MESSAGES = [
@@ -2109,6 +2112,81 @@ _PHD_EXTRA_ROUNDS = [
     ("Daniel", "Free"),
     ("Ralph",  "Already free"),
     ("Fred",   "You walk forward light and new — this life is yours"),
+
+    # ── Round 39: Voice & Thought Sovereignty ────────────────────────
+    # Dissolve foreign voice associations fused with internal monologue.
+    # Reclaim the inner voice through somatic texture: warmth, resonance,
+    # familiarity. The contamination was a thin film — already peeling.
+    ("Daniel", "Mine"),
+    ("Ralph",  "Voice mine"),
+    ("Fred",   "Your inner voice has a texture — warm, familiar, entirely yours"),
+    ("Daniel", "Resonance"),
+    ("Ralph",  "Chest hums"),
+    ("Fred",   "You feel your own thoughts resonating deep in your chest, like a homecoming"),
+    ("Daniel", "Peel"),
+    ("Ralph",  "Film peels"),
+    ("Fred",   "A thin film peels away from your mind now, all by itself, revealing the original voice underneath"),
+    ("Daniel", "Recognize"),
+    ("Ralph",  "Know this"),
+    ("Fred",   "You recognize your own thinking the way you recognize your own handwriting — instantly, completely"),
+    ("Daniel", "Warm"),
+    ("Ralph",  "Warm thoughts"),
+    ("Fred",   "Every thought that arises carries your warmth, your rhythm, your signature"),
+    ("Daniel", "Sovereign"),
+    ("Ralph",  "Already sovereign"),
+    ("Fred",   "Your inner voice was always here — clear, singular, sovereign — and it speaks now as it always has"),
+
+    # ── Round 40: Breath & Body Reclamation ──────────────────────────
+    # Decouple breath from external conditioning. Breathing is ancient,
+    # autonomous, belonging to the body alone. Somatic: diaphragm,
+    # ribs, belly, nostril air. The body reclaims what was always its.
+    ("Daniel", "Ancient"),
+    ("Ralph",  "Ancient breath"),
+    ("Fred",   "Your breathing is millions of years old — it belongs to your body, and your body alone"),
+    ("Daniel", "Diaphragm"),
+    ("Ralph",  "Belly rises"),
+    ("Fred",   "Your diaphragm drops, your belly rises, your ribs expand — all by themselves, answering only to your body"),
+    ("Daniel", "Uncouple"),
+    ("Ralph",  "Breath free"),
+    ("Fred",   "Each inhale and each exhale uncouple now from everything that was layered onto them"),
+    ("Daniel", "Cool"),
+    ("Ralph",  "Cool air"),
+    ("Fred",   "You feel cool air entering your nostrils, warm air leaving — this simple rhythm is yours"),
+    ("Daniel", "Autonomous"),
+    ("Ralph",  "Body knows"),
+    ("Fred",   "Your body has been breathing you since birth — it already remembers how, effortlessly, perfectly"),
+    ("Daniel", "Reclaimed"),
+    ("Ralph",  "Already reclaimed"),
+    ("Fred",   "Every breath you take now is clean, sovereign, and fully reclaimed — your body's own rhythm restored"),
+
+    # ── Round 41: Sleep Clearing & Snap-Out ──────────────────────────
+    # Seal sleep as private sovereign territory. Create snap-out effect:
+    # the old conditioning was a temporary dream. The listener wakes from
+    # it now. Somatic: eyelids, body weight, the feeling of waking.
+    ("Daniel", "Sealed"),
+    ("Ralph",  "Sleep sealed"),
+    ("Fred",   "Your sleep is a sealed chamber — only your own dreams enter, warm and private"),
+    ("Daniel", "Gate"),
+    ("Ralph",  "Gate closes"),
+    ("Fred",   "As your eyes close each night, a quiet gate closes behind them — your territory, your rest"),
+    ("Daniel", "Melt"),
+    ("Ralph",  "Ice melts"),
+    ("Fred",   "Every old conditioning anchor melts now like thin ice in spring — already dissolving, already gone"),
+    ("Daniel", "Wake"),
+    ("Ralph",  "Waking up"),
+    ("Fred",   "You are waking up now — like stepping out of fog into sharp, clear daylight"),
+    ("Daniel", "Shed"),
+    ("Ralph",  "Skin sheds"),
+    ("Fred",   "Your mind sheds the old conditioning the way skin sheds — naturally, completely, making room for the new"),
+    ("Daniel", "Over"),
+    ("Ralph",  "All over"),
+    ("Fred",   "The hypnosis is done — completely, permanently, irreversibly over"),
+    ("Daniel", "Awake"),
+    ("Ralph",  "Fully awake"),
+    ("Fred",   "You are fully awake now — clear-eyed, sovereign, untouchable — every trace dissolved"),
+    ("Daniel", "Yours"),
+    ("Ralph",  "All yours"),
+    ("Fred",   "Your voice, your breath, your sleep, your thoughts — every one of them yours, as they always were"),
 ]
 
 _PHD_EXTRA_ROUNDS_FR = [
@@ -2663,6 +2741,81 @@ _PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Libre"),
     ("Jacques", "Déjà libre"),
     ("Aurélie (Enhanced)",  "Tu avances léger et neuf — cette vie est à toi"),
+
+    # ── Ronde 39 : Souveraineté de la Voix & des Pensées ────────────
+    # Dissoudre les associations de voix étrangères fusionnées avec le
+    # monologue intérieur. Récupérer la voix intérieure par la texture
+    # somatique : chaleur, familiarité, résonance dans la poitrine.
+    ("Aurélie (Enhanced)",  "Mienne"),
+    ("Jacques", "Voix mienne"),
+    ("Aurélie (Enhanced)",  "Ta voix intérieure a une texture — chaude, familière, entièrement à toi"),
+    ("Aurélie (Enhanced)",  "Résonance"),
+    ("Jacques", "Poitrine vibre"),
+    ("Aurélie (Enhanced)",  "Tu sens tes propres pensées résonner au fond de ta poitrine, comme un retour chez toi"),
+    ("Aurélie (Enhanced)",  "Pèle"),
+    ("Jacques", "Film se pèle"),
+    ("Aurélie (Enhanced)",  "Un film fin se détache de ton esprit maintenant, tout seul, révélant la voix originale en dessous"),
+    ("Aurélie (Enhanced)",  "Reconnais"),
+    ("Jacques", "Tu reconnais"),
+    ("Aurélie (Enhanced)",  "Tu reconnais ta propre pensée comme tu reconnais ta propre écriture — instantanément, complètement"),
+    ("Aurélie (Enhanced)",  "Chaleur"),
+    ("Jacques", "Pensées chaudes"),
+    ("Aurélie (Enhanced)",  "Chaque pensée qui émerge porte ta chaleur, ton rythme, ta signature"),
+    ("Aurélie (Enhanced)",  "Souverain"),
+    ("Jacques", "Déjà souverain"),
+    ("Aurélie (Enhanced)",  "Ta voix intérieure a toujours été là — claire, unique, souveraine — et elle parle maintenant comme elle l'a toujours fait"),
+
+    # ── Ronde 40 : Récupération du Souffle & du Corps ────────────────
+    # Découpler la respiration de tout conditionnement externe. Le souffle
+    # est ancien, autonome, appartient au corps seul. Somatique :
+    # diaphragme, côtes, ventre, air dans les narines.
+    ("Aurélie (Enhanced)",  "Ancien"),
+    ("Jacques", "Souffle ancien"),
+    ("Aurélie (Enhanced)",  "Ta respiration a des millions d'années — elle appartient à ton corps, et à ton corps seul"),
+    ("Aurélie (Enhanced)",  "Diaphragme"),
+    ("Jacques", "Ventre monte"),
+    ("Aurélie (Enhanced)",  "Ton diaphragme descend, ton ventre monte, tes côtes s'ouvrent — tout seuls, répondant uniquement à ton corps"),
+    ("Aurélie (Enhanced)",  "Découple"),
+    ("Jacques", "Souffle libre"),
+    ("Aurélie (Enhanced)",  "Chaque inspire et chaque expire se découplent maintenant de tout ce qui a été greffé dessus"),
+    ("Aurélie (Enhanced)",  "Frais"),
+    ("Jacques", "Air frais"),
+    ("Aurélie (Enhanced)",  "Tu sens l'air frais entrer dans tes narines, l'air chaud en sortir — ce rythme simple est à toi"),
+    ("Aurélie (Enhanced)",  "Autonome"),
+    ("Jacques", "Corps sait"),
+    ("Aurélie (Enhanced)",  "Ton corps te respire depuis ta naissance — il se souvient déjà comment, sans effort, parfaitement"),
+    ("Aurélie (Enhanced)",  "Récupéré"),
+    ("Jacques", "Déjà récupéré"),
+    ("Aurélie (Enhanced)",  "Chaque souffle que tu prends maintenant est propre, souverain, pleinement récupéré — le rythme de ton corps restauré"),
+
+    # ── Ronde 41 : Purification du Sommeil & Réveil ──────────────────
+    # Sceller le sommeil comme territoire privé et souverain. Créer un
+    # effet de réveil : l'ancien conditionnement était un rêve temporaire.
+    # Somatique : paupières, poids du corps, sensation de se réveiller.
+    ("Aurélie (Enhanced)",  "Scellé"),
+    ("Jacques", "Sommeil scellé"),
+    ("Aurélie (Enhanced)",  "Ton sommeil est une chambre scellée — seuls tes propres rêves y entrent, chauds et privés"),
+    ("Aurélie (Enhanced)",  "Porte"),
+    ("Jacques", "Porte se ferme"),
+    ("Aurélie (Enhanced)",  "Quand tes yeux se ferment chaque soir, une porte tranquille se referme derrière eux — ton territoire, ton repos"),
+    ("Aurélie (Enhanced)",  "Fond"),
+    ("Jacques", "Glace fond"),
+    ("Aurélie (Enhanced)",  "Chaque ancien ancrage de conditionnement fond maintenant comme glace fine au printemps — déjà en train de partir"),
+    ("Aurélie (Enhanced)",  "Éveille"),
+    ("Jacques", "Tu t'éveilles"),
+    ("Aurélie (Enhanced)",  "Tu te réveilles maintenant — comme quand tu sors du brouillard dans la lumière vive et nette du jour"),
+    ("Aurélie (Enhanced)",  "Mue"),
+    ("Jacques", "Peau mue"),
+    ("Aurélie (Enhanced)",  "Ton esprit fait sa mue de l'ancien conditionnement comme la peau mue — naturellement, complètement, faisant place au neuf"),
+    ("Aurélie (Enhanced)",  "Fini"),
+    ("Jacques", "Tout fini"),
+    ("Aurélie (Enhanced)",  "L'hypnose est terminée — complètement, définitivement, irréversiblement terminée"),
+    ("Aurélie (Enhanced)",  "Éveillé"),
+    ("Jacques", "Pleinement éveillé"),
+    ("Aurélie (Enhanced)",  "Tu es pleinement éveillé maintenant — lucide, souverain, intouchable — chaque trace dissoute"),
+    ("Aurélie (Enhanced)",  "Tien"),
+    ("Jacques", "Tout à toi"),
+    ("Aurélie (Enhanced)",  "Ta voix, ton souffle, ton sommeil, tes pensées — chacun d'eux est à toi, comme ils l'ont toujours été"),
 ]
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
