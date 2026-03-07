@@ -2848,6 +2848,15 @@ def _audiobook_renderer_thread():
                 # than gaps near commas; gaps after glue words get none.
                 _rhythm_scores = None   # None = flat multiplier mode
                 if reading_rhythm:
+                    # ── Unified musical rhythm system ──────────────────────
+                    # Single backbone: word-count pattern [1, 3, 5, 9] (cycling)
+                    # determines WHERE pauses land.  Context at each position
+                    # determines HOW LONG the pause is:
+                    #   - Punctuation present  → punctuation hierarchy (150-450ms)
+                    #   - No punctuation       → musical pause (200-350ms, varied)
+                    #   - Next word is glue    → skip (preserve semantic unit)
+                    # No separate breath-pause system — punctuation hierarchy
+                    # handles long pauses naturally (periods = 450ms).
                     _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
                     _PUNCT_MS = {
                         ',': int(150 * _lang_mult), ';': int(250 * _lang_mult),
@@ -2876,57 +2885,68 @@ def _audiobook_renderer_thread():
                         'dans', 'mais', 'car', 'pas', 'plus', 'bien', 'tout',
                         'cette', 'ces', 'peu',
                     })
-                    # Build list of (char_fraction, pause_ms) for each word boundary
+                    # Musical pause durations for non-punctuation rhythm points
+                    # Cycle through these for variety (short-medium-long-medium)
+                    _MUSICAL_MS = [int(m * _lang_mult) for m in [220, 280, 350, 260]]
+                    _musical_idx = 0
                     _words = text.split()
                     _total_chars = max(sum(len(w) + 1 for w in _words), 1)
-                    _char_pos = 0
-                    _pause_map = []   # (fraction, ms)  — expected pauses
-                    _CYCLE = [12, 18, 25]   # cycling character threshold
-                    _cycle_idx = 0
-                    _chars_since_pause = 0
-                    for _wi_idx, _w in enumerate(_words):
-                        _char_pos += len(_w) + 1
-                        _chars_since_pause += len(_w) + 1
-                        _frac = _char_pos / _total_chars
-                        # Skip trailing period (fraction ~1.0) — no audio gap there
-                        if _frac > 0.95:
-                            continue
-                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
-                        _punct_m = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
-                        if _punct_m:
-                            # Punctuation pause — strongest signal
-                            _pause_map.append((_frac, _PUNCT_MS.get(_punct_m.group(1), 150)))
-                            _chars_since_pause = 0
-                            _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
-                        elif _bare not in _GLUE and _chars_since_pause >= _CYCLE[_cycle_idx]:
-                            # Cycling character-threshold pause (weaker, 100ms)
-                            # Look-ahead: don't orphan a short glue word
-                            if _wi_idx + 1 < len(_words):
-                                _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
-                                if _next_bare in _GLUE and len(_next_bare) <= 3:
-                                    continue
-                            _pause_map.append((_frac, int(100 * _lang_mult)))
-                            _chars_since_pause = 0
-                            _cycle_idx = (_cycle_idx + 1) % len(_CYCLE)
-                    _rhythm_scores = _pause_map
-                    _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
-                    # Word-count rhythm: 1s breath pauses at word positions 1,3,5,9 (cycling)
+                    _pause_map = []   # (fraction, ms)  — unified pause schedule
+
+                    # Word-count backbone: pause after word 1, then 3, then 5, then 9 (cycling)
                     _WORD_RHYTHM = [1, 3, 5, 9]
-                    _WR_PAUSE_MS = 1000
                     _wr_cycle_idx = 0
                     _wr_countdown = _WORD_RHYTHM[0]
-                    _wr_word_idx = 0
-                    _wr_positions = set()   # char-fractions where 1s pauses go
-                    for _wi_idx2, _w2 in enumerate(_words):
-                        _wr_word_idx += 1
-                        if _wr_word_idx >= _wr_countdown:
-                            _cp2 = sum(len(_words[j]) + 1 for j in range(_wi_idx2 + 1))
-                            _frac2 = _cp2 / _total_chars
-                            if _frac2 < 0.95:
-                                _wr_positions.add(_frac2)
-                            _wr_word_idx = 0
+                    _wr_word_count = 0
+                    _char_pos = 0
+
+                    for _wi_idx, _w in enumerate(_words):
+                        _char_pos += len(_w) + 1
+                        _wr_word_count += 1
+                        _frac = _char_pos / _total_chars
+                        # Skip near end of sentence — no useful gap there
+                        if _frac > 0.95:
+                            continue
+                        _punct_m = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
+
+                        # Always emit punctuation pauses (they define the natural phrasing)
+                        if _punct_m:
+                            _pms = _PUNCT_MS.get(_punct_m.group(1), 150)
+                            _pause_map.append((_frac, _pms))
+                            # Punctuation resets the word-rhythm counter (it already paused)
+                            _wr_word_count = 0
                             _wr_cycle_idx = (_wr_cycle_idx + 1) % len(_WORD_RHYTHM)
                             _wr_countdown = _WORD_RHYTHM[_wr_cycle_idx]
+                            continue
+
+                        # Check if this is a word-rhythm position
+                        if _wr_word_count < _wr_countdown:
+                            continue
+
+                        # Glue-word look-ahead: don't break before short function words
+                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
+                        if _bare in _GLUE:
+                            continue  # current word is glue — wait for a content word
+                        if _wi_idx + 1 < len(_words):
+                            _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
+                            if _next_bare in _GLUE and len(_next_bare) <= 3:
+                                continue  # don't orphan a short glue word
+
+                        # Musical pause: varied duration for natural rhythm
+                        _pms = _MUSICAL_MS[_musical_idx]
+                        _musical_idx = (_musical_idx + 1) % len(_MUSICAL_MS)
+                        _pause_map.append((_frac, _pms))
+
+                        # Reset word counter, advance rhythm cycle
+                        _wr_word_count = 0
+                        _wr_cycle_idx = (_wr_cycle_idx + 1) % len(_WORD_RHYTHM)
+                        _wr_countdown = _WORD_RHYTHM[_wr_cycle_idx]
+
+                    _rhythm_scores = _pause_map
+                    _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
+                    # Unified system: no separate word-rhythm positions needed
+                    _WR_PAUSE_MS = 0
+                    _wr_positions = set()
 
                 # Compute short-time energy (RMS per window)
                 _n_wins = len(arr) // _win_n
