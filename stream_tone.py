@@ -290,12 +290,13 @@ if phd_peace:
 
 # --audiobook-list: display catalog and exit
 if audiobook_list:
-    from books.catalog import BOOK_CATALOG, BOOK_CATEGORIES
+    from books.catalog import BOOK_CATALOG, BOOK_CATEGORIES, ARCHAIC_BOOKS
     _texts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "books", "texts")
     _total = len(BOOK_CATALOG)
     _n_fr = sum(1 for m in BOOK_CATALOG.values() if m.get("language") == "fr")
     _n_en = sum(1 for m in BOOK_CATALOG.values() if m.get("language") == "en")
-    print(f"\nAvailable audiobooks ({_total} books — {_n_fr} French, {_n_en} English):\n")
+    _n_archaic = sum(1 for n in ARCHAIC_BOOKS if n in BOOK_CATALOG)
+    print(f"\nAvailable audiobooks ({_total} books — {_n_fr} French, {_n_en} English, {_n_archaic} archaic):\n")
     for cat in BOOK_CATEGORIES:
         _cat_books = [(n, m) for n, m in BOOK_CATALOG.items() if m["category"] == cat]
         if not _cat_books:
@@ -305,10 +306,12 @@ if audiobook_list:
             _dl = os.path.exists(os.path.join(_texts_dir, f"{name}.txt"))
             _mark = "[OK]" if _dl else "[--]"
             _lang = meta.get("language", "fr").upper()
+            if name in ARCHAIC_BOOKS:
+                _lang = "EN - Ancient formulations"
             print(f"    {_mark} {name:<25s} {meta['title']} — {meta['author']}  [{_lang}]")
         print()
     print("  [OK] = downloaded    [--] = run: python books/fetch_books.py")
-    print("  [FR] = French (Thomas voice)    [EN] = English (Daniel voice)")
+    print("  [FR] = French    [EN] = English    [EN - Ancient formulations] = archaic English")
     print()
     sys.exit(0)
 
@@ -2833,7 +2836,7 @@ def _audiobook_renderer_thread():
                 _gap_mult = audiobook_word_gap       # multiplier (default 1.5)
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
-                _min_gap = int((0.060 if reading_rhythm else 0.025) * sample_rate)
+                _min_gap = int((0.100 if reading_rhythm else 0.025) * sample_rate)
                 _max_ext = int(1.000 * sample_rate)  # cap extension at 1s
 
                 # ── Reading rhythm: text-aware pause scoring ──────────

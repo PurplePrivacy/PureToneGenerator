@@ -6782,6 +6782,33 @@ BOOK_CATALOG = {
     },
 }
 
+# Books using archaic English formulations (thou, thee, thy, hath, doth, etc.)
+# Identified by scanning downloaded texts for archaic word density (≥ 5 per 1000 words)
+ARCHAIC_BOOKS = {
+    # Shakespeare (all plays and sonnets)
+    "shakespeare-sonnets", "romeo-and-juliet", "the-tempest", "king-lear",
+    "midsummer-nights-dream", "othello", "twelfth-night", "as-you-like-it",
+    "macbeth", "julius-caesar", "merchant-of-venice", "much-ado", "hamlet",
+    "henry-v",
+    # Ancient philosophy & religion (archaic translations)
+    "meditations", "enchiridion", "golden-sayings-epictetus",
+    "dhammapada", "imitation-christ-en", "confessions-augustine",
+    "gospel-buddha", "coran", "thus-spoke-zarathustra",
+    # Classical literature (archaic translations)
+    "divine-comedy", "eneide", "iliad-en", "paradise-lost",
+    # Religious & spiritual
+    "pilgrim-progress", "songs-innocence", "light-of-asia",
+    # William Morris romances (deliberately archaic prose)
+    "well-at-worlds-end", "water-of-wondrous-isles", "sundering-flood",
+    "wood-beyond-the-world",
+    # Other archaic / pseudo-archaic style
+    "worm-ouroboros", "time-and-the-gods", "prince-and-pauper",
+    "kim", "essays-bacon", "household-tales-grimm", "poe-works-5",
+    "she", "ayesha-return-of-she", "empire-of-business",
+    # Borderline (5–5.5‰ density)
+    "don-quixote", "scarlet-letter", "leaves-of-grass", "second-jungle-book",
+}
+
 # Ordered category list for display
 BOOK_CATEGORIES = [
     "Stoic Philosophy",
