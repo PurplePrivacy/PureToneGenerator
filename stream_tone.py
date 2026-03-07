@@ -2826,7 +2826,7 @@ def _audiobook_renderer_thread():
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
             else:
-                _ab_rate = args.audiobook_rate if args.audiobook_rate else 135
+                _ab_rate = args.audiobook_rate if args.audiobook_rate else (120 if _ab_lang == 'fr' else 135)
                 arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
@@ -2838,7 +2838,7 @@ def _audiobook_renderer_thread():
                 _gap_mult = audiobook_word_gap       # multiplier (default 1.5)
                 _win_ms  = 10                        # energy-analysis window (ms)
                 _win_n   = int(_win_ms / 1000 * sample_rate)
-                _min_gap = int((0.100 if reading_rhythm else 0.025) * sample_rate)
+                _min_gap = int((0.200 if reading_rhythm else 0.025) * sample_rate)
                 _max_ext = int(1.000 * sample_rate)  # cap extension at 1s
 
                 # ── Reading rhythm: text-aware pause scoring ──────────
@@ -2988,8 +2988,9 @@ def _audiobook_renderer_thread():
                                 _extra = min(int(_pms / 1000 * sample_rate), _max_ext)
                             elif _wr_match:
                                 _extra = min(int(_WR_PAUSE_MS / 1000 * sample_rate), _max_ext)
-                            elif _gap_dur >= int(0.060 * sample_rate):
+                            elif _gap_dur >= int(0.150 * sample_rate):
                                 # Unmatched but significant gap — small fixed extension
+                                # (150ms threshold avoids splitting stop consonants like /p/, /t/, /k/)
                                 _extra = int(0.070 * sample_rate)  # 70ms
                             else:
                                 continue
