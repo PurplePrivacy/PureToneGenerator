@@ -2822,12 +2822,59 @@ def _audiobook_renderer_thread():
                 time.sleep(0.5)
                 continue
             voice, text = _audiobook_sentences[_audiobook_next_render]
-            cache_key = (voice, text)
+            # ── Word-rhythm: inject [[slnc]] tags at [1,3,5,9] positions ──
+            # TTS handles pauses natively — no risk of cutting into speech.
+            _tts_text = text
+            if reading_rhythm and not audiobook_no_gaps:
+                _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
+                _WR_PATTERN = [1, 3, 5, 9]
+                _WR_SLNC_CYCLE = [int(m * _lang_mult) for m in [220, 280, 350, 260]]
+                _wr_slnc_idx = 0
+                _GLUE_WR = frozenset({
+                    'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
+                    'for', 'is', 'it', 'or', 'as', 'and', 'but', 'this',
+                    'that', 'with', 'from', 'into', 'her', 'his', 'its',
+                    'our', 'my', 'your', 'their', 'we', 'he', 'she', 'they',
+                    'was', 'are', 'were', 'has', 'had', 'been', 'will',
+                    'would', 'could', 'should', 'can', 'may', 'not', 'all',
+                    'le', 'la', 'les', 'un', 'une', 'de', 'du', 'des',
+                    'à', 'en', 'au', 'aux', 'et', 'ou', 'par', 'pour',
+                    'sur', 'est', 'ce', 'se', 'ne', 'qui', 'que', 'son',
+                    'sa', 'ses', 'il', 'elle', 'on', 'nous', 'vous',
+                    'je', 'tu', 'ni', 'si', 'y', 'dont', 'dans', 'mais',
+                    'car', 'pas', 'ces', 'cette',
+                })
+                _wr_words = text.split()
+                if len(_wr_words) > 3:
+                    _wr_cyc = 0
+                    _wr_cnt = 0
+                    _wr_target = _WR_PATTERN[0]
+                    _wr_out = []
+                    for _wi, _ww in enumerate(_wr_words):
+                        _wr_out.append(_ww)
+                        # Punctuation resets counter (TTS already pauses there)
+                        if re.search(r'[.!?;:]$', _ww):
+                            _wr_cnt = 0
+                            _wr_cyc = (_wr_cyc + 1) % len(_WR_PATTERN)
+                            _wr_target = _WR_PATTERN[_wr_cyc]
+                            continue
+                        _wr_cnt += 1
+                        if _wr_cnt >= _wr_target and _wi < len(_wr_words) - 1:
+                            _bare = re.sub(r'[,\-]+$', '', _ww).lower()
+                            _next_bare = re.sub(r'[,\-]+$', '', _wr_words[_wi + 1]).lower()
+                            if _bare not in _GLUE_WR and _next_bare not in _GLUE_WR:
+                                _wr_out.append(f'[[slnc {_WR_SLNC_CYCLE[_wr_slnc_idx]}]]')
+                                _wr_slnc_idx = (_wr_slnc_idx + 1) % len(_WR_SLNC_CYCLE)
+                                _wr_cnt = 0
+                                _wr_cyc = (_wr_cyc + 1) % len(_WR_PATTERN)
+                                _wr_target = _WR_PATTERN[_wr_cyc]
+                    _tts_text = ' '.join(_wr_out)
+            cache_key = (voice, _tts_text)
             if cache_key in _ab_tts_cache:
                 arr = _ab_tts_cache[cache_key]
             else:
                 _ab_rate = args.audiobook_rate if args.audiobook_rate else (120 if _ab_lang == 'fr' else 135)
-                arr = _render_peace_voice(text, voice, rate=_ab_rate, trim_silence=True)
+                arr = _render_peace_voice(_tts_text, voice, rate=_ab_rate, trim_silence=True)
                 if arr is not None:
                     _ab_tts_cache[cache_key] = arr
             if arr is not None and reading_rhythm and not audiobook_no_gaps:
@@ -2848,15 +2895,11 @@ def _audiobook_renderer_thread():
                 # than gaps near commas; gaps after glue words get none.
                 _rhythm_scores = None   # None = flat multiplier mode
                 if reading_rhythm:
-                    # ── Unified musical rhythm system ──────────────────────
-                    # Single backbone: word-count pattern [1, 3, 5, 9] (cycling)
-                    # determines WHERE pauses land.  Context at each position
-                    # determines HOW LONG the pause is:
-                    #   - Punctuation present  → punctuation hierarchy (150-450ms)
-                    #   - No punctuation       → musical pause (200-350ms, varied)
-                    #   - Next word is glue    → skip (preserve semantic unit)
-                    # No separate breath-pause system — punctuation hierarchy
-                    # handles long pauses naturally (periods = 450ms).
+                    # ── Punctuation-only pause scoring ──────────────────────
+                    # Word-rhythm pauses are handled upstream via [[slnc]] tags
+                    # injected into the TTS text. Here we only score punctuation
+                    # so the RMS gap-extension pass can stretch existing TTS
+                    # pauses at commas, periods, etc.
                     _lang_mult = 1.15 if _ab_lang == 'fr' else 1.0
                     _PUNCT_MS = {
                         ',': int(150 * _lang_mult), ';': int(250 * _lang_mult),
@@ -2866,85 +2909,20 @@ def _audiobook_renderer_thread():
                         '-': int(180 * _lang_mult), '\u2014': int(180 * _lang_mult),
                         '\u2013': int(180 * _lang_mult),
                     }
-                    _GLUE = frozenset({
-                        'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'by',
-                        'for', 'is', 'it', 'or', 'as', 'and', 'but', 'this',
-                        'that', 'with', 'from', 'into', 'her', 'his', 'its',
-                        'our', 'my', 'your', 'their', 'we', 'he', 'she', 'they',
-                        'was', 'are', 'were', 'has', 'had', 'been', 'will',
-                        'would', 'could', 'should', 'can', 'may', 'not', 'all',
-                        'each', 'every', 'no', 'so', 'if', 'then', 'when',
-                        'than', 'just', 'still', 'yet', 'much', 'very', 'too',
-                        'also', 'even', 'both', 'nor', 'do', 'did', 'does', 'am',
-                        'le', 'la', 'les', 'un', 'une', 'de', 'du', 'des',
-                        '\u00e0', 'en', 'au', 'aux', 'et', 'ou', 'par', 'pour',
-                        'sur', 'est', 'ce', 'se', 'ne', 'qui', 'que', 'son',
-                        'sa', 'ses', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
-                        'leur', 'leurs', 'il', 'elle', 'ils', 'elles', 'on',
-                        'nous', 'vous', 'je', 'tu', 'ni', 'si', 'y', 'dont',
-                        'dans', 'mais', 'car', 'pas', 'plus', 'bien', 'tout',
-                        'cette', 'ces', 'peu',
-                    })
-                    # Musical pause durations for non-punctuation rhythm points
-                    # Cycle through these for variety (short-medium-long-medium)
-                    _MUSICAL_MS = [int(m * _lang_mult) for m in [220, 280, 350, 260]]
-                    _musical_idx = 0
-                    _words = text.split()
+                    _words = _tts_text.split()
                     _total_chars = max(sum(len(w) + 1 for w in _words), 1)
-                    _pause_map = []   # (fraction, ms)  — unified pause schedule
-
-                    # Word-count backbone: pause after word 1, then 3, then 5, then 9 (cycling)
-                    _WORD_RHYTHM = [1, 3, 5, 9]
-                    _wr_cycle_idx = 0
-                    _wr_countdown = _WORD_RHYTHM[0]
-                    _wr_word_count = 0
+                    _pause_map = []
                     _char_pos = 0
-
                     for _wi_idx, _w in enumerate(_words):
                         _char_pos += len(_w) + 1
-                        _wr_word_count += 1
                         _frac = _char_pos / _total_chars
-                        # Skip near end of sentence — no useful gap there
                         if _frac > 0.95:
                             continue
                         _punct_m = re.search(r'([,;:!?\.\-\u2014\u2013])$', _w)
-
-                        # Always emit punctuation pauses (they define the natural phrasing)
                         if _punct_m:
-                            _pms = _PUNCT_MS.get(_punct_m.group(1), 150)
-                            _pause_map.append((_frac, _pms))
-                            # Punctuation resets the word-rhythm counter (it already paused)
-                            _wr_word_count = 0
-                            _wr_cycle_idx = (_wr_cycle_idx + 1) % len(_WORD_RHYTHM)
-                            _wr_countdown = _WORD_RHYTHM[_wr_cycle_idx]
-                            continue
-
-                        # Check if this is a word-rhythm position
-                        if _wr_word_count < _wr_countdown:
-                            continue
-
-                        # Glue-word look-ahead: don't break before short function words
-                        _bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _w).lower()
-                        if _bare in _GLUE:
-                            continue  # current word is glue — wait for a content word
-                        if _wi_idx + 1 < len(_words):
-                            _next_bare = re.sub(r'[,;:!?\.\-\u2014\u2013]+$', '', _words[_wi_idx + 1]).lower()
-                            if _next_bare in _GLUE and len(_next_bare) <= 3:
-                                continue  # don't orphan a short glue word
-
-                        # Musical pause: varied duration for natural rhythm
-                        _pms = _MUSICAL_MS[_musical_idx]
-                        _musical_idx = (_musical_idx + 1) % len(_MUSICAL_MS)
-                        _pause_map.append((_frac, _pms))
-
-                        # Reset word counter, advance rhythm cycle
-                        _wr_word_count = 0
-                        _wr_cycle_idx = (_wr_cycle_idx + 1) % len(_WORD_RHYTHM)
-                        _wr_countdown = _WORD_RHYTHM[_wr_cycle_idx]
-
+                            _pause_map.append((_frac, _PUNCT_MS.get(_punct_m.group(1), 150)))
                     _rhythm_scores = _pause_map
-                    _max_added = int(2.0 * sample_rate)  # cap total added silence per sentence
-                    # Unified system: no separate word-rhythm positions needed
+                    _max_added = int(4.0 * sample_rate)
                     _WR_PAUSE_MS = 0
                     _wr_positions = set()
 
