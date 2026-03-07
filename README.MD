@@ -46,9 +46,17 @@ python -m venv .venv
 source .venv/bin/activate
 pip install numpy sounddevice soundfile
 
-# Voice setup (macOS — checks required TTS voices)
+# Voice setup (macOS — required for TTS to work)
 ./setup_voices.sh
+```
 
+**Voice requirement:** Resonance uses macOS built-in TTS voices. You **must** download the required voices before running audiobooks or therapeutic voice modes. Go to **System Settings > Accessibility > Spoken Content > System Voice > Manage Voices** and install:
+- **English:** Jamie (Premium), Daniel, Samantha
+- **French:** Audrey (Premium), Thomas, Jacques, Nicolas
+
+Run `./setup_voices.sh` to check what's missing. Premium voices (~800 MB each) sound significantly better for audiobook listening.
+
+```bash
 # Download audiobook library (739 books, run once)
 python books/fetch_books.py
 ```
@@ -309,9 +317,9 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 ### Book Library (739 books)
 
 **Philosophy & Wisdom:**
-- `meditations` — Meditations (Marcus Aurelius) [EN]
-- `enchiridion` — The Enchiridion (Epictetus) [EN]
-- `golden-sayings-epictetus` — Golden Sayings of Epictetus [EN]
+- `meditations` — Meditations (Marcus Aurelius) [EN - Ancient formulations]
+- `enchiridion` — The Enchiridion (Epictetus) [EN - Ancient formulations]
+- `golden-sayings-epictetus` — Golden Sayings of Epictetus [EN - Ancient formulations]
 - `lettres-lucilius` — Minor Dialogues (Seneca) [EN]
 - `republique` — The Republic (Plato) [EN]
 - `apologie` — Apology (Plato) [EN]
@@ -322,11 +330,11 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `ethique-nicomaque` — Nicomachean Ethics (Aristotle) [EN]
 - `art-guerre` — The Art of War (Sun Tzu) [EN]
 - `tao-te-king` — Tao Te Ching (Lao Tzu) [EN]
-- `dhammapada` — Dhammapada [EN]
+- `dhammapada` — Dhammapada [EN - Ancient formulations]
 - `bhagavad-gita` — Bhagavad-Gita [EN]
 - `bushido` — Bushido, the Soul of Japan (Nitobe) [EN]
 - `bible` — The Bible, KJV [EN]
-- `coran` — The Quran (tr. Rodwell) [EN]
+- `coran` — The Quran (tr. Rodwell) [EN - Ancient formulations]
 - `prince` — The Prince (Machiavelli) [EN]
 - `contrat-social` — The Social Contract (Rousseau) [EN]
 - `oracle-manuel` — The Art of Controversy (Schopenhauer) [EN]
@@ -346,7 +354,7 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 **Classical Literature:**
 - `odyssee` — L'Odyssee (Homere) [FR]
 - `iliade` — L'Iliade (Homere) [FR]
-- `eneide` — The Aeneid (Virgil) [EN]
+- `eneide` — The Aeneid (Virgil) [EN - Ancient formulations]
 - `metamorphoses` — The Metamorphoses (Ovid) [EN]
 - `nature-choses` — On the Nature of Things (Lucretius) [EN]
 
@@ -413,20 +421,20 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `emerson-essays` — Essays, First Series (Emerson) [EN]
 - `nature-emerson` — Nature (Emerson) [EN]
 - `civil-disobedience` — On Civil Disobedience (Thoreau) [EN]
-- `leaves-of-grass` — Leaves of Grass (Whitman) [EN]
-- `songs-innocence` — Songs of Innocence and Experience (Blake) [EN]
+- `leaves-of-grass` — Leaves of Grass (Whitman) [EN - Ancient formulations]
+- `songs-innocence` — Songs of Innocence and Experience (Blake) [EN - Ancient formulations]
 
 **Spiritual Wisdom:**
-- `imitation-christ-en` — The Imitation of Christ (Thomas a Kempis) [EN]
-- `confessions-augustine` — Confessions of St. Augustine [EN]
+- `imitation-christ-en` — The Imitation of Christ (Thomas a Kempis) [EN - Ancient formulations]
+- `confessions-augustine` — Confessions of St. Augustine [EN - Ancient formulations]
 - `prophet-gibran` — The Prophet (Kahlil Gibran) [EN]
-- `gospel-buddha` — The Gospel of Buddha (Paul Carus) [EN]
+- `gospel-buddha` — The Gospel of Buddha (Paul Carus) [EN - Ancient formulations]
 - `gitanjali` — Gitanjali (Tagore) [EN]
 - `sadhana` — Sadhana (Tagore) [EN]
 - `songs-kabir` — Songs of Kabir (Tagore tr.) [EN]
-- `paradise-lost` — Paradise Lost (Milton) [EN]
-- `divine-comedy` — The Divine Comedy (Dante) [EN]
-- `pilgrim-progress` — The Pilgrim's Progress (Bunyan) [EN]
+- `paradise-lost` — Paradise Lost (Milton) [EN - Ancient formulations]
+- `divine-comedy` — The Divine Comedy (Dante) [EN - Ancient formulations]
+- `pilgrim-progress` — The Pilgrim's Progress (Bunyan) [EN - Ancient formulations]
 
 **Literature on the Human Condition:**
 - `crime-punishment` — Crime and Punishment (Dostoyevsky) [EN]
@@ -463,7 +471,7 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 - `upanishads` — The Upanishads (tr. Swami Paramananda) [EN]
 - `autobiography-yogi` — Autobiography of a Yogi (Yogananda) [EN]
 - `jnana-yoga` — Jnana Yoga (Swami Vivekananda) [EN]
-- `light-of-asia` — The Light of Asia (Sir Edwin Arnold) [EN]
+- `light-of-asia` — The Light of Asia (Sir Edwin Arnold) [EN - Ancient formulations]
 
 **Mindfulness & Presence:**
 - `presence-of-god` — The Practice of the Presence of God (Brother Lawrence) [EN]

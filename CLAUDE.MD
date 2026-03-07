@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Identity (MANDATORY)
+
+All commits in this repository MUST use:
+- **Name:** `PurplePrivacy`
+- **Email:** `chemseddine.code@gmail.com`
+
+Before committing, always verify with `git config user.name` and `git config user.email`.
+If incorrect, fix with: `git config user.name "PurplePrivacy" && git config user.email "chemseddine.code@gmail.com"`
+Never commit with any other identity. This is non-negotiable.
+
 ## Quick Reference
 
 ```bash
