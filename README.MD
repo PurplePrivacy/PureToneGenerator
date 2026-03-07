@@ -51,7 +51,7 @@ pip install numpy sounddevice soundfile
 ```
 
 **Voice requirement:** Resonance uses macOS built-in TTS voices. You **must** download the required voices before running audiobooks or therapeutic voice modes. Go to **System Settings > Accessibility > Spoken Content > System Voice > Manage Voices** and install:
-- **English:** Jamie (Premium), Daniel, Samantha
+- **English:** Ava (Premium), Daniel, Samantha
 - **French:** Audrey (Premium), Thomas, Jacques, Nicolas
 
 Run `./setup_voices.sh` to check what's missing. Premium voices (~800 MB each) sound significantly better for audiobook listening.
@@ -180,7 +180,7 @@ python stream_tone.py --full-restore
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
 --audiobook-list     List all 739 available audiobooks and exit
 --audiobook-vol FL   Voice volume (default: 0.40)
---audiobook-voice V  Override TTS voice (default: Jamie (Premium) for EN, Audrey (Premium) for FR)
+--audiobook-voice V  Override TTS voice (default: Ava (Premium) for EN, Audrey (Premium) for FR)
 --audiobook-rate WPM Override speech rate in words-per-minute (default: 135)
 --audiobook-resume   Resume from saved position
 --audiobook-page N   Start from page N (each page = 10 sentences)
@@ -257,7 +257,7 @@ python stream_tone.py --audiobook meditations --no-rhythm
 
 ## Audiobook Mode (739 Books — 277 French, 462 English)
 
-Listen to public domain classics read aloud during sessions. Voice is auto-selected by language: **Jamie (Premium)** for English, **Audrey (Premium)** for French. Base tone is silenced automatically. Reading rhythm is enabled by default for natural, narrator-like pacing.
+Listen to public domain classics read aloud during sessions. Voice is auto-selected by language: **Ava (Premium)** for English, **Audrey (Premium)** for French. Base tone is silenced automatically. Reading rhythm is enabled by default for natural, narrator-like pacing.
 
 ### Setup
 
@@ -602,14 +602,14 @@ Resonance uses macOS `say` for TTS. Run the setup script to check required voice
 ```
 
 **Required voices:**
-- **Jamie (Premium)** (English) — audiobooks + affirmations
+- **Ava (Premium)** (English) — audiobooks + affirmations
 - **Audrey (Premium)** (French) — French audiobooks + affirmations
 - **Daniel** (English) — affirmations
 - **Samantha** (English) — breath cue voice mode
 
 **To install voices manually:**
 1. System Settings -> Accessibility -> Spoken Content -> System Voice -> Manage Voices
-2. Search for and download: Jamie (Premium), Audrey (Premium), Daniel, Samantha
+2. Search for and download: Ava (Premium), Audrey (Premium), Daniel, Samantha
 
 The Premium voices (~800 MB each) sound significantly better for audiobook listening.
 
