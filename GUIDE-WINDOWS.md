@@ -70,7 +70,7 @@ https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
 **Try a simple session first:**
 
 ```
-python stream_tone.py --peaceful-vibe
+python pure_tone.py --peaceful-vibe
 ```
 
 You should hear a calm tone with breathing pacing. Press **Ctrl+C** to stop.
@@ -78,14 +78,14 @@ You should hear a calm tone with breathing pacing. Press **Ctrl+C** to stop.
 **Try a preset for sleep:**
 
 ```
-python stream_tone.py --sleep
+python pure_tone.py --sleep
 ```
 
 **Try an audiobook:**
 
 ```
 python books/fetch_books.py
-python stream_tone.py --audiobook meditations
+python pure_tone.py --audiobook meditations
 ```
 
 ---
@@ -108,7 +108,7 @@ Every time you want to use Resonance:
 ```
 cd %USERPROFILE%\Desktop\PureToneGenerator
 .venv\Scripts\activate
-python stream_tone.py --peaceful-vibe
+python pure_tone.py --peaceful-vibe
 ```
 
 ---
@@ -117,15 +117,15 @@ python stream_tone.py --peaceful-vibe
 
 | What you want | Command |
 |---|---|
-| Calm ambient tone | `python stream_tone.py --peaceful-vibe` |
-| Deep focus / study | `python stream_tone.py --deep-focus` |
-| Fall asleep | `python stream_tone.py --sleep` |
-| Anxiety relief | `python stream_tone.py --anxiety-relief` |
-| Morning energy | `python stream_tone.py --morning-energy` |
-| Meditation | `python stream_tone.py --meditation` |
-| Audiobook | `python stream_tone.py --audiobook meditations` |
+| Calm ambient tone | `python pure_tone.py --peaceful-vibe` |
+| Deep focus / study | `python pure_tone.py --deep-focus` |
+| Fall asleep | `python pure_tone.py --sleep` |
+| Anxiety relief | `python pure_tone.py --anxiety-relief` |
+| Morning energy | `python pure_tone.py --morning-energy` |
+| Meditation | `python pure_tone.py --meditation` |
+| Audiobook | `python pure_tone.py --audiobook meditations` |
 
-See the full list of 20 presets with `python stream_tone.py --help`.
+See the full list of 20 presets with `python pure_tone.py --help`.
 
 ---
 

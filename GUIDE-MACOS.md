@@ -73,8 +73,8 @@ pip install numpy sounddevice soundfile
 ## Step 5: Install Voices (for therapeutic modes)
 
 ```bash
-chmod +x setup_voices.sh
-./setup_voices.sh
+chmod +x scripts/setup_voices.sh
+./scripts/setup_voices.sh
 ```
 
 If any voices are missing, the script will tell you how to install them:
@@ -89,7 +89,7 @@ If any voices are missing, the script will tell you how to install them:
 **Try a simple session first:**
 
 ```bash
-python stream_tone.py --peaceful-vibe
+python pure_tone.py --peaceful-vibe
 ```
 
 You should hear a calm tone with breathing pacing. Press **Ctrl+C** to stop.
@@ -97,14 +97,14 @@ You should hear a calm tone with breathing pacing. Press **Ctrl+C** to stop.
 **Try a therapeutic session:**
 
 ```bash
-python stream_tone.py --phd-peace --alternate --no-tone --disable-inputs
+python pure_tone.py --phd-peace --alternate --no-tone --disable-inputs
 ```
 
 **Try an audiobook:**
 
 ```bash
 python books/fetch_books.py          # Download library (run once)
-python stream_tone.py --audiobook meditations
+python pure_tone.py --audiobook meditations
 ```
 
 ---
@@ -116,7 +116,7 @@ Every time you want to use Resonance:
 ```bash
 cd ~/Desktop/PureToneGenerator
 source .venv/bin/activate
-python stream_tone.py --peaceful-vibe
+python pure_tone.py --peaceful-vibe
 ```
 
 ---
@@ -125,15 +125,15 @@ python stream_tone.py --peaceful-vibe
 
 | What you want | Command |
 |---|---|
-| Calm ambient tone | `python stream_tone.py --peaceful-vibe` |
-| Deep focus / study | `python stream_tone.py --deep-focus` |
-| Fall asleep | `python stream_tone.py --sleep` |
-| Anxiety relief | `python stream_tone.py --anxiety-relief` |
-| Morning energy | `python stream_tone.py --morning-energy` |
-| Full therapeutic EMDR | `python stream_tone.py --emdr-session` |
-| Audiobook | `python stream_tone.py --audiobook meditations` |
+| Calm ambient tone | `python pure_tone.py --peaceful-vibe` |
+| Deep focus / study | `python pure_tone.py --deep-focus` |
+| Fall asleep | `python pure_tone.py --sleep` |
+| Anxiety relief | `python pure_tone.py --anxiety-relief` |
+| Morning energy | `python pure_tone.py --morning-energy` |
+| Full therapeutic EMDR | `python pure_tone.py --emdr-session` |
+| Audiobook | `python pure_tone.py --audiobook meditations` |
 
-See the full list of 20 presets with `python stream_tone.py --help`.
+See the full list of 20 presets with `python pure_tone.py --help`.
 
 ---
 

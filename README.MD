@@ -47,14 +47,14 @@ source .venv/bin/activate
 pip install numpy sounddevice soundfile
 
 # Voice setup (macOS — required for TTS to work)
-./setup_voices.sh
+./scripts/setup_voices.sh
 ```
 
 **Voice requirement:** Resonance uses macOS built-in TTS voices. You **must** download the required voices before running audiobooks or therapeutic voice modes. Go to **System Settings > Accessibility > Spoken Content > System Voice > Manage Voices** and install:
 - **English:** Ava (Premium), Daniel, Samantha
 - **French:** Audrey (Premium), Thomas, Jacques, Nicolas
 
-Run `./setup_voices.sh` to check what's missing. Premium voices (~800 MB each) sound significantly better for audiobook listening.
+Run `./scripts/setup_voices.sh` to check what's missing. Premium voices (~800 MB each) sound significantly better for audiobook listening.
 
 ```bash
 # Download audiobook library (739 books, run once)
@@ -69,64 +69,64 @@ The fastest way to get started — each preset combines optimal settings:
 
 ```bash
 # Calm ambient tone with HRV breathing and isochronic pulse
-python stream_tone.py --peaceful-vibe
+python pure_tone.py --peaceful-vibe
 
 # Pure gamma focus (no breathing, just 528 Hz + 40 Hz isochronic)
-python stream_tone.py --deep-focus
+python pure_tone.py --deep-focus
 
 # Study mode (same as deep-focus)
-python stream_tone.py --study
+python pure_tone.py --study
 
 # 432 Hz meditation with slow breathing and 30-min fade
-python stream_tone.py --meditation
+python pure_tone.py --meditation
 
 # Fall asleep: 174 Hz + slow breathing + 30-min fade
-python stream_tone.py --sleep
+python pure_tone.py --sleep
 
 # Deep sleep with singing bowl cues
-python stream_tone.py --deep-sleep
+python pure_tone.py --deep-sleep
 
 # 4-7-8 breathing for anxiety relief with bell cues
-python stream_tone.py --anxiety-relief
+python pure_tone.py --anxiety-relief
 
 # Morning energy: 528 Hz + isochronic + bilateral + fast breathing
-python stream_tone.py --morning-energy
+python pure_tone.py --morning-energy
 
 # 4-7-8 yoga breathing with singing bowl
-python stream_tone.py --yoga
+python pure_tone.py --yoga
 
 # Breathwork only (no tone, just voice-guided 4-7-8 breathing)
-python stream_tone.py --breathwork
+python pure_tone.py --breathwork
 
 # 528 Hz Solfeggio healing + slow bilateral stimulation
-python stream_tone.py --healing
+python pure_tone.py --healing
 
 # 639 Hz alpha-wave creativity boost
-python stream_tone.py --creativity
+python pure_tone.py --creativity
 
 # Gentle 432 Hz ambient for reading
-python stream_tone.py --reading-calm
+python pure_tone.py --reading-calm
 
 # 30-min power nap with gradual fade
-python stream_tone.py --power-nap
+python pure_tone.py --power-nap
 
 # 528 Hz bilateral calm with alternating stimulation
-python stream_tone.py --bilateral-calm
+python pure_tone.py --bilateral-calm
 
 # 256 Hz ocean calm: slow ABS + slow breathing + 30-min fade
-python stream_tone.py --ocean-calm
+python pure_tone.py --ocean-calm
 
 # Grounding: 396 Hz + HRV + Claude counter-conditioning
-python stream_tone.py --grounding
+python pure_tone.py --grounding
 
 # Full EMDR session: PhD-peace 21-phase + bilateral + alternating voices
-python stream_tone.py --emdr-session
+python pure_tone.py --emdr-session
 
 # Trauma release: PhD-peace + bilateral alternation + 4-7-8 breathing
-python stream_tone.py --trauma-release
+python pure_tone.py --trauma-release
 
 # Full therapeutic stack: everything enabled
-python stream_tone.py --full-restore
+python pure_tone.py --full-restore
 ```
 
 ---
@@ -203,7 +203,7 @@ Audiobooks play with intelligent pacing that mimics a skilled human narrator:
 
 To disable rhythm and use raw TTS output:
 ```bash
-python stream_tone.py --audiobook meditations --no-rhythm
+python pure_tone.py --audiobook meditations --no-rhythm
 ```
 
 ### Preset Modes
@@ -266,32 +266,32 @@ Listen to public domain classics read aloud during sessions. Voice is auto-selec
 python books/fetch_books.py
 
 # List all available books
-python stream_tone.py --audiobook-list
+python pure_tone.py --audiobook-list
 ```
 
 ### Usage
 
 ```bash
 # Listen to Meditations by Marcus Aurelius (rhythm enabled by default)
-python stream_tone.py --audiobook meditations
+python pure_tone.py --audiobook meditations
 
 # French literature with bilateral alternation
-python stream_tone.py --audiobook candide --alternate
+python pure_tone.py --audiobook candide --alternate
 
 # Resume from where you left off
-python stream_tone.py --audiobook miserables --audiobook-resume
+python pure_tone.py --audiobook miserables --audiobook-resume
 
 # Jump to a specific page
-python stream_tone.py --audiobook miserables --audiobook-page 42
+python pure_tone.py --audiobook miserables --audiobook-page 42
 
 # Raw TTS pacing (no rhythm enhancement)
-python stream_tone.py --audiobook meditations --no-rhythm
+python pure_tone.py --audiobook meditations --no-rhythm
 
 # Custom speech rate (default: 135 WPM)
-python stream_tone.py --audiobook meditations --audiobook-rate 170
+python pure_tone.py --audiobook meditations --audiobook-rate 170
 
 # Override TTS voice
-python stream_tone.py --audiobook meditations --audiobook-voice "Alex"
+python pure_tone.py --audiobook meditations --audiobook-voice "Alex"
 ```
 
 ### Real-Time Text Display
@@ -568,7 +568,7 @@ For books that are part of a series, read them in this order:
 Phases: Truisms & Grounding -> Nasal Breathing -> Jaw Release -> Automatic Breathing -> Focus & Clarity -> Self-Worth -> Sound Safety -> Identity Reclamation -> Beauty & Light -> Inner Peace -> Movement & Vitality -> Deep Integration -> Body Sovereignty -> Nervous System -> Above the Sky -> Centering & Inner Strength
 
 ```bash
-python stream_tone.py --claude-peace --disable-inputs
+python pure_tone.py --claude-peace --disable-inputs
 ```
 
 ### PhD-Peace (27-Phase Expert-Reviewed)
@@ -577,10 +577,10 @@ Extends claude-peace with 11 additional rounds (17-27): Default Expression, Defa
 
 ```bash
 # Full PhD-peace with bilateral alternation
-python stream_tone.py --phd-peace --alternate --disable-inputs
+python pure_tone.py --phd-peace --alternate --disable-inputs
 
 # French language
-python stream_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
+python pure_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
 ```
 
 ### Restore-Peace (Custom Affirmations)
@@ -588,7 +588,7 @@ python stream_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
 ~170 affirmations covering breathing restoration, mental clarity, autonomy, grounding, and counter-conditioning.
 
 ```bash
-python stream_tone.py --freq 432 --hrv --restore-peace --breath-bar --breath-cue bowl
+python pure_tone.py --freq 432 --hrv --restore-peace --breath-bar --breath-cue bowl
 ```
 
 ---
@@ -598,7 +598,7 @@ python stream_tone.py --freq 432 --hrv --restore-peace --breath-bar --breath-cue
 Resonance uses macOS `say` for TTS. Run the setup script to check required voices:
 
 ```bash
-./setup_voices.sh
+./scripts/setup_voices.sh
 ```
 
 **Required voices:**
@@ -631,5 +631,5 @@ The Premium voices (~800 MB each) sound significantly better for audiobook liste
 
 - Keep volume at a comfortable level
 - If you feel dizzy, anxious, or overloaded — stop and rest
-- For trauma sensitivity, start with: `python stream_tone.py --freq 432 --hrv` at low volume
+- For trauma sensitivity, start with: `python pure_tone.py --freq 432 --hrv` at low volume
 - This tool exists to help you take sound back as something that serves you

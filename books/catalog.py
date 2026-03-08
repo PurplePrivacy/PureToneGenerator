@@ -1,6 +1,6 @@
 """Audiobook catalog -- 739 books, all public domain.
 
-Each entry maps a short CLI name to metadata used by stream_tone.py and fetch_books.py.
+Each entry maps a short CLI name to metadata used by pure_tone.py and fetch_books.py.
 Voice is auto-selected by language: Aurélie (Enhanced) (fr) or Ava (Premium) (en).
 """
 

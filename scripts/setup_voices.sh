@@ -15,8 +15,8 @@
 #   - Nicolas  (French)
 #
 # Usage:
-#   chmod +x setup_voices.sh
-#   ./setup_voices.sh
+#   chmod +x scripts/setup_voices.sh
+#   ./scripts/setup_voices.sh
 # ============================================================================
 
 set -e
@@ -105,5 +105,5 @@ if [ ${#MISSING_OPTIONAL[@]} -gt 0 ]; then
 fi
 
 echo "After installing voices, re-run this script to verify:"
-echo "  ./setup_voices.sh"
+echo "  ./scripts/setup_voices.sh"
 echo ""
