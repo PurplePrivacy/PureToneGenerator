@@ -281,9 +281,21 @@ def audiobook_renderer_thread(g):
                 time.sleep(0.5)
                 continue
             voice, text = g.audiobook_sentences[g.audiobook_next_render]
-            tts_text = text
-            if g.reading_rhythm and not g.audiobook_no_gaps:
+            if g.reading_rhythm and not g.audiobook_no_gaps and g.flat_read:
                 tts_text = _inject_word_rhythm(text, g.ab_lang)
+            else:
+                tts_text = text
+            plan = None
+            if g.reading_rhythm and not g.audiobook_no_gaps and not g.flat_read:
+                from . import rhythm
+                is_para = g.audiobook_next_render in getattr(g, 'audiobook_para_initial', set())
+                plan = rhythm.analyze_sentence(
+                    text, g.ab_lang,
+                    is_paragraph_initial=is_para,
+                    is_archaic=g.audiobook_is_archaic,
+                    rng=g.rhythm_rng,
+                    sentence_index=g.audiobook_next_render,
+                )
             cache_key = (voice, tts_text)
             if cache_key in ab_tts_cache:
                 arr = ab_tts_cache[cache_key]
@@ -294,8 +306,12 @@ def audiobook_renderer_thread(g):
                 if arr is not None:
                     ab_tts_cache[cache_key] = arr
             if arr is not None and g.reading_rhythm and not g.audiobook_no_gaps:
-                arr = _extend_audio_gaps(arr, tts_text, g.ab_lang, g.sample_rate,
-                                         g.audiobook_word_gap, g.reading_rhythm)
+                if g.flat_read:
+                    arr = _extend_audio_gaps(arr, tts_text, g.ab_lang, g.sample_rate,
+                                             g.audiobook_word_gap, g.reading_rhythm)
+                elif plan is not None:
+                    from . import rhythm
+                    arr = rhythm.refine_audio_gaps(arr, plan, g.sample_rate)
             if arr is not None:
                 g.audiobook_rendered[g.audiobook_next_render] = arr
             else:

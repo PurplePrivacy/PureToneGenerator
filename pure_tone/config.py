@@ -10,7 +10,7 @@ from queue import Queue
 
 from .constants import (
     SAMPLE_RATE, CHANNELS, FADE_SECONDS, LONG_FADE_SECONDS,
-    HRV_PATTERNS, AUDIOBOOK_PAGE_SIZE,
+    HRV_PATTERNS, AUDIOBOOK_PAGE_SIZE, RHYTHM_SEED,
     build_hrv_tables,
 )
 
@@ -93,6 +93,7 @@ def init(args):
     g.audiobook_gap = args.audiobook_gap
     g.audiobook_word_gap = args.audiobook_word_gap
     g.reading_rhythm = args.rhythm and not args.no_rhythm
+    g.flat_read = args.flat_read
     if g.reading_rhythm and "--audiobook-word-gap" not in sys.argv:
         g.audiobook_word_gap = 2.0
     g.audiobook_loop = not args.no_audiobook_loop
@@ -175,19 +176,36 @@ def init(args):
             print(f"Note: audiobook voice overridden to: {g.ab_voice}")
         elif g.ab_lang == "en":
             print(f"Note: '{ab_meta['title']}' is an English audiobook — using voice: {g.ab_voice}")
-        ab_raw = re.sub(r'(?<!\n)\n(?!\n)', ' ', ab_raw)
-        ab_parts = re.split(r'(?<=[.!?])\s+|\n{2,}', ab_raw)
-        g.audiobook_sentences = [
-            (g.ab_voice, s.strip())
-            for s in ab_parts
-            if s.strip() and len(s.strip()) > 2
-        ]
+        ab_raw_normalized = re.sub(r'(?<!\n)\n(?!\n)', ' ', ab_raw)
+        paragraphs = re.split(r'\n{2,}', ab_raw_normalized)
+        g.audiobook_para_initial = set()
+        sent_idx = 0
+        for para in paragraphs:
+            sentences = re.split(r'(?<=[.!?])\s+', para)
+            first_in_para = True
+            for s in sentences:
+                s = s.strip()
+                if not s or len(s) <= 2:
+                    continue
+                if first_in_para:
+                    g.audiobook_para_initial.add(sent_idx)
+                    first_in_para = False
+                g.audiobook_sentences.append((g.ab_voice, s))
+                sent_idx += 1
         g.audiobook_book_title = f"{ab_meta['title']} — {ab_meta['author']} [{g.ab_lang.upper()}]"
         g.audiobook_mode = True
         g.hrv_mode = True
         if g.pure_mode:
             print("Note: --audiobook overrides --pure to enable HRV")
         g.ab_rate = args.audiobook_rate if args.audiobook_rate else (120 if g.ab_lang == 'fr' else 135)
+
+    # Prosodic rhythm state
+    g.rhythm_rng = np.random.RandomState(RHYTHM_SEED)
+    if g.audiobook_name:
+        from books.catalog import ARCHAIC_BOOKS
+        g.audiobook_is_archaic = g.audiobook_name in ARCHAIC_BOOKS
+    else:
+        g.audiobook_is_archaic = False
 
     # ABS rate
     if g.abs_speed == "slow":

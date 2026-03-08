@@ -22,6 +22,9 @@ SOFT_HEADROOM = 1.0 - SOFT_THRESHOLD  # 0.08
 # Exhale cue pitch shift
 EXHALE_PITCH_FACTOR = 0.85
 
+# Prosodic rhythm RNG seed (deterministic across runs)
+RHYTHM_SEED = 42
+
 # HRV breathing patterns: list of (phase_name, duration_seconds)
 HRV_PATTERNS = {
     "A":   [("INHALE", 5.5), ("EXHALE", 5.5)],

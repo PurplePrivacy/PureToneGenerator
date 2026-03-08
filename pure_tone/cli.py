@@ -93,6 +93,8 @@ def build_parser():
                         help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel (default: on)")
     parser.add_argument("--no-rhythm", action="store_true",
                         help="Disable reading rhythm — use raw TTS pacing with no pause extension")
+    parser.add_argument("--flat-read", action="store_true",
+                        help="Use the legacy flat reading rhythm (static word-position cycling) instead of prosodic analysis")
     # Presets
     parser.add_argument("--peaceful-vibe", action="store_true",
                         help="Preset: 432 Hz + isochronic 40 Hz + HRV breathing + breath bar")
