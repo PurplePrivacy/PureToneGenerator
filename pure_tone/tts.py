@@ -13,6 +13,7 @@ from .constants import (
     VOICE_ALIASES, SAMPLE_RATE, AUDIOBOOK_LOOK_AHEAD, AUDIOBOOK_PAGE_SIZE,
     WR_PATTERN, WR_SLNC_CYCLE_EN, WR_LANG_MULT_FR, GLUE_WORDS,
     PUNCT_PAUSE_BASE,
+    CLAUDE_PEACE_VOICE_RATES, CLAUDE_PEACE_DEFAULT_RATE,
 )
 
 
@@ -102,11 +103,14 @@ def unified_renderer_thread(g):
 
     tts_cache = {}
     for i, (voice, text) in enumerate(g.CLAUDE_PEACE_MESSAGES if g.claude_peace else []):
-        cache_key = (voice, text)
+        voice_rate = CLAUDE_PEACE_VOICE_RATES.get(voice, CLAUDE_PEACE_DEFAULT_RATE)
+        cache_key = (voice, text, voice_rate)
         if cache_key in tts_cache:
             g.claude_rendered[i] = tts_cache[cache_key]
         else:
-            arr = render_voice(text, voice, rate=130, sample_rate=g.sample_rate, tts_lock=g.tts_lock)
+            arr = render_voice(text, voice, rate=voice_rate, sample_rate=g.sample_rate, tts_lock=g.tts_lock)
+            if arr is not None and g.phd_peace:
+                arr = _apply_hypnotic_rhythm(arr, text, g.sample_rate)
             if arr is not None:
                 tts_cache[cache_key] = arr
                 g.claude_rendered[i] = arr
@@ -159,6 +163,70 @@ def _inject_word_rhythm(text, lang):
                 cyc = (cyc + 1) % len(WR_PATTERN)
                 target = WR_PATTERN[cyc]
     return ' '.join(out)
+
+
+def _apply_hypnotic_rhythm(arr, text, sample_rate):
+    """Insert a single 300ms pause before the final 2-3 words of full sentences.
+
+    Hypnotic delivery keeps the sentence as one prosodic arc, but marks the
+    embedded command (always the final words) with a brief anticipatory silence.
+    Only applies to sentences with 4+ words — 1-word anchors and short bridge
+    phrases are left atomic.
+    """
+    words = text.split()
+    if len(words) < 4:
+        return arr
+
+    # Find the last significant silence gap in the final 40% of the audio
+    # This is where the pause before the final phrase group lives
+    win_ms = 15
+    win_n = int(win_ms / 1000 * sample_rate)
+    n_wins = len(arr) // win_n
+    if n_wins <= 4:
+        return arr
+
+    trimmed = arr[:n_wins * win_n].reshape(n_wins, win_n)
+    rms = np.sqrt(np.mean(trimmed ** 2, axis=1))
+    thresh = np.median(rms) * 0.08
+
+    # Search in the final 40% of the audio for the last inter-word gap
+    search_start = int(n_wins * 0.60)
+    search_end = int(n_wins * 0.92)
+    is_sil = rms < thresh
+
+    # Find the last gap in the search region
+    best_gap = None
+    in_gap = False
+    gap_start = 0
+    min_gap_samples = int(0.060 * sample_rate)
+    for wi in range(search_start, search_end):
+        if is_sil[wi] and not in_gap:
+            gap_start = wi * win_n
+            in_gap = True
+        elif not is_sil[wi] and in_gap:
+            gap_end = wi * win_n
+            if gap_end - gap_start >= min_gap_samples:
+                best_gap = (gap_start, gap_end)
+            in_gap = False
+
+    if best_gap is None:
+        return arr
+
+    gs, ge = best_gap
+    extra = int(0.300 * sample_rate)
+    mid = (gs + ge) // 2
+    xf_n = min(int(0.008 * sample_rate), mid, len(arr) - mid)
+    if xf_n > 1:
+        xf_out = ((1 + np.cos(np.linspace(0, np.pi, xf_n))) / 2).astype(np.float32)
+        xf_in = ((1 - np.cos(np.linspace(0, np.pi, xf_n))) / 2).astype(np.float32)
+        left = arr[:mid].copy()
+        right = arr[mid:].copy()
+        left[-xf_n:] *= xf_out
+        right[:xf_n] *= xf_in
+        arr = np.concatenate([left, np.zeros(extra, dtype=np.float32), right])
+    else:
+        arr = np.concatenate([arr[:mid], np.zeros(extra, dtype=np.float32), arr[mid:]])
+    return arr
 
 
 def _extend_audio_gaps(arr, tts_text, lang, sample_rate, word_gap_mult, reading_rhythm):

@@ -11,6 +11,7 @@ from queue import Queue
 from .constants import (
     SAMPLE_RATE, CHANNELS, FADE_SECONDS, LONG_FADE_SECONDS,
     HRV_PATTERNS, AUDIOBOOK_PAGE_SIZE, RHYTHM_SEED,
+    HYPNOTIC_GAP_SCHEDULE, HYPNOTIC_EXHALE_DELAY,
     build_hrv_tables,
 )
 
@@ -277,6 +278,12 @@ def init(args):
     g.claude_cue_pos = 0
     g.claude_cycle_count = 0
     g.claude_alt_left = True
+
+    # Hypnotic timing (phd-peace progressive deepening)
+    g.claude_next_trigger_sample = 0
+    g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate) if g.phd_peace else 0
+    g.claude_gap_schedule = HYPNOTIC_GAP_SCHEDULE if g.phd_peace else []
+    g.claude_gap_rng = np.random.RandomState(RHYTHM_SEED + 7)
 
     # Audiobook state
     g.audiobook_rendered = {}

@@ -42,6 +42,71 @@ VOICE_ALIASES = {
     "Evan (Enhanced)": "Evan (Enhanced)",
 }
 
+# Per-voice TTS rates for claude/phd-peace (WPM)
+# Aurélie slowed to 115 for hypnotic delivery; Jacques stays crisp at 130 for bridge phrases
+CLAUDE_PEACE_VOICE_RATES = {
+    "Aurélie (Enhanced)": 115,
+    "Thomas": 130,
+    "Jacques": 130,
+}
+CLAUDE_PEACE_DEFAULT_RATE = 130
+
+# Hypnotic gap schedule — progressive deepening (gap_cycles, jitter_max_cycles)
+# Messages trigger further apart as the session deepens, per Ericksonian pacing
+HYPNOTIC_GAP_SCHEDULE = [
+    # Rounds 1-12: rapport building — 1 cycle, minimal jitter
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    (1.0, 0.15),
+    # Rounds 13-20: transition — 1.0-1.5 cycles
+    (1.1, 0.25),
+    (1.2, 0.25),
+    (1.25, 0.30),
+    (1.3, 0.30),
+    (1.35, 0.35),
+    (1.4, 0.35),
+    (1.45, 0.40),
+    (1.5, 0.40),
+    # Rounds 21-34: deepening — 1.5-2.0 cycles
+    (1.55, 0.40),
+    (1.6, 0.40),
+    (1.65, 0.45),
+    (1.7, 0.45),
+    (1.75, 0.45),
+    (1.8, 0.45),
+    (1.85, 0.50),
+    (1.9, 0.50),
+    (1.9, 0.50),
+    (1.95, 0.50),
+    (1.95, 0.50),
+    (2.0, 0.50),
+    (2.0, 0.50),
+    (2.0, 0.50),
+    # Rounds 35-43: integration/deep trance — 2.0-3.0 cycles
+    (2.2, 0.50),
+    (2.3, 0.50),
+    (2.4, 0.50),
+    (2.5, 0.50),
+    (2.6, 0.50),
+    (2.7, 0.50),
+    (2.8, 0.50),
+    (2.9, 0.50),
+    (3.0, 0.50),
+]
+
+# Exhale onset delay for hypnotic delivery (seconds)
+# Messages fire 0.8s into exhale phase when parasympathetic response is fully engaged
+HYPNOTIC_EXHALE_DELAY = 0.8
+
 # Audiobook
 AUDIOBOOK_LOOK_AHEAD = 10
 AUDIOBOOK_PAGE_SIZE = 10

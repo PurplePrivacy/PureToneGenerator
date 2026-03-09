@@ -77,26 +77,35 @@ def make_callback(g):
                         pass
                     g.peace_cycle_count += 1
 
-                # Claude-peace trigger
-                claude_trigger = current_phase_name == g.hrv_phase_names[0] or g.dense_mode
-                if g.claude_peace and claude_trigger:
-                    ci = g.claude_cycle_count % len(g.CLAUDE_PEACE_MESSAGES)
-                    if ci in g.claude_rendered:
-                        g.claude_cue_buf = g.claude_rendered[ci]
-                        g.claude_cue_pos = 0
-                    if g.alternate_mode:
-                        g.claude_alt_left = (g.claude_cycle_count % 2 == 0)
-                    cv, ct = g.CLAUDE_PEACE_MESSAGES[ci]
-                    claude_side = "L" if g.alternate_mode and g.claude_alt_left else "R" if g.alternate_mode else ""
-                    claude_side_tag = f" [{claude_side}]" if claude_side else ""
-                    try:
-                        os.write(2, f"\n  ~ [{cv}] {ct}{claude_side_tag}\n".encode())
-                    except Exception:
-                        pass
-                    g.claude_cycle_count += 1
+                # Claude-peace trigger — two modes:
+                # PHD-peace: sample-counter with progressive deepening gaps + exhale alignment
+                # Regular claude-peace: phase-transition trigger (original behavior)
+                if g.claude_peace and g.claude_gap_schedule:
+                    # PHD-peace: handled below via sample counter (not phase transition)
+                    pass
+                elif g.claude_peace:
+                    claude_trigger = current_phase_name == g.hrv_phase_names[0] or g.dense_mode
+                    if claude_trigger:
+                        _fire_claude_message(g)
                 g.hrv_last_phase_name = current_phase_name
 
             g.hrv_phase += frames
+
+        # PHD-peace progressive deepening: sample-counter trigger with exhale alignment
+        if g.claude_peace and g.claude_gap_schedule and g.claude_render_done:
+            if g.current_sample >= g.claude_next_trigger_sample:
+                _fire_claude_message(g)
+                # Compute next trigger time using progressive gap schedule
+                ci = g.claude_cycle_count  # already incremented by _fire
+                n_msgs = len(g.CLAUDE_PEACE_MESSAGES)
+                if ci < n_msgs:
+                    sched_idx = min(ci, len(g.claude_gap_schedule) - 1)
+                    gap_cycles, jitter_max = g.claude_gap_schedule[sched_idx]
+                    jitter = g.claude_gap_rng.random() * jitter_max
+                    total_cycles = gap_cycles + jitter
+                    gap_samples = int(total_cycles * g.hrv_cycle_samples)
+                    # Align to next exhale phase + delay
+                    g.claude_next_trigger_sample = g.current_sample + gap_samples + g.claude_exhale_delay_samples
 
         # Audiobook: trigger next sentence after inter-sentence gap elapses
         if g.audiobook_mode and g.audiobook_cue_buf is None and g.audiobook_gap_remaining > 0:
@@ -230,6 +239,24 @@ def make_callback(g):
                               np.sign(outdata) * compressed, outdata)
 
     return audio_callback
+
+
+def _fire_claude_message(g):
+    """Load the next claude-peace message into the playback buffer."""
+    ci = g.claude_cycle_count % len(g.CLAUDE_PEACE_MESSAGES)
+    if ci in g.claude_rendered:
+        g.claude_cue_buf = g.claude_rendered[ci]
+        g.claude_cue_pos = 0
+    if g.alternate_mode:
+        g.claude_alt_left = (g.claude_cycle_count % 2 == 0)
+    cv, ct = g.CLAUDE_PEACE_MESSAGES[ci]
+    claude_side = "L" if g.alternate_mode and g.claude_alt_left else "R" if g.alternate_mode else ""
+    claude_side_tag = f" [{claude_side}]" if claude_side else ""
+    try:
+        os.write(2, f"\n  ~ [{cv}] {ct}{claude_side_tag}\n".encode())
+    except Exception:
+        pass
+    g.claude_cycle_count += 1
 
 
 def _mix_voice(outdata, frames, g, buf_attr, pos_attr, vol, alternate, alt_attr):
