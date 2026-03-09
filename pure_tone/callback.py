@@ -92,8 +92,9 @@ def make_callback(g):
             g.hrv_phase += frames
 
         # PHD-peace progressive deepening: sample-counter trigger with exhale alignment
-        if g.claude_peace and g.claude_gap_schedule and g.claude_render_done:
-            if g.current_sample >= g.claude_next_trigger_sample:
+        if g.claude_peace and g.claude_gap_schedule:
+            ci = g.claude_cycle_count % len(g.CLAUDE_PEACE_MESSAGES)
+            if ci in g.claude_rendered and g.current_sample >= g.claude_next_trigger_sample:
                 _fire_claude_message(g)
                 # Compute next trigger time using progressive gap schedule
                 ci = g.claude_cycle_count  # already incremented by _fire
