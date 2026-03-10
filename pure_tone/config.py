@@ -84,6 +84,8 @@ def init(args):
     g.claude_peace_vol = args.claude_peace_vol
     g.phd_peace = args.phd_peace
     g.phd_peace_vol = args.phd_peace_vol
+    g.ego_boost = args.ego_boost
+    g.ego_boost_vol = args.ego_boost_vol
     g.alternate_mode = args.alternate
     g.dense_mode = args.dense
     g.peace_lang = args.peace_lang
@@ -147,6 +149,14 @@ def init(args):
         g.claude_peace_vol = g.phd_peace_vol
         if g.pure_mode:
             print("Note: --phd-peace overrides --pure to enable HRV + breath-bar")
+
+    # --ego-boost: dithyrambic ego-strengthening — activates claude_peace infrastructure
+    if g.ego_boost:
+        g.hrv_mode = True
+        g.breath_bar = True
+        g.claude_peace_vol = g.ego_boost_vol
+        if g.pure_mode:
+            print("Note: --ego-boost overrides --pure to enable HRV + breath-bar")
 
     # ── Audiobook loading ──
     g.audiobook_mode = False
@@ -247,6 +257,11 @@ def init(args):
             g.CLAUDE_PEACE_MESSAGES = messages.PHD_PEACE_MESSAGES
         g.claude_peace = True
 
+    if g.ego_boost:
+        g.CLAUDE_PEACE_MESSAGES = messages.EGO_BOOST_MESSAGES_FR
+        g.peace_lang = "fr"  # ego-boost is French-only
+        g.claude_peace = True
+
     # ── Mutable state ──
     g.phase = 0.0
     g.current_sample = 0
@@ -281,8 +296,8 @@ def init(args):
 
     # Hypnotic timing (phd-peace progressive deepening)
     g.claude_next_trigger_sample = 0
-    g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate) if g.phd_peace else 0
-    g.claude_gap_schedule = HYPNOTIC_GAP_SCHEDULE if g.phd_peace else []
+    g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate) if (g.phd_peace or g.ego_boost) else 0
+    g.claude_gap_schedule = HYPNOTIC_GAP_SCHEDULE if (g.phd_peace or g.ego_boost) else []
     g.claude_gap_rng = np.random.RandomState(RHYTHM_SEED + 7)
 
     # Audiobook state

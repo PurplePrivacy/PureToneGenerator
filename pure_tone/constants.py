@@ -188,6 +188,34 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "audible breath & lung apex (hear me, longest breath, top of lungs)",
 ]
 
+EGO_BOOST_PHASE_NAMES = [
+    "physical beauty & attractiveness",
+    "intelligence & mental sharpness",
+    "accuracy & precision",
+    "virtue & moral character",
+    "strength & resilience",
+    "charisma & social magnetism",
+    "grace & elegance",
+    "creativity & vision",
+    "worth & value",
+    "confidence & self-assurance",
+    "warmth & kindness",
+    "competence & mastery",
+    "sexual attractiveness & magnetism",
+    "humor & wit",
+    "leadership & command",
+    "authenticity & uniqueness",
+    "body power & physical capability",
+    "emotional depth & maturity",
+    "success & achievement",
+    "sovereignty & independence",
+    "sensory richness & aliveness",
+    "legacy & impact",
+    "purity & radiance",
+    "abundance & completeness",
+    "transcendence & apotheosis",
+]
+
 
 def build_hrv_tables(hrv_pattern, sample_rate):
     """Precompute one full cycle of HRV envelope values + phase IDs.

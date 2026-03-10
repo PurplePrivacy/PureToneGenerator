@@ -754,3 +754,9 @@ _PHD_EXTRA_ROUNDS, _PHD_EXTRA_ROUNDS_FR = _load_phd_extra()
 
 PHD_PEACE_MESSAGES = CLAUDE_PEACE_MESSAGES + _PHD_EXTRA_ROUNDS
 PHD_PEACE_MESSAGES_FR = CLAUDE_PEACE_MESSAGES_FR + _PHD_EXTRA_ROUNDS_FR
+
+# ============================
+# EGO-BOOST MESSAGES
+# ============================
+
+from ._ego_boost_messages import EGO_BOOST_MESSAGES_FR

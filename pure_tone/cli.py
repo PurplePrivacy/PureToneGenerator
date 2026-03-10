@@ -60,6 +60,12 @@ def build_parser():
                              "plus 5 default-state conditioning rounds (expression, posture, feeling, mode, body)")
     parser.add_argument("--phd-peace-vol", type=float, default=0.35,
                         help="Volume for --phd-peace voice affirmations (default: 0.35)")
+    parser.add_argument("--ego-boost", action="store_true",
+                        help="Dithyrambic ego-strengthening: 25 rounds of epic French compliments "
+                             "celebrating beauty, intelligence, virtue, strength, charisma — "
+                             "single Aurélie voice, same hypnotic timing as PHD-peace")
+    parser.add_argument("--ego-boost-vol", type=float, default=0.35,
+                        help="Volume for --ego-boost voice affirmations (default: 0.35)")
     parser.add_argument("--alternate", action="store_true",
                         help="Alternate voice messages between left and right speakers (EMDR-style bilateral)")
     parser.add_argument("--dense", action="store_true",
