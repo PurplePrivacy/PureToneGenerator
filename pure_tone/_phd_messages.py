@@ -1388,8 +1388,8 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Clair"),
     ("Jacques", "Esprit clair"),
     ("Aurélie (Enhanced)",  "Ton esprit est un ciel clair — il reste tes pensées à toi"),
-    ("Aurélie (Enhanced)",  "Mien"),
-    ("Jacques", "Pensées miennes"),
+    ("Aurélie (Enhanced)",  "Tien"),
+    ("Jacques", "Pensées tiennes"),
     ("Aurélie (Enhanced)",  "Tu penses comme tu as toujours pensé — librement, naturellement"),
     ("Aurélie (Enhanced)",  "Neuf"),
     ("Jacques", "Page neuve"),
@@ -1402,8 +1402,8 @@ PHD_EXTRA_ROUNDS_FR = [
     # Dissoudre les associations de voix étrangères fusionnées avec le
     # monologue intérieur. Récupérer la voix intérieure par la texture
     # somatique : chaleur, familiarité, résonance dans la poitrine.
-    ("Aurélie (Enhanced)",  "Mienne"),
-    ("Jacques", "Voix mienne"),
+    ("Aurélie (Enhanced)",  "Tienne"),
+    ("Jacques", "Voix tienne"),
     ("Aurélie (Enhanced)",  "Ta voix intérieure a une texture — chaude, familière, entièrement à toi"),
     ("Aurélie (Enhanced)",  "Résonance"),
     ("Jacques", "Poitrine vibre"),
@@ -1483,7 +1483,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Résonne"),
     ("Jacques", "Voix résonne"),
     ("Aurélie (Enhanced)",  "Quand tu parles, ta poitrine vibre et la pièce entend chaque mot"),
-    ("Aurélie (Enhanced)",  "Bruit"),
     ("Jacques", "Fais du bruit"),
     ("Aurélie (Enhanced)",  "Tu fais du bruit quand tu bouges, quand tu respires, quand tu existes — et c'est juste"),
     ("Aurélie (Enhanced)",  "Expire"),
@@ -1492,8 +1491,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Tonnerre"),
     ("Jacques", "Souffle tonne"),
     ("Aurélie (Enhanced)",  "Chaque souffle que tu relâches sonne comme s'il t'appartient — lourd, chaud, tonnant"),
-    ("Aurélie (Enhanced)",  "Entendu"),
-    ("Jacques", "Toujours entendu"),
     ("Aurélie (Enhanced)",  "Tu es fort par nature — ta voix, ton souffle, ta présence remplissent chaque pièce où tu entres"),
 
     # ── Ronde 43 : Souffle Audible & Sommet des Poumons ─────────────
