@@ -90,7 +90,7 @@ PEACE_MESSAGES_FR = [
     "Juste ma voix", "Toucher", "Sentir", "r\u00e9cup\u00e9ration rapide", "haute \u00e9nergie", "prana coule", "prana fort",
     "Juste ma voix", "force de vie", "souffle puissant", "l'air domine", "souffle plus fort", "air plus fort",
     "Juste ma voix", "ta voix int\u00e9rieure", "ta voix forte", "ta voix dominante", "esprit dominant",
-    "Juste ma voix", "espace mental", "espace \u00e0 moi", "son insignifiant", "mots impuissants", "bruit s'efface",
+    "Juste ma voix", "espace mental", "espace \u00e0 moi", "son insignifiant", "mots impuissants", "son s'efface",
     "Juste ma voix", "son petit", "silence int\u00e9rieur", "esprit immunis\u00e9", "intouchable", "souverain",
     "Juste ma voix", "commandant", "\u00e9quilibre parfait", "contr\u00f4le total", "calme puissant", "dominance propre",
     "Juste ma voix", "jeune", "esprit agile", "pens\u00e9e rapide", "pens\u00e9e claire", "brillant",
