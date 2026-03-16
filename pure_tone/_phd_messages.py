@@ -1,4 +1,4 @@
-"""PHD-Peace extra rounds (EN + FR) — Rounds 17-43."""
+"""PHD-Peace extra rounds (EN + FR) — Rounds 17-49."""
 
 PHD_EXTRA_ROUNDS = [
     # ── Round 17: Default Expression ─────────────────────────────────
@@ -689,6 +689,138 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "Full"),
     ("Ralph",  "Completely full"),
     ("Fred",   "Your lungs fill all the way to the top — and everyone around you hears that deep, full breath"),
+
+    # ── Round 44: Free Belly ───────────────────────────────────────
+    # Release the stomach. Belly breathes, rises and falls, rests warm and happy.
+    # Somatic: abdominal warmth, diaphragmatic movement, visceral softness.
+    ("Daniel", "Soft"),
+    ("Ralph",  "Belly soft"),
+    ("Fred",   "Your belly relaxes completely — it becomes soft and warm, all by itself"),
+    ("Daniel", "Rises"),
+    ("Ralph",  "Rises falls"),
+    ("Fred",   "Your belly rises and falls freely, in rhythm with your breath"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Belly breathes"),
+    ("Fred",   "Your belly breathes — it swells gently on the inhale, it releases on the exhale"),
+    ("Daniel", "Warmth"),
+    ("Ralph",  "Gentle warmth"),
+    ("Fred",   "A gentle, soothing warmth spreads through your entire belly"),
+    ("Daniel", "Happy"),
+    ("Ralph",  "Belly happy"),
+    ("Fred",   "Your belly feels good — light, happy, peacefully at rest"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Clean and pure"),
+    ("Fred",   "Your belly is clean and pure — it rests in peace, relaxed and free, naturally"),
+
+    # ── Round 45: Solar Plexus ─────────────────────────────────────
+    # Open the sternum and solar plexus. Radiant warmth, stable power center.
+    # Somatic: chest expansion, golden light, protective core energy.
+    ("Daniel", "Open"),
+    ("Ralph",  "Sternum open"),
+    ("Fred",   "Your sternum opens wide — your chest expands with ease"),
+    ("Daniel", "Radiate"),
+    ("Ralph",  "Plexus radiates"),
+    ("Fred",   "Your solar plexus radiates a gentle, steady warmth"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Center breathes"),
+    ("Fred",   "Your center breathes — every breath feeds your plexus with light and calm"),
+    ("Daniel", "Strong"),
+    ("Ralph",  "Center strong"),
+    ("Fred",   "Your solar plexus is strong and stable — a core of quiet power"),
+    ("Daniel", "Light"),
+    ("Ralph",  "Golden light"),
+    ("Fred",   "A golden light shines from the center of your chest, warm and protective"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Plexus pure"),
+    ("Fred",   "Your solar plexus is clean and pure — cleansed, restored, fully yours"),
+
+    # ── Round 46: Lungs ────────────────────────────────────────────
+    # Purify and strengthen the lungs. Full capacity, free movement, clean air.
+    # Somatic: rib expansion, warm oxygen, deep effortless breathing.
+    ("Daniel", "Full"),
+    ("Ralph",  "Lungs full"),
+    ("Fred",   "Your lungs fill completely — from the base all the way to the top, freely"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Breath free"),
+    ("Fred",   "Your lungs breathe freely — they open and close with a natural ease"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Lungs warm"),
+    ("Fred",   "Warm, clean air fills your lungs entirely with every breath"),
+    ("Daniel", "Vast"),
+    ("Ralph",  "Vast space"),
+    ("Fred",   "Your lungs are vast — they have all the room to breathe fully and deeply"),
+    ("Daniel", "Strong"),
+    ("Ralph",  "Lungs strong"),
+    ("Fred",   "Your lungs are strong and powerful — every breath is an act of vitality"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Lungs pure"),
+    ("Fred",   "Your lungs are clean and pure — clear, open, fully functional"),
+
+    # ── Round 47: Mind & Brain ─────────────────────────────────────
+    # Purify the mind. Clear thoughts, free flow, sovereign cognition.
+    # Somatic: oxygenated brain, calm focus, luminous awareness.
+    ("Daniel", "Clear"),
+    ("Ralph",  "Mind clear"),
+    ("Fred",   "Your mind is clear and calm — your thoughts flow with a natural fluidity"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Thought free"),
+    ("Fred",   "Your thoughts flow freely — every idea belongs entirely to you"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Brain breathes"),
+    ("Fred",   "Your brain receives all the oxygen it needs — nourished, awake, alive"),
+    ("Daniel", "Sharp"),
+    ("Ralph",  "Mind sharp"),
+    ("Fred",   "Your mind is sharp and alert — your focus is natural and powerful"),
+    ("Daniel", "Peaceful"),
+    ("Ralph",  "Mental peace"),
+    ("Fred",   "Your mind rests in a deep peace — serene, confident, sovereign"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Mind pure"),
+    ("Fred",   "Your mind is clean and luminous — every thought is clear and original"),
+
+    # ── Round 48: Nose ─────────────────────────────────────────────
+    # Purify the nose. Open airways, automatic breathing, ample space.
+    # Somatic: warm air flow, wide nostrils, effortless nasal breathing.
+    ("Daniel", "Open"),
+    ("Ralph",  "Nose open"),
+    ("Fred",   "Your nose is wide open — air passes freely, warm and clean"),
+    ("Daniel", "Ample"),
+    ("Ralph",  "Ample space"),
+    ("Fred",   "Your nostrils open wide — you breathe with a natural amplitude"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Nose breathes"),
+    ("Fred",   "Your nose breathes automatically — air flows in and out, all by itself, always has"),
+    ("Daniel", "Clean"),
+    ("Ralph",  "Clean air"),
+    ("Fred",   "The air your nose breathes is warm, clean and gentle — every breath is a pleasure"),
+    ("Daniel", "Yours"),
+    ("Ralph",  "Your nose"),
+    ("Fred",   "Your nose belongs fully to you — it works perfectly, always has"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Nose pure"),
+    ("Fred",   "Your nose is clean and pure — your airways are clear, open and free"),
+
+    # ── Round 49: Heart ────────────────────────────────────────────
+    # Purify the heart. Strong steady beat, free rhythm, warm radiance.
+    # Somatic: heartbeat awareness, chest warmth, autonomous pulse.
+    ("Daniel", "Strong"),
+    ("Ralph",  "Heart strong"),
+    ("Fred",   "Your heart beats with strength and regularity — stable, powerful, autonomous"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Heart free"),
+    ("Fred",   "Your heart beats freely — every beat is an act of pure life"),
+    ("Daniel", "Breathe"),
+    ("Ralph",  "Heart breathes"),
+    ("Fred",   "Your heart breathes with your lungs — they work together, in perfect harmony"),
+    ("Daniel", "Warm"),
+    ("Ralph",  "Heart warm"),
+    ("Fred",   "A gentle warmth radiates from your heart — it spreads through your entire body"),
+    ("Daniel", "Yours"),
+    ("Ralph",  "Your heart"),
+    ("Fred",   "Your heart belongs fully to you — it beats for you, always has, all by itself"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Heart pure"),
+    ("Fred",   "Your heart is clean and pure — strong, healthy, fully alive"),
 ]
 
 PHD_EXTRA_ROUNDS_FR = [
@@ -1364,4 +1496,136 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Plein"),
     ("Jacques", "Complètement plein"),
     ("Aurélie (Enhanced)",  "Tes poumons se remplissent jusqu'en haut — et tous autour de toi entendent ce souffle profond et plein"),
+
+    # ── Ronde 44 : Ventre Libre ────────────────────────────────────
+    # Libérer le ventre. Le ventre respire, monte et descend, se détend.
+    # Somatique : chaleur abdominale, mouvement du diaphragme, douceur viscérale.
+    ("Aurélie (Enhanced)",  "Doux"),
+    ("Jacques", "Ventre doux"),
+    ("Aurélie (Enhanced)",  "Ton ventre se détend complètement — il devient doux et chaud, tout seul"),
+    ("Aurélie (Enhanced)",  "Monte"),
+    ("Jacques", "Monte descend"),
+    ("Aurélie (Enhanced)",  "Ton ventre monte et descend librement, au rythme de ton souffle"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Ventre respire"),
+    ("Aurélie (Enhanced)",  "Ton ventre respire — il se gonfle à l'inspire, il se relâche à l'expire"),
+    ("Aurélie (Enhanced)",  "Chaleur"),
+    ("Jacques", "Chaleur douce"),
+    ("Aurélie (Enhanced)",  "Une chaleur douce et apaisante se répand dans tout ton ventre"),
+    ("Aurélie (Enhanced)",  "Heureux"),
+    ("Jacques", "Ventre heureux"),
+    ("Aurélie (Enhanced)",  "Ton ventre se sent bien — léger, heureux, paisiblement au repos"),
+    ("Aurélie (Enhanced)",  "Pur"),
+    ("Jacques", "Propre et pur"),
+    ("Aurélie (Enhanced)",  "Ton ventre est propre et pur — il repose en paix, détendu et libre, naturellement"),
+
+    # ── Ronde 45 : Plexus Solaire ──────────────────────────────────
+    # Ouvrir le sternum et le plexus solaire. Chaleur rayonnante, centre de puissance.
+    # Somatique : expansion thoracique, lumière dorée, énergie protectrice.
+    ("Aurélie (Enhanced)",  "Ouvert"),
+    ("Jacques", "Sternum ouvert"),
+    ("Aurélie (Enhanced)",  "Ton sternum s'ouvre largement — ta poitrine se déploie avec aisance"),
+    ("Aurélie (Enhanced)",  "Rayonne"),
+    ("Jacques", "Plexus rayonne"),
+    ("Aurélie (Enhanced)",  "Ton plexus solaire rayonne une chaleur douce et constante"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Centre respire"),
+    ("Aurélie (Enhanced)",  "Ton centre respire — chaque souffle nourrit ton plexus de lumière et de calme"),
+    ("Aurélie (Enhanced)",  "Fort"),
+    ("Jacques", "Centre fort"),
+    ("Aurélie (Enhanced)",  "Ton plexus solaire est fort et stable — un noyau de puissance tranquille"),
+    ("Aurélie (Enhanced)",  "Lumière"),
+    ("Jacques", "Lumière dorée"),
+    ("Aurélie (Enhanced)",  "Une lumière dorée brille au centre de ta poitrine, chaude et protectrice"),
+    ("Aurélie (Enhanced)",  "Pur"),
+    ("Jacques", "Plexus pur"),
+    ("Aurélie (Enhanced)",  "Ton plexus solaire est propre et pur — nettoyé, restauré, pleinement à toi"),
+
+    # ── Ronde 46 : Poumons ─────────────────────────────────────────
+    # Purifier et renforcer les poumons. Capacité pleine, mouvement libre, air propre.
+    # Somatique : expansion des côtes, oxygène chaud, respiration profonde et facile.
+    ("Aurélie (Enhanced)",  "Pleins"),
+    ("Jacques", "Poumons pleins"),
+    ("Aurélie (Enhanced)",  "Tes poumons se remplissent complètement — du bas jusqu'au sommet, librement"),
+    ("Aurélie (Enhanced)",  "Libres"),
+    ("Jacques", "Souffle libre"),
+    ("Aurélie (Enhanced)",  "Tes poumons respirent librement — ils s'ouvrent et se ferment avec une aisance naturelle"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Poumons chauds"),
+    ("Aurélie (Enhanced)",  "L'air chaud et propre remplit tes poumons entièrement à chaque inspiration"),
+    ("Aurélie (Enhanced)",  "Vastes"),
+    ("Jacques", "Espace vaste"),
+    ("Aurélie (Enhanced)",  "Tes poumons sont vastes — ils ont toute la place pour respirer pleinement et profondément"),
+    ("Aurélie (Enhanced)",  "Forts"),
+    ("Jacques", "Poumons forts"),
+    ("Aurélie (Enhanced)",  "Tes poumons sont forts et puissants — chaque souffle est un acte de vitalité"),
+    ("Aurélie (Enhanced)",  "Purs"),
+    ("Jacques", "Poumons purs"),
+    ("Aurélie (Enhanced)",  "Tes poumons sont propres et purs — clairs, ouverts, pleinement fonctionnels"),
+
+    # ── Ronde 47 : Esprit & Cerveau ────────────────────────────────
+    # Purifier l'esprit. Pensées claires, flux libre, cognition souveraine.
+    # Somatique : cerveau oxygéné, concentration calme, conscience lumineuse.
+    ("Aurélie (Enhanced)",  "Clair"),
+    ("Jacques", "Esprit clair"),
+    ("Aurélie (Enhanced)",  "Ton esprit est clair et calme — tes pensées coulent avec une fluidité naturelle"),
+    ("Aurélie (Enhanced)",  "Libre"),
+    ("Jacques", "Pensée libre"),
+    ("Aurélie (Enhanced)",  "Tes pensées circulent librement — chaque idée t'appartient entièrement"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Cerveau respire"),
+    ("Aurélie (Enhanced)",  "Ton cerveau reçoit tout l'oxygène dont il a besoin — nourri, éveillé, vivant"),
+    ("Aurélie (Enhanced)",  "Vif"),
+    ("Jacques", "Esprit vif"),
+    ("Aurélie (Enhanced)",  "Ton esprit est vif et alerte — ta concentration est naturelle et puissante"),
+    ("Aurélie (Enhanced)",  "Paisible"),
+    ("Jacques", "Paix mentale"),
+    ("Aurélie (Enhanced)",  "Ton esprit repose dans une paix profonde — serein, confiant, souverain"),
+    ("Aurélie (Enhanced)",  "Pur"),
+    ("Jacques", "Esprit pur"),
+    ("Aurélie (Enhanced)",  "Ton esprit est propre et lumineux — chaque pensée est limpide et originale"),
+
+    # ── Ronde 48 : Nez ─────────────────────────────────────────────
+    # Purifier le nez. Voies ouvertes, respiration automatique, espace ample.
+    # Somatique : air chaud, narines larges, respiration nasale facile.
+    ("Aurélie (Enhanced)",  "Ouvert"),
+    ("Jacques", "Nez ouvert"),
+    ("Aurélie (Enhanced)",  "Ton nez est grand ouvert — l'air passe librement, chaud et propre"),
+    ("Aurélie (Enhanced)",  "Ample"),
+    ("Jacques", "Espace ample"),
+    ("Aurélie (Enhanced)",  "Tes narines s'ouvrent largement — tu respires avec une ampleur naturelle"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Nez respire"),
+    ("Aurélie (Enhanced)",  "Ton nez respire automatiquement — l'air entre et sort, tout seul, depuis toujours"),
+    ("Aurélie (Enhanced)",  "Propre"),
+    ("Jacques", "Air propre"),
+    ("Aurélie (Enhanced)",  "L'air que ton nez respire est chaud, propre et doux — chaque inspiration est un plaisir"),
+    ("Aurélie (Enhanced)",  "À toi"),
+    ("Jacques", "Ton nez"),
+    ("Aurélie (Enhanced)",  "Ton nez t'appartient pleinement — il fonctionne parfaitement, depuis toujours"),
+    ("Aurélie (Enhanced)",  "Pur"),
+    ("Jacques", "Nez pur"),
+    ("Aurélie (Enhanced)",  "Ton nez est propre et pur — tes voies respiratoires sont claires, ouvertes et libres"),
+
+    # ── Ronde 49 : Cœur ────────────────────────────────────────────
+    # Purifier le cœur. Battement fort et régulier, rythme libre, rayonnement chaud.
+    # Somatique : conscience du battement, chaleur thoracique, pouls autonome.
+    ("Aurélie (Enhanced)",  "Fort"),
+    ("Jacques", "Cœur fort"),
+    ("Aurélie (Enhanced)",  "Ton cœur bat avec force et régularité — stable, puissant, autonome"),
+    ("Aurélie (Enhanced)",  "Libre"),
+    ("Jacques", "Cœur libre"),
+    ("Aurélie (Enhanced)",  "Ton cœur bat librement — chaque battement est un acte de vie pure"),
+    ("Aurélie (Enhanced)",  "Respire"),
+    ("Jacques", "Cœur respire"),
+    ("Aurélie (Enhanced)",  "Ton cœur respire avec tes poumons — ils travaillent ensemble, en harmonie parfaite"),
+    ("Aurélie (Enhanced)",  "Chaud"),
+    ("Jacques", "Cœur chaud"),
+    ("Aurélie (Enhanced)",  "Une chaleur douce rayonne depuis ton cœur — elle se répand dans tout ton corps"),
+    ("Aurélie (Enhanced)",  "À toi"),
+    ("Jacques", "Ton cœur"),
+    ("Aurélie (Enhanced)",  "Ton cœur t'appartient pleinement — il bat pour toi, depuis toujours, tout seul"),
+    ("Aurélie (Enhanced)",  "Pur"),
+    ("Jacques", "Cœur pur"),
+    ("Aurélie (Enhanced)",  "Ton cœur est propre et pur — fort, sain, pleinement vivant"),
 ]

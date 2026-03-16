@@ -172,8 +172,11 @@ python pure_tone.py --full-restore
 --phd-peace-vol      PhD-peace volume (default: 0.35)
 --ego-boost          25-round dithyrambic ego-strengthening (French, Aurélie only)
 --ego-boost-vol      Ego-boost volume (default: 0.35)
+--full-hypnosis      Combined PHD + ego-boost + body purification, randomized sections
+--full-hypnosis-vol  Full-hypnosis volume (default: 0.35)
 --alternate          EMDR-style bilateral voice alternation (L/R)
 --dense              Affirmation every phase (~5.5s) instead of per cycle (~11s)
+--accelerated        Rapid-fire affirmations with random intervals (~2-4s)
 --peace-lang STR     Language: en | fr (default: en)
 ```
 
@@ -602,6 +605,26 @@ python pure_tone.py --ego-boost --alternate --abs --disable-inputs
 
 # Sleep mode: ego-boost + 30-min fade (fall asleep a god, wake up knowing it)
 python pure_tone.py --ego-boost --alternate --disable-inputs --fade-long --freq 174
+```
+
+### Full Hypnosis (Combined Therapeutic Session)
+
+1114 messages combining all PHD-peace phases (49 rounds including body purification), all ego-boost rounds (25 rounds), delivered in randomized section order. When all sections are played, the order reshuffles and loops indefinitely.
+
+New body purification sections: belly, solar plexus, lungs, mind/brain, nose, heart — each targeting organ-specific relaxation, cleansing and sovereignty.
+
+```bash
+# Full hypnosis session with bilateral alternation
+python pure_tone.py --full-hypnosis --alternate --disable-inputs
+
+# Accelerated full hypnosis — rapid-fire with random intervals (~2-4s)
+python pure_tone.py --full-hypnosis --alternate --accelerated --disable-inputs
+
+# Full hypnosis sleep mode
+python pure_tone.py --full-hypnosis --alternate --disable-inputs --fade-long --freq 174
+
+# Accelerated PHD-peace (works with any voice mode)
+python pure_tone.py --phd-peace --accelerated --alternate --disable-inputs
 ```
 
 ### Restore-Peace (Custom Affirmations)

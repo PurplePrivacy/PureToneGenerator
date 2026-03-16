@@ -56,8 +56,8 @@ def build_parser():
     parser.add_argument("--claude-peace-vol", type=float, default=0.35,
                         help="Volume for --claude-peace voice affirmations (default: 0.35)")
     parser.add_argument("--phd-peace", action="store_true",
-                        help="Expert-reviewed 21-phase counter-conditioning: all 16 claude-peace phases "
-                             "plus 5 default-state conditioning rounds (expression, posture, feeling, mode, body)")
+                        help="Expert-reviewed 49-phase counter-conditioning: 16 claude-peace phases "
+                             "plus 33 extended rounds (body purification, ego-strengthening, identity reclamation)")
     parser.add_argument("--phd-peace-vol", type=float, default=0.35,
                         help="Volume for --phd-peace voice affirmations (default: 0.35)")
     parser.add_argument("--ego-boost", action="store_true",
@@ -66,10 +66,17 @@ def build_parser():
                              "single Aurélie voice, same hypnotic timing as PHD-peace")
     parser.add_argument("--ego-boost-vol", type=float, default=0.35,
                         help="Volume for --ego-boost voice affirmations (default: 0.35)")
+    parser.add_argument("--full-hypnosis", action="store_true",
+                        help="Combined PHD-peace + ego-boost + body purification sections, "
+                             "randomized section order (resets when all sections played)")
+    parser.add_argument("--full-hypnosis-vol", type=float, default=0.35,
+                        help="Volume for --full-hypnosis voice affirmations (default: 0.35)")
     parser.add_argument("--alternate", action="store_true",
                         help="Alternate voice messages between left and right speakers (EMDR-style bilateral)")
     parser.add_argument("--dense", action="store_true",
                         help="Play affirmations on every breath phase transition (~5.5s) instead of every full cycle (~11s)")
+    parser.add_argument("--accelerated", action="store_true",
+                        help="Rapid-fire affirmations with random intervals (~2-4s) — faster than --dense")
     parser.add_argument("--peace-lang", type=str, default="en", choices=["en", "fr"],
                         help="Language for peace affirmations: en | fr (default: en)")
     parser.add_argument("--audiobook", type=str, default=None, metavar="BOOK",

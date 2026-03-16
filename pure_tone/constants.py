@@ -186,6 +186,33 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "sleep clearing & snap-out (sealed, private, awake, shed)",
     "loud voice & loud exhale (boom, thunder, noise, heard)",
     "audible breath & lung apex (hear me, longest breath, top of lungs)",
+    "free belly (soft, warm, rises, falls, happy, pure)",
+    "solar plexus (sternum, radiance, golden light, power center)",
+    "lungs purification (full, free, vast, strong, clean)",
+    "mind & brain (clear, free, sharp, peaceful, luminous)",
+    "nose purification (open, ample, automatic, clean, yours)",
+    "heart purification (strong, free, warm, yours, pure)",
+]
+
+# Section sizes for splitting flat message lists into rounds (full-hypnosis shuffling)
+CLAUDE_PEACE_SECTION_SIZES = [18] * 3 + [24] + [18] * 12       # 16 rounds, 294 total (EN)
+CLAUDE_PEACE_SECTION_SIZES_FR = [16] + [18] * 2 + [24] + [18] * 12  # 16 rounds, 292 total (FR)
+PHD_EXTRA_SECTION_SIZES = [18] * 10 + [81] + [18] * 9 + [27] + [18] * 3 + [24] + [18] * 8  # 33 rounds (27 orig + 6 new)
+EGO_BOOST_SECTION_SIZE = 6                                      # uniform: 25 × 6 = 150
+
+# Accelerated gap schedule — tight, random intervals (gap_cycles, jitter_max_cycles)
+# ~2-4s between messages with unpredictable timing
+ACCELERATED_GAP_SCHEDULE = [
+    (0.25, 0.25),
+    (0.25, 0.25),
+    (0.25, 0.25),
+    (0.30, 0.25),
+    (0.30, 0.25),
+    (0.30, 0.30),
+    (0.30, 0.30),
+    (0.35, 0.30),
+    (0.35, 0.30),
+    (0.35, 0.30),
 ]
 
 EGO_BOOST_PHASE_NAMES = [

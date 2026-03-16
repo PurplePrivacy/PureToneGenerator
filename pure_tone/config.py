@@ -12,6 +12,9 @@ from .constants import (
     SAMPLE_RATE, CHANNELS, FADE_SECONDS, LONG_FADE_SECONDS,
     HRV_PATTERNS, AUDIOBOOK_PAGE_SIZE, RHYTHM_SEED,
     HYPNOTIC_GAP_SCHEDULE, HYPNOTIC_EXHALE_DELAY,
+    ACCELERATED_GAP_SCHEDULE,
+    CLAUDE_PEACE_SECTION_SIZES_FR, PHD_EXTRA_SECTION_SIZES,
+    EGO_BOOST_SECTION_SIZE,
     build_hrv_tables,
 )
 
@@ -86,8 +89,11 @@ def init(args):
     g.phd_peace_vol = args.phd_peace_vol
     g.ego_boost = args.ego_boost
     g.ego_boost_vol = args.ego_boost_vol
+    g.full_hypnosis = args.full_hypnosis
+    g.full_hypnosis_vol = args.full_hypnosis_vol
     g.alternate_mode = args.alternate
     g.dense_mode = args.dense
+    g.accelerated_mode = args.accelerated
     g.peace_lang = args.peace_lang
     g.audiobook_name = args.audiobook
     g.audiobook_vol = args.audiobook_vol
@@ -157,6 +163,14 @@ def init(args):
         g.claude_peace_vol = g.ego_boost_vol
         if g.pure_mode:
             print("Note: --ego-boost overrides --pure to enable HRV + breath-bar")
+
+    # --full-hypnosis: combined PHD + ego-boost + body purification, shuffled sections
+    if g.full_hypnosis:
+        g.hrv_mode = True
+        g.breath_bar = True
+        g.claude_peace_vol = g.full_hypnosis_vol
+        if g.pure_mode:
+            print("Note: --full-hypnosis overrides --pure to enable HRV + breath-bar")
 
     # ── Audiobook loading ──
     g.audiobook_mode = False
@@ -262,6 +276,24 @@ def init(args):
         g.peace_lang = "fr"  # ego-boost is French-only
         g.claude_peace = True
 
+    if g.full_hypnosis:
+        g.peace_lang = "fr"  # full-hypnosis is French (ego-boost is FR-only)
+        # Split PHD-peace FR into sections
+        phd_msgs = messages.PHD_PEACE_MESSAGES_FR
+        phd_section_sizes = CLAUDE_PEACE_SECTION_SIZES_FR + PHD_EXTRA_SECTION_SIZES
+        phd_sections = _split_sections(phd_msgs, phd_section_sizes)
+        # Split ego-boost FR into sections (uniform size)
+        ego_msgs = messages.EGO_BOOST_MESSAGES_FR
+        ego_sections = [ego_msgs[i:i + EGO_BOOST_SECTION_SIZE]
+                        for i in range(0, len(ego_msgs), EGO_BOOST_SECTION_SIZE)]
+        # Combine all sections
+        g.full_hypnosis_sections = phd_sections + ego_sections
+        # Shuffle and flatten
+        g.section_rng = np.random.RandomState(RHYTHM_SEED + 99)
+        _shuffle_and_flatten(g)
+        g.claude_peace = True
+        g.phd_peace = True  # enable hypnotic rhythm
+
     # ── Mutable state ──
     g.phase = 0.0
     g.current_sample = 0
@@ -296,8 +328,15 @@ def init(args):
 
     # Hypnotic timing (phd-peace progressive deepening)
     g.claude_next_trigger_sample = 0
-    g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate) if (g.phd_peace or g.ego_boost) else 0
-    g.claude_gap_schedule = HYPNOTIC_GAP_SCHEDULE if (g.phd_peace or g.ego_boost) else []
+    _uses_hypnotic = g.phd_peace or g.ego_boost or g.full_hypnosis
+    g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate) if _uses_hypnotic else 0
+    if g.accelerated_mode:
+        g.claude_gap_schedule = ACCELERATED_GAP_SCHEDULE
+        g.claude_exhale_delay_samples = int(HYPNOTIC_EXHALE_DELAY * g.sample_rate)
+    elif _uses_hypnotic:
+        g.claude_gap_schedule = HYPNOTIC_GAP_SCHEDULE
+    else:
+        g.claude_gap_schedule = []
     g.claude_gap_rng = np.random.RandomState(RHYTHM_SEED + 7)
 
     # Audiobook state
@@ -345,6 +384,48 @@ def init(args):
         print(f"Audiobook rolling renderer will start {'after peace rendering' if (g.claude_peace or g.restore_peace) else 'immediately'}...")
 
     return g
+
+
+def _split_sections(messages, section_sizes):
+    """Split a flat message list into sections based on size list."""
+    sections = []
+    pos = 0
+    for size in section_sizes:
+        sections.append(messages[pos:pos + size])
+        pos += size
+    if pos < len(messages):
+        sections.append(messages[pos:])
+    return sections
+
+
+def _shuffle_and_flatten(g):
+    """Shuffle sections and flatten into g.CLAUDE_PEACE_MESSAGES."""
+    order = list(range(len(g.full_hypnosis_sections)))
+    g.section_rng.shuffle(order)
+    flat = []
+    for i in order:
+        flat.extend(g.full_hypnosis_sections[i])
+    g.CLAUDE_PEACE_MESSAGES = flat
+    g.full_hypnosis_section_order = order
+
+
+def reshuffle_full_hypnosis(g):
+    """Re-shuffle sections and rebuild message list + rendered audio mapping.
+    Called from callback when all messages have been played."""
+    # Build audio cache by (voice, text) key from existing rendered
+    audio_cache = {}
+    for idx, buf in g.claude_rendered.items():
+        if idx < len(g.CLAUDE_PEACE_MESSAGES):
+            msg = g.CLAUDE_PEACE_MESSAGES[idx]
+            audio_cache[msg] = buf
+    # Reshuffle
+    _shuffle_and_flatten(g)
+    # Rebuild rendered dict for new order
+    g.claude_rendered = {}
+    for i, msg in enumerate(g.CLAUDE_PEACE_MESSAGES):
+        if msg in audio_cache:
+            g.claude_rendered[i] = audio_cache[msg]
+    g.claude_render_done = True
 
 
 def audiobook_load_progress(progress_path, book_name):

@@ -6,7 +6,7 @@ import sounddevice as sd
 
 from .constants import (
     CLAUDE_PEACE_PHASE_NAMES, PHD_PEACE_EXTRA_PHASE_NAMES,
-    AUDIOBOOK_PAGE_SIZE,
+    EGO_BOOST_PHASE_NAMES, AUDIOBOOK_PAGE_SIZE,
 )
 from .config import audiobook_save_progress
 
@@ -130,25 +130,37 @@ def print_status(g):
         print(f"  {len(g.PEACE_MESSAGES)} affirmations, {len(set(g.PEACE_MESSAGES))} unique — rendering in background\n")
     if g.claude_peace:
         lang_note = f" [{g.peace_lang.upper()}]" if g.peace_lang != "en" else ""
-        mode_label = "PhD-peace" if g.phd_peace else "Claude-peace"
-        n_phases = 38 if g.phd_peace else 16
+        if g.full_hypnosis:
+            mode_label = "Full-hypnosis"
+            n_phases = len(g.full_hypnosis_sections)
+        elif g.phd_peace:
+            mode_label = "PhD-peace"
+            n_phases = len(CLAUDE_PEACE_PHASE_NAMES) + len(PHD_PEACE_EXTRA_PHASE_NAMES)
+        else:
+            mode_label = "Claude-peace"
+            n_phases = 16
         print(f"{mode_label}: active (vol={g.claude_peace_vol}){lang_note}")
-        print(f"  {len(g.CLAUDE_PEACE_MESSAGES)} affirmations across {n_phases} therapeutic phases")
+        print(f"  {len(g.CLAUDE_PEACE_MESSAGES)} affirmations across {n_phases} sections")
         if g.peace_lang == "fr":
-            print("  Language: French (Thomas 1-word + full sentences, Jacques 2-3 words)")
+            print("  Language: French (Aur\u00e9lie 1-word + full sentences, Jacques 2-3 words)")
         else:
             print("  Voices: Daniel (GB), Ralph (US), Fred (US)")
         print("  Mixed depth: 1-word -> 2-3 words -> full sentence (targets subconscious)")
-        phases = CLAUDE_PEACE_PHASE_NAMES + (PHD_PEACE_EXTRA_PHASE_NAMES if g.phd_peace else [])
-        prefix = "  Progression: "
-        indent = " " * len(prefix)
-        for pi, pname in enumerate(phases):
-            if pi == 0:
-                sys.stdout.write(f"{prefix}{pname}")
-            else:
-                sys.stdout.write(f"\n{indent}-> {pname}")
-        sys.stdout.write("\n")
-        if g.dense_mode:
+        if g.full_hypnosis:
+            print("  Mode: PHD-peace + ego-boost + body purification \u2014 randomized section order")
+        else:
+            phases = CLAUDE_PEACE_PHASE_NAMES + (PHD_PEACE_EXTRA_PHASE_NAMES if g.phd_peace else [])
+            prefix = "  Progression: "
+            indent = " " * len(prefix)
+            for pi, pname in enumerate(phases):
+                if pi == 0:
+                    sys.stdout.write(f"{prefix}{pname}")
+                else:
+                    sys.stdout.write(f"\n{indent}-> {pname}")
+            sys.stdout.write("\n")
+        if g.accelerated_mode:
+            print("  Accelerated: rapid-fire affirmations with random intervals (~2-4s)")
+        elif g.dense_mode:
             dense_interval = g.hrv_cycle_seconds / len(g.hrv_pattern)
             print(f"  Dense: affirmation every phase transition (~{dense_interval:.1f}s instead of ~{g.hrv_cycle_seconds:.0f}s)")
         if g.alternate_mode:

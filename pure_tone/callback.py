@@ -91,15 +91,23 @@ def make_callback(g):
 
             g.hrv_phase += frames
 
-        # PHD-peace progressive deepening: sample-counter trigger with exhale alignment
+        # PHD-peace / full-hypnosis / accelerated: sample-counter trigger with exhale alignment
         if g.claude_peace and g.claude_gap_schedule:
             ci = g.claude_cycle_count % len(g.CLAUDE_PEACE_MESSAGES)
             if ci in g.claude_rendered and g.current_sample >= g.claude_next_trigger_sample:
+                # Full-hypnosis: reshuffle when all messages have been played
+                if g.full_hypnosis and g.claude_cycle_count > 0 and ci == 0:
+                    from .config import reshuffle_full_hypnosis
+                    reshuffle_full_hypnosis(g)
+                    try:
+                        os.write(2, "\n  === FULL HYPNOSIS: all sections complete \u2014 reshuffling ===\n\n".encode())
+                    except Exception:
+                        pass
                 _fire_claude_message(g)
-                # Compute next trigger time using progressive gap schedule
+                # Compute next trigger time using gap schedule
                 ci = g.claude_cycle_count  # already incremented by _fire
                 n_msgs = len(g.CLAUDE_PEACE_MESSAGES)
-                if ci < n_msgs:
+                if ci < n_msgs or g.full_hypnosis:
                     sched_idx = min(ci, len(g.claude_gap_schedule) - 1)
                     gap_cycles, jitter_max = g.claude_gap_schedule[sched_idx]
                     jitter = g.claude_gap_rng.random() * jitter_max
