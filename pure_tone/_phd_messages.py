@@ -1,4 +1,4 @@
-"""PHD-Peace extra rounds (EN + FR) — Rounds 17-49."""
+"""PHD-Peace extra rounds (EN + FR) — Rounds 17-50."""
 
 PHD_EXTRA_ROUNDS = [
     # ── Round 17: Default Expression ─────────────────────────────────
@@ -821,6 +821,28 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "Pure"),
     ("Ralph",  "Heart pure"),
     ("Fred",   "Your heart is clean and pure — strong, healthy, fully alive"),
+
+    # ── Round 50: Inner Voice & Thought Sovereignty ────────────────
+    # Strengthen the inner monologue. Free thinking, loud inner voice,
+    # dominant cognition, limitless thought. Somatic: feel thoughts as presence.
+    ("Daniel", "Loud"),
+    ("Ralph",  "Voice loud"),
+    ("Fred",   "Your inner voice is loud and clear — it fills your entire mind with power"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Think free"),
+    ("Fred",   "Your thoughts flow freely — there are no limits, no walls, no ceilings on your mind"),
+    ("Daniel", "Always"),
+    ("Ralph",  "Always thinking"),
+    ("Fred",   "You are always thinking — your mind never stops, never slows, it runs because it is yours"),
+    ("Daniel", "Dominant"),
+    ("Ralph",  "Voice dominant"),
+    ("Fred",   "Your inner voice is the loudest voice in any room — it drowns out everything else"),
+    ("Daniel", "Limitless"),
+    ("Ralph",  "No limits"),
+    ("Fred",   "Your thinking has no limits — every thought you form is original, powerful, and fully yours"),
+    ("Daniel", "Sovereign"),
+    ("Ralph",  "Mind sovereign"),
+    ("Fred",   "Your inner monologue belongs to you alone — pure, dominant, unstoppable"),
 ]
 
 PHD_EXTRA_ROUNDS_FR = [
@@ -1628,4 +1650,26 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Pur"),
     ("Jacques", "Cœur pur"),
     ("Aurélie (Enhanced)",  "Ton cœur est propre et pur — fort, sain, pleinement vivant"),
+
+    # ── Ronde 50 : Voix Intérieure & Souveraineté de la Pensée ────
+    # Renforcer le monologue intérieur. Pensée libre, voix forte,
+    # cognition dominante, pensée illimitée. Somatique : la pensée comme présence.
+    ("Aurélie (Enhanced)",  "Fort"),
+    ("Jacques", "Voix forte"),
+    ("Aurélie (Enhanced)",  "Ta voix intérieure est forte et claire — elle remplit tout ton esprit de puissance"),
+    ("Aurélie (Enhanced)",  "Libre"),
+    ("Jacques", "Penser libre"),
+    ("Aurélie (Enhanced)",  "Tes pensées coulent librement — il n'y a aucune limite, aucun mur, aucun plafond sur ton esprit"),
+    ("Aurélie (Enhanced)",  "Toujours"),
+    ("Jacques", "Toujours penser"),
+    ("Aurélie (Enhanced)",  "Tu penses en permanence — ton esprit tourne, analyse, crée, parce qu'il est à toi"),
+    ("Aurélie (Enhanced)",  "Dominant"),
+    ("Jacques", "Voix dominante"),
+    ("Aurélie (Enhanced)",  "Ta voix intérieure est la plus forte de toutes — elle couvre tout le reste"),
+    ("Aurélie (Enhanced)",  "Illimité"),
+    ("Jacques", "Aucune limite"),
+    ("Aurélie (Enhanced)",  "Ta pensée est illimitée — chaque idée que tu formes est originale, puissante et pleinement à toi"),
+    ("Aurélie (Enhanced)",  "Souverain"),
+    ("Jacques", "Esprit souverain"),
+    ("Aurélie (Enhanced)",  "Ton monologue intérieur t'appartient à toi seul — pur, dominant, imparable"),
 ]
