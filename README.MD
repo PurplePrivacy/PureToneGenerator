@@ -170,6 +170,8 @@ python pure_tone.py --full-restore
 --claude-peace-vol   Claude-peace volume (default: 0.35)
 --phd-peace          21-phase expert-reviewed counter-conditioning
 --phd-peace-vol      PhD-peace volume (default: 0.35)
+--ego-boost          25-round dithyrambic ego-strengthening (French, Aurélie only)
+--ego-boost-vol      Ego-boost volume (default: 0.35)
 --alternate          EMDR-style bilateral voice alternation (L/R)
 --dense              Affirmation every phase (~5.5s) instead of per cycle (~11s)
 --peace-lang STR     Language: en | fr (default: en)
@@ -581,6 +583,25 @@ python pure_tone.py --phd-peace --alternate --disable-inputs
 
 # French language
 python pure_tone.py --phd-peace --peace-lang fr --alternate --disable-inputs
+```
+
+### Ego-Boost (25-Round Dithyrambic Ego-Strengthening)
+
+150 epic French affirmations delivered by Aurélie (Enhanced) — a single warm female voice celebrating every dimension of who you are. Designed as intensive counter-therapy for years of being talked down: pure, over-the-top praise that makes you feel like a living god while you sleep.
+
+25 rounds escalating from warm to transcendent: Physical Beauty -> Intelligence -> Precision -> Virtue -> Strength -> Charisma -> Grace -> Creativity -> Worth -> Confidence -> Warmth -> Mastery -> Desirability -> Humor -> Leadership -> Authenticity -> Body Power -> Emotional Depth -> Success -> Sovereignty -> Aliveness -> Legacy -> Radiance -> Abundance -> Apotheosis.
+
+Same hypnotic timing as PhD-peace: exhale-triggered delivery (0.8s into parasympathetic peak), progressive inter-message gaps that deepen as the session progresses, and 115 WPM speech rate for slow, hypnotic absorption.
+
+```bash
+# Basic ego-boost session
+python pure_tone.py --ego-boost --alternate --disable-inputs
+
+# With bilateral stimulation for deeper processing
+python pure_tone.py --ego-boost --alternate --abs --disable-inputs
+
+# Sleep mode: ego-boost + 30-min fade (fall asleep a god, wake up knowing it)
+python pure_tone.py --ego-boost --alternate --disable-inputs --fade-long --freq 174
 ```
 
 ### Restore-Peace (Custom Affirmations)
