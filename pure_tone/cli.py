@@ -102,6 +102,15 @@ def build_parser():
                         help="Override audiobook voice (e.g., Tom, Samantha, Daniel, Alex)")
     parser.add_argument("--audiobook-rate", type=int, default=None, metavar="WPM",
                         help="Override audiobook speech rate in words-per-minute (default: 135)")
+    parser.add_argument("--mindfulness", type=str, default=None, metavar="N_OR_NAME",
+                        help="Play a guided meditation by number or name (e.g., --mindfulness 1 or --mindfulness body-scan). "
+                             "Use --mindfulness-list to see the catalog.")
+    parser.add_argument("--mindfulness-loop", action="store_true",
+                        help="Play all guided meditations in sequence, looping indefinitely")
+    parser.add_argument("--mindfulness-list", action="store_true",
+                        help="List available guided meditations and exit")
+    parser.add_argument("--mindfulness-voice", type=str, default=None, metavar="VOICE",
+                        help="Override meditation narrator voice (default: Samantha for EN, Aurélie Enhanced for FR)")
     parser.add_argument("--rhythm", action="store_true", default=True,
                         help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel (default: on)")
     parser.add_argument("--no-rhythm", action="store_true",

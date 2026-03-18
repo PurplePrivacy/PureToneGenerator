@@ -52,6 +52,34 @@ def show_audiobook_list():
     sys.exit(0)
 
 
+def show_mindfulness_list():
+    """Display the mindfulness meditation catalog and exit."""
+    from meditations.catalog import MEDITATION_CATALOG, MEDITATION_CATEGORIES
+    texts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "meditations", "texts")
+    total = len(MEDITATION_CATALOG)
+    print(f"\nAvailable guided meditations ({total}):\n")
+    for cat in MEDITATION_CATEGORIES:
+        cat_items = [(n, m) for n, m in MEDITATION_CATALOG.items() if m["category"] == cat]
+        if not cat_items:
+            continue
+        cat_items.sort(key=lambda x: x[1]["number"])
+        print(f"  {cat}:")
+        for name, meta in cat_items:
+            dl = os.path.exists(os.path.join(texts_dir, f"{name}.txt"))
+            mark = "[OK]" if dl else "[--]"
+            lang = meta.get("language", "en").upper()
+            num = meta["number"]
+            author = meta.get("author", "")
+            print(f"    {mark} {num:>2}. {name:<25s} {meta['title']} — {author}  [{lang}]")
+        print()
+    print("  Select by number:  python pure_tone.py --mindfulness 1")
+    print("  Select by name:    python pure_tone.py --mindfulness body-scan")
+    print("  Play all (loop):   python pure_tone.py --mindfulness-loop")
+    print("  With bilateral:    python pure_tone.py --mindfulness 1 --alternate")
+    print()
+    sys.exit(0)
+
+
 def init(args):
     """Initialize all configuration and mutable state from parsed args. Returns G instance."""
     g = G()
@@ -174,13 +202,95 @@ def init(args):
 
     # ── Audiobook loading ──
     g.audiobook_mode = False
+    g.mindfulness_mode = False
     g.audiobook_sentences = []
     g.audiobook_book_title = ""
     g.ab_voice = ""
     g.ab_lang = "fr"
     g.ab_rate = 135
 
-    if g.audiobook_name:
+    # ── Mindfulness meditation loading ──
+    _mindfulness_names = []
+    if args.mindfulness_loop:
+        if g.audiobook_name:
+            print("Error: --mindfulness-loop and --audiobook are mutually exclusive.")
+            sys.exit(1)
+        from meditations.catalog import MEDITATION_CATALOG, MEDITATION_BY_NUMBER
+        # Build ordered list of all meditations by number
+        for num in sorted(MEDITATION_BY_NUMBER.keys()):
+            _mindfulness_names.append(MEDITATION_BY_NUMBER[num])
+    elif args.mindfulness:
+        if g.audiobook_name:
+            print("Error: --mindfulness and --audiobook are mutually exclusive.")
+            sys.exit(1)
+        from meditations.catalog import MEDITATION_CATALOG, MEDITATION_BY_NUMBER
+        med_input = args.mindfulness
+        # Support selection by number
+        try:
+            med_num = int(med_input)
+            if med_num not in MEDITATION_BY_NUMBER:
+                print(f"Error: meditation #{med_num} does not exist. Use --mindfulness-list to see available options.")
+                sys.exit(1)
+            _mindfulness_names.append(MEDITATION_BY_NUMBER[med_num])
+        except ValueError:
+            if med_input not in MEDITATION_CATALOG:
+                print(f"Error: unknown meditation '{med_input}'. Use --mindfulness-list to see available options.")
+                sys.exit(1)
+            _mindfulness_names.append(med_input)
+
+    if _mindfulness_names:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        g.audiobook_para_initial = set()
+        sent_idx = 0
+        titles = []
+        for med_name in _mindfulness_names:
+            med_meta = MEDITATION_CATALOG[med_name]
+            med_text_path = os.path.join(base_dir, "meditations", "texts", f"{med_name}.txt")
+            if not os.path.exists(med_text_path):
+                print(f"Error: meditation file not found: {med_text_path}")
+                sys.exit(1)
+            with open(med_text_path, "r", encoding="utf-8") as f:
+                med_raw = f.read()
+            lang = med_meta.get("language", "en")
+            voice = med_meta.get("voice", "Samantha" if lang == "en" else "Aurélie (Enhanced)")
+            if args.mindfulness_voice:
+                voice = args.mindfulness_voice
+            # Set language from first meditation
+            if not titles:
+                g.ab_lang = lang
+                g.ab_voice = voice
+            med_normalized = re.sub(r'(?<!\n)\n(?!\n)', ' ', med_raw)
+            paragraphs = re.split(r'\n{2,}', med_normalized)
+            for para in paragraphs:
+                sentences = re.split(r'(?<=[.!?])\s+', para)
+                first_in_para = True
+                for s in sentences:
+                    s = s.strip()
+                    if not s or len(s) <= 2:
+                        continue
+                    if first_in_para:
+                        g.audiobook_para_initial.add(sent_idx)
+                        first_in_para = False
+                    g.audiobook_sentences.append((voice, s))
+                    sent_idx += 1
+            titles.append(med_meta["title"])
+        if args.mindfulness_voice:
+            print(f"Note: meditation voice overridden to: {args.mindfulness_voice}")
+        if len(titles) == 1:
+            g.audiobook_book_title = titles[0]
+        else:
+            g.audiobook_book_title = f"Guided Meditations ({len(titles)} sessions)"
+        g.audiobook_name = _mindfulness_names[0]
+        g.audiobook_mode = True
+        g.mindfulness_mode = True
+        g.no_tone = True  # No tone by default for mindfulness
+        g.hrv_mode = True
+        g.breath_bar = True
+        if g.pure_mode:
+            print("Note: --mindfulness overrides --pure to enable HRV")
+        g.ab_rate = 135
+
+    if g.audiobook_name and not g.mindfulness_mode:
         from books.catalog import BOOK_CATALOG
         if g.audiobook_name not in BOOK_CATALOG:
             print(f"Error: unknown book '{g.audiobook_name}'. Use --audiobook-list to see available books.")

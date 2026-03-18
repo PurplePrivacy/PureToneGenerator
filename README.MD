@@ -14,6 +14,8 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
+**18 Guided Meditations** — Buddhism, Yoga, and Mindfulness guided sessions read aloud by TTS voices during HRV breathing. Body scans, metta, vipassana, yoga nidra, chakra meditations, anapanasati, and more. Select by number, name, or loop through all. No tone by default — pure voice guidance.
+
 **739-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, H.G. Wells, Proust, Balzac, Austen, Dickens, Shakespeare, Herodotus, Gibbon, Michelet, and 700+ more classics read aloud during your sessions. 277 French, 462 English — covering philosophy, sci-fi, fantasy, classics, history, and personal improvement. Page tracking, resume support, and real-time subtitles.
 
 **Intelligent Reading Rhythm** — Audiobooks play with text-aware pacing by default: punctuation-sensitive pause hierarchy (periods > semicolons > commas), word-count breath pauses at natural intervals, and glue-word protection to keep articles attached to their nouns. Disable with `--no-rhythm` for raw TTS speed.
@@ -180,6 +182,15 @@ python pure_tone.py --full-restore
 --peace-lang STR     Language: en | fr (default: en)
 ```
 
+### Guided Meditations
+```
+--mindfulness N      Play meditation by number (e.g., --mindfulness 1)
+--mindfulness NAME   Play meditation by name (e.g., --mindfulness body-scan)
+--mindfulness-loop   Play all 18 meditations in sequence, looping
+--mindfulness-list   List all available meditations and exit
+--mindfulness-voice  Override narrator voice
+```
+
 ### Audiobook
 ```
 --audiobook BOOK     Read a book aloud (e.g., --audiobook meditations)
@@ -257,6 +268,74 @@ python pure_tone.py --audiobook meditations --no-rhythm
 - **box** — Box breathing (4-4-4-4) — stress control
 - **478** — 4-7-8 breathing (4s in / 7s hold / 8s out) — relaxation technique
 - **426** — 4-2-6 breathing (4s in / 2s hold / 6s out) — calm focus
+
+---
+
+## Guided Meditations (18 Sessions — Buddhism, Yoga, Mindfulness)
+
+Guided meditation scripts read aloud during HRV breath pacing. No base tone by default — just voice guidance synchronized to your breathing. Compatible with `--alternate` (EMDR-style bilateral), `--disable-inputs`, and all other flags.
+
+### Setup
+
+```bash
+# List all available meditations
+python pure_tone.py --mindfulness-list
+```
+
+### Usage
+
+```bash
+# Play a meditation by number
+python pure_tone.py --mindfulness 1
+
+# Play by name
+python pure_tone.py --mindfulness body-scan
+
+# With EMDR-style bilateral alternation
+python pure_tone.py --mindfulness 2 --alternate
+
+# With safety hardening
+python pure_tone.py --mindfulness 3 --disable-inputs
+
+# Loop through all 18 meditations
+python pure_tone.py --mindfulness-loop
+
+# Loop all with bilateral alternation
+python pure_tone.py --mindfulness-loop --alternate --disable-inputs
+
+# Override narrator voice
+python pure_tone.py --mindfulness 1 --mindfulness-voice "Daniel"
+
+# Add a gentle background tone (off by default)
+python pure_tone.py --mindfulness 8 --freq 432 --no-tone
+# (remove --no-tone to hear the background frequency)
+```
+
+### Meditation Catalog
+
+**Buddhism (7):**
+- `1` buddhist-breath-metta — Buddhist Breath & Metta (Thanissaro Bhikkhu)
+- `2` metta — Lovingkindness / Metta (Palouse Mindfulness)
+- `3` vipassana — Vipassana Insight Meditation
+- `4` anapanasati — Anapanasati Sutta, 16 Steps (2,500-year-old classical text)
+- `5` loving-kindness — Loving-Kindness (UC Berkeley)
+- `6` impermanence — Contemplation of Impermanence
+- `7` tonglen — Tonglen Compassion Practice
+
+**Yoga (6):**
+- `8` yoga-nidra — Yoga Nidra in Nature (YogaLeela)
+- `9` yoga-nidra-relaxation — Yoga Nidra for Deep Relaxation
+- `10` chakra — Guided Chakra Meditation
+- `11` chakra-awareness — Chakra Awareness Meditation
+- `12` savasana — Guided Savasana Relaxation
+- `13` prana-breath — Pranayama Breath Meditation
+
+**Mindfulness (5):**
+- `14` body-scan — Body Scan Meditation (Yoga Jala)
+- `15` mindful-breathing — Guided Mindfulness Breathing
+- `16` mindful-breathing-va — Mindful Breathing (VA, public domain)
+- `17` breath-awareness — Breath Awareness Meditation
+- `18` present-moment — Present Moment Awareness
 
 ---
 
