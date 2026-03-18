@@ -26,7 +26,7 @@ def render_voice(text, voice, rate, sample_rate, tts_lock, trim_silence=False):
         tmp.close()
         with tts_lock:
             subprocess.run(
-                ["say", "-v", say_voice, "-r", str(rate), "-o", tmp.name, text],
+                ["say", "-v", say_voice, "-r", str(rate), "-o", tmp.name, "--", text],
                 check=True, timeout=15,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )

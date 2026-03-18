@@ -239,20 +239,31 @@ def init(args):
             _mindfulness_names.append(med_input)
 
     if _mindfulness_names:
+        _mind_lang = args.mindfulness_lang  # "en" or "fr"
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         g.audiobook_para_initial = set()
         sent_idx = 0
         titles = []
         for med_name in _mindfulness_names:
             med_meta = MEDITATION_CATALOG[med_name]
-            med_text_path = os.path.join(base_dir, "meditations", "texts", f"{med_name}.txt")
+            # FR: try {name}-fr.txt first, fall back to EN
+            if _mind_lang == "fr":
+                med_text_path = os.path.join(base_dir, "meditations", "texts", f"{med_name}-fr.txt")
+                if not os.path.exists(med_text_path):
+                    med_text_path = os.path.join(base_dir, "meditations", "texts", f"{med_name}.txt")
+            else:
+                med_text_path = os.path.join(base_dir, "meditations", "texts", f"{med_name}.txt")
             if not os.path.exists(med_text_path):
                 print(f"Error: meditation file not found: {med_text_path}")
                 sys.exit(1)
             with open(med_text_path, "r", encoding="utf-8") as f:
                 med_raw = f.read()
-            lang = med_meta.get("language", "en")
-            voice = med_meta.get("voice", "Samantha" if lang == "en" else "Aurélie (Enhanced)")
+            if _mind_lang == "fr":
+                lang = "fr"
+                voice = "Aurélie (Enhanced)"
+            else:
+                lang = med_meta.get("language", "en")
+                voice = med_meta.get("voice", "Samantha")
             if args.mindfulness_voice:
                 voice = args.mindfulness_voice
             # Set language from first meditation

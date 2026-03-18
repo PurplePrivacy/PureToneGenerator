@@ -14,7 +14,7 @@ Your personal sound therapist, running entirely on your machine. No cloud, no mi
 
 **Solfeggio & Focus Frequencies** — Tunable from 174 Hz (grounding) to 852 Hz (clarity), with optional 40 Hz gamma isochronic pulses for deep focus and study.
 
-**18 Guided Meditations** — Buddhism, Yoga, and Mindfulness guided sessions read aloud by TTS voices during HRV breathing. Body scans, metta, vipassana, yoga nidra, chakra meditations, anapanasati, and more. Select by number, name, or loop through all. No tone by default — pure voice guidance.
+**82 Guided Meditations (EN + FR)** — Buddhism, Yoga, Mindfulness, Spiritual, Therapeutic, Healing, and Nature guided sessions read aloud during HRV breathing. Metta, vipassana, yoga nidra, chakra, zazen, ho'oponopono, mountain, forest bathing, and 70+ more. All available in English and French. Select by number, name, or loop through all. No tone by default — pure voice guidance.
 
 **739-Book Audiobook Library** — Listen to Marcus Aurelius, Dostoyevsky, Hugo, Voltaire, Jules Verne, H.G. Wells, Proust, Balzac, Austen, Dickens, Shakespeare, Herodotus, Gibbon, Michelet, and 700+ more classics read aloud during your sessions. 277 French, 462 English — covering philosophy, sci-fi, fantasy, classics, history, and personal improvement. Page tracking, resume support, and real-time subtitles.
 
@@ -186,9 +186,10 @@ python pure_tone.py --full-restore
 ```
 --mindfulness N      Play meditation by number (e.g., --mindfulness 1)
 --mindfulness NAME   Play meditation by name (e.g., --mindfulness body-scan)
---mindfulness-loop   Play all 18 meditations in sequence, looping
+--mindfulness-loop   Play all 82 meditations in sequence, looping
 --mindfulness-list   List all available meditations and exit
 --mindfulness-voice  Override narrator voice
+--mindfulness-lang   Language: en | fr (default: en)
 ```
 
 ### Audiobook
@@ -271,9 +272,9 @@ python pure_tone.py --audiobook meditations --no-rhythm
 
 ---
 
-## Guided Meditations (18 Sessions — Buddhism, Yoga, Mindfulness)
+## Guided Meditations (82 Sessions — 7 Categories — EN + FR)
 
-Guided meditation scripts read aloud during HRV breath pacing. No base tone by default — just voice guidance synchronized to your breathing. Compatible with `--alternate` (EMDR-style bilateral), `--disable-inputs`, and all other flags.
+82 guided meditation scripts across Buddhism, Yoga, Mindfulness, Spiritual, Therapeutic, Healing, and Nature categories. Each session is read aloud during HRV breath pacing. No base tone by default — just voice guidance synchronized to your breathing. All 82 meditations available in both English and French.
 
 ### Setup
 
@@ -291,29 +292,31 @@ python pure_tone.py --mindfulness 1
 # Play by name
 python pure_tone.py --mindfulness body-scan
 
+# Play in French
+python pure_tone.py --mindfulness 1 --mindfulness-lang fr
+
 # With EMDR-style bilateral alternation
 python pure_tone.py --mindfulness 2 --alternate
 
 # With safety hardening
 python pure_tone.py --mindfulness 3 --disable-inputs
 
-# Loop through all 18 meditations
+# Loop through all 82 meditations
 python pure_tone.py --mindfulness-loop
 
-# Loop all with bilateral alternation
-python pure_tone.py --mindfulness-loop --alternate --disable-inputs
+# Loop all in French with bilateral alternation
+python pure_tone.py --mindfulness-loop --mindfulness-lang fr --alternate --disable-inputs
 
 # Override narrator voice
 python pure_tone.py --mindfulness 1 --mindfulness-voice "Daniel"
 
-# Add a gentle background tone (off by default)
-python pure_tone.py --mindfulness 8 --freq 432 --no-tone
-# (remove --no-tone to hear the background frequency)
+# French loop for sleep
+python pure_tone.py --mindfulness-loop --mindfulness-lang fr --fade-long --freq 174
 ```
 
 ### Meditation Catalog
 
-**Buddhism (7):**
+**Buddhism (18):**
 - `1` buddhist-breath-metta — Buddhist Breath & Metta (Thanissaro Bhikkhu)
 - `2` metta — Lovingkindness / Metta (Palouse Mindfulness)
 - `3` vipassana — Vipassana Insight Meditation
@@ -321,21 +324,93 @@ python pure_tone.py --mindfulness 8 --freq 432 --no-tone
 - `5` loving-kindness — Loving-Kindness (UC Berkeley)
 - `6` impermanence — Contemplation of Impermanence
 - `7` tonglen — Tonglen Compassion Practice
+- `8` equanimity — Equanimity (Upekkha)
+- `9` sympathetic-joy — Sympathetic Joy (Mudita)
+- `10` death-contemplation — Mindfulness of Death (Maranasati)
+- `11` satipatthana-body — Satipatthana Body Meditation
+- `12` mindfulness-feelings — Mindfulness of Feelings (Vedananupassana)
+- `13` zen-sitting — Zen Sitting (Zazen / Shikantaza)
+- `14` calm-abiding — Calm Abiding (Samatha)
+- `15` four-elements — Four Elements Meditation
+- `16` refuge — Taking Refuge
+- `17` ho-oponopono — Ho'oponopono Hawaiian Healing
+- `18` forgiveness — Forgiveness Meditation
 
-**Yoga (6):**
-- `8` yoga-nidra — Yoga Nidra in Nature (YogaLeela)
-- `9` yoga-nidra-relaxation — Yoga Nidra for Deep Relaxation
-- `10` chakra — Guided Chakra Meditation
-- `11` chakra-awareness — Chakra Awareness Meditation
-- `12` savasana — Guided Savasana Relaxation
-- `13` prana-breath — Pranayama Breath Meditation
+**Yoga (12):**
+- `19` yoga-nidra — Yoga Nidra in Nature (YogaLeela)
+- `20` yoga-nidra-relaxation — Yoga Nidra for Deep Relaxation
+- `21` yoga-nidra-deep — Deep Yoga Nidra (Extended Session)
+- `22` chakra — Guided Chakra Meditation
+- `23` chakra-awareness — Chakra Awareness
+- `24` savasana — Guided Savasana Relaxation
+- `25` prana-breath — Pranayama Breath
+- `26` kundalini — Kundalini Awakening
+- `27` heart-opening — Heart Opening
+- `28` third-eye — Third Eye (Ajna)
+- `29` nadi-shodhana — Alternate Nostril Breathing
+- `30` om-meditation — OM Vibration
 
-**Mindfulness (5):**
-- `14` body-scan — Body Scan Meditation (Yoga Jala)
-- `15` mindful-breathing — Guided Mindfulness Breathing
-- `16` mindful-breathing-va — Mindful Breathing (VA, public domain)
-- `17` breath-awareness — Breath Awareness Meditation
-- `18` present-moment — Present Moment Awareness
+**Mindfulness (10):**
+- `31` body-scan — Body Scan (Yoga Jala)
+- `32` mindful-breathing — Guided Mindfulness Breathing
+- `33` mindful-breathing-va — Mindful Breathing (VA, public domain)
+- `34` breath-awareness — Breath Awareness
+- `35` present-moment — Present Moment Awareness
+- `36` grounding — Grounding for Anxiety
+- `37` rain-meditation — RAIN (Tara Brach inspired)
+- `38` progressive-relaxation — Progressive Muscle Relaxation
+- `39` safe-place — Safe Place Visualization
+- `40` acceptance — Acceptance Meditation
+
+**Spiritual (14):**
+- `41` gratitude — Deep Gratitude
+- `42` self-compassion — Self-Compassion (Kristin Neff inspired)
+- `43` inner-child — Inner Child Healing
+- `44` divine-light — Divine Light
+- `45` letting-go — Letting Go
+- `46` surrender — Surrender and Trust
+- `47` abundance — Abundance
+- `48` peace-within — Inner Peace
+- `49` sacred-heart — Sacred Heart
+- `50` spiritual-awakening — Spiritual Awakening
+- `51` unity-consciousness — Unity Consciousness
+- `52` prayer-of-the-heart — Contemplative Prayer
+- `53` sacred-silence — Sacred Silence
+- `54` cosmic-breath — Cosmic Breath
+
+**Therapeutic (10):**
+- `55` mountain — Mountain Meditation (Kabat-Zinn inspired)
+- `56` lake — Lake Meditation
+- `57` ocean — Ocean Meditation
+- `58` sleep — Sleep Meditation
+- `59` morning — Morning Awakening
+- `60` confidence — Confidence
+- `61` emotional-release — Emotional Release
+- `62` stress-release — Stress Release Body Scan
+- `63` resilience — Resilience
+- `64` pain-management — Pain Management
+
+**Healing (6):**
+- `65` healing-light — Healing Light
+- `66` body-love — Body Appreciation
+- `67` cellular-healing — Cellular Healing
+- `68` energy-cleansing — Energy Cleansing
+- `69` golden-light-scan — Golden Light Body Scan
+- `70` earth-connection — Earth Connection Grounding
+
+**Nature (12):**
+- `71` forest-bathing — Forest Bathing (Shinrin-yoku)
+- `72` starlight — Starlight
+- `73` garden — Secret Garden
+- `74` river — River
+- `75` waterfall — Waterfall Purification
+- `76` ocean-depths — Ocean Depths
+- `77` sunset — Sunset
+- `78` moonlight — Moonlight
+- `79` meadow — Meadow
+- `80` rain-forest — Rainforest
+- `81` mountain-lake — Mountain Lake
+- `82` spring-garden — Spring Garden Awakening
 
 ---
 

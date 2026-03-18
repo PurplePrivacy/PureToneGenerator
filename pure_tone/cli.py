@@ -111,6 +111,8 @@ def build_parser():
                         help="List available guided meditations and exit")
     parser.add_argument("--mindfulness-voice", type=str, default=None, metavar="VOICE",
                         help="Override meditation narrator voice (default: Samantha for EN, Aurélie Enhanced for FR)")
+    parser.add_argument("--mindfulness-lang", type=str, default="en", choices=["en", "fr"],
+                        help="Language for guided meditations: en | fr (default: en)")
     parser.add_argument("--rhythm", action="store_true", default=True,
                         help="Enhance audiobook pacing — extends natural TTS pauses for a deliberate reading feel (default: on)")
     parser.add_argument("--no-rhythm", action="store_true",
