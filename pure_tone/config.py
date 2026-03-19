@@ -216,9 +216,12 @@ def init(args):
             print("Error: --mindfulness-loop and --audiobook are mutually exclusive.")
             sys.exit(1)
         from meditations.catalog import MEDITATION_CATALOG, MEDITATION_BY_NUMBER
-        # Build ordered list of all meditations by number
+        # Build ordered list of all meditations by number, then shuffle
         for num in sorted(MEDITATION_BY_NUMBER.keys()):
             _mindfulness_names.append(MEDITATION_BY_NUMBER[num])
+        _mind_rng = np.random.RandomState(RHYTHM_SEED + int.from_bytes(os.urandom(4), 'big'))
+        _mind_rng.shuffle(_mindfulness_names)
+        g._mindfulness_rng = _mind_rng
     elif args.mindfulness:
         if g.audiobook_name:
             print("Error: --mindfulness and --audiobook are mutually exclusive.")
@@ -242,6 +245,7 @@ def init(args):
         _mind_lang = args.mindfulness_lang  # "en" or "fr"
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         g.audiobook_para_initial = set()
+        g._mindfulness_blocks = []  # [(start_idx, end_idx)] per meditation
         sent_idx = 0
         titles = []
         for med_name in _mindfulness_names:
@@ -270,6 +274,7 @@ def init(args):
             if not titles:
                 g.ab_lang = lang
                 g.ab_voice = voice
+            block_start = sent_idx
             med_normalized = re.sub(r'(?<!\n)\n(?!\n)', ' ', med_raw)
             paragraphs = re.split(r'\n{2,}', med_normalized)
             for para in paragraphs:
@@ -284,6 +289,7 @@ def init(args):
                         first_in_para = False
                     g.audiobook_sentences.append((voice, s))
                     sent_idx += 1
+            g._mindfulness_blocks.append((block_start, sent_idx))
             titles.append(med_meta["title"])
         if args.mindfulness_voice:
             print(f"Note: meditation voice overridden to: {args.mindfulness_voice}")

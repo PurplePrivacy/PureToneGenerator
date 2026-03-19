@@ -135,7 +135,10 @@ def make_callback(g):
             try:
                 _, ab_sent_text = g.audiobook_sentences[ab_sent_idx]
                 ab_display = ab_sent_text[:120] + ("..." if len(ab_sent_text) > 120 else "")
-                os.write(2, f"\n  > {ab_display}\n".encode())
+                ab_side = ""
+                if g.alternate_mode:
+                    ab_side = " [L]" if g.audiobook_alt_left else " [R]"
+                os.write(2, f"\n  >{ab_side} {ab_display}\n".encode())
             except Exception:
                 pass
             ab_page = (g.audiobook_play_idx - 1) // AUDIOBOOK_PAGE_SIZE
@@ -153,6 +156,26 @@ def make_callback(g):
                 and g.audiobook_gap_remaining <= 0 and g.audiobook_done
                 and g.audiobook_play_idx >= len(g.audiobook_sentences)):
             g.audiobook_loop_count += 1
+            # Reshuffle meditation order on each loop (avoid repeating last meditation first)
+            if g.mindfulness_mode and hasattr(g, '_mindfulness_blocks') and len(g._mindfulness_blocks) > 1:
+                blocks = [g.audiobook_sentences[s:e] for s, e in g._mindfulness_blocks]
+                last_block = blocks[-1]
+                for _ in range(20):
+                    g._mindfulness_rng.shuffle(blocks)
+                    if blocks[0] is not last_block:
+                        break
+                g.audiobook_sentences = []
+                g.audiobook_para_initial = set()
+                idx = 0
+                new_boundaries = []
+                for block in blocks:
+                    block_start = idx
+                    g.audiobook_para_initial.add(idx)
+                    for sent in block:
+                        g.audiobook_sentences.append(sent)
+                        idx += 1
+                    new_boundaries.append((block_start, idx))
+                g._mindfulness_blocks = new_boundaries
             g.audiobook_play_idx = 0
             g.audiobook_next_render = 0
             g.audiobook_done = False
