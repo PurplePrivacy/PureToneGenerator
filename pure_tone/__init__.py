@@ -20,6 +20,11 @@ def main():
         config.show_audiobook_list()
         return
 
+    # Early exit: mindfulness meditation catalog display
+    if args.mindfulness_list:
+        config.show_mindfulness_list()
+        return
+
     # Initialize config + state
     g = config.init(args)
 

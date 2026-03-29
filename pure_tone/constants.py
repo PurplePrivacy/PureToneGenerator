@@ -43,11 +43,10 @@ VOICE_ALIASES = {
 }
 
 # Per-voice TTS rates for claude/phd-peace (WPM)
-# Aurélie slowed to 115 for hypnotic delivery; Jacques stays crisp at 130 for bridge phrases
+# Aurélie at 115 for hypnotic delivery (single voice — bridge phrases included)
 CLAUDE_PEACE_VOICE_RATES = {
     "Aurélie (Enhanced)": 115,
     "Thomas": 130,
-    "Jacques": 130,
 }
 CLAUDE_PEACE_DEFAULT_RATE = 130
 
@@ -195,12 +194,13 @@ PHD_PEACE_EXTRA_PHASE_NAMES = [
     "inner voice & thought sovereignty (loud, free, dominant, limitless, sovereign)",
     "athletic body (muscular, agile, explosive, trained, fast reflexes)",
     "nourished body (well-fed, hydrated, replenished, recovered, vibrant energy)",
+    "feeling good inside (head, eyes, lungs, belly, whole body glows)",
 ]
 
 # Section sizes for splitting flat message lists into rounds (full-hypnosis shuffling)
 CLAUDE_PEACE_SECTION_SIZES = [18] * 3 + [24] + [18] * 12       # 16 rounds, 294 total (EN)
 CLAUDE_PEACE_SECTION_SIZES_FR = [16] + [18] * 2 + [24] + [18] * 12  # 16 rounds, 292 total (FR)
-PHD_EXTRA_SECTION_SIZES = [18] * 10 + [81] + [18] * 9 + [27] + [18] * 3 + [24] + [18] * 11  # 36 rounds (27 orig + 9 new)
+PHD_EXTRA_SECTION_SIZES = [18] * 10 + [81] + [18] * 9 + [27] + [18] * 3 + [24] + [18] * 12  # 37 rounds (27 orig + 10 new)
 EGO_BOOST_SECTION_SIZE = 6                                      # uniform: 25 × 6 = 150
 
 # Accelerated gap schedule — tight, random intervals (gap_cycles, jitter_max_cycles)

@@ -635,7 +635,7 @@ With `--audiobook-resume`, progress is auto-saved and restored between sessions.
 **Mindfulness & Presence:**
 - `presence-of-god` — The Practice of the Presence of God (Brother Lawrence) [EN]
 - `light-on-path` — Light on the Path (Mabel Collins) [EN]
-- `heavenly-life` — The Heavenly Life (James Allen) [EN]
+- `heavenly-life` — The Heavenly Life (James Allen) [EN]Sho
 - `zen-buddhism` — Essays in Zen Buddhism (D.T. Suzuki) [EN]
 - `buddhas-path-virtue` — The Buddha's Path of Virtue (Dhammapada) [EN]
 - `kybalion` — The Kybalion (Three Initiates) [EN]

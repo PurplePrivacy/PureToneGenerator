@@ -16,7 +16,9 @@ def handle_interrupt(sig, frame, g):
     sys.stdout.write("\033[?25h")
     sys.stdout.flush()
     print("\nStopping cleanly...")
-    if g.audiobook_mode:
+    if g.audiobook_mode and getattr(g, 'mindfulness_mode', False):
+        print(f"  Meditation: {g.audiobook_book_title} — session ended")
+    elif g.audiobook_mode:
         ab_page = g.audiobook_play_idx // AUDIOBOOK_PAGE_SIZE
         ab_total_pages = (len(g.audiobook_sentences) + AUDIOBOOK_PAGE_SIZE - 1) // AUDIOBOOK_PAGE_SIZE
         ab_lang_tag = "FR" if g.audiobook_sentences and g.audiobook_sentences[0][0] in ("Aurélie (Enhanced)", "Jacques") else "EN"
@@ -142,7 +144,7 @@ def print_status(g):
         print(f"{mode_label}: active (vol={g.claude_peace_vol}){lang_note}")
         print(f"  {len(g.CLAUDE_PEACE_MESSAGES)} affirmations across {n_phases} sections")
         if g.peace_lang == "fr":
-            print("  Language: French (Aur\u00e9lie 1-word + full sentences, Jacques 2-3 words)")
+            print("  Language: French (Aurélie Enhanced — single voice)")
         else:
             print("  Voices: Daniel (GB), Ralph (US), Fred (US)")
         print("  Mixed depth: 1-word -> 2-3 words -> full sentence (targets subconscious)")
@@ -167,8 +169,17 @@ def print_status(g):
             print("  Bilateral: voice messages alternate between L and R speakers")
         print()
     if g.alternate_mode and not (g.claude_peace or g.restore_peace or g.audiobook_mode):
-        print("Note: --alternate has no effect without --claude-peace, --phd-peace, --restore-peace, or --audiobook\n")
-    if g.audiobook_mode:
+        print("Note: --alternate has no effect without --claude-peace, --phd-peace, --restore-peace, --audiobook, or --mindfulness\n")
+    if g.audiobook_mode and g.mindfulness_mode:
+        est_min = len(g.audiobook_sentences) * g.hrv_cycle_seconds / 60
+        print(f"Meditation: {g.audiobook_book_title}")
+        print(f"  {len(g.audiobook_sentences)} sentences (voice: {g.ab_voice}, vol={g.audiobook_vol})")
+        print(f"  Estimated duration: ~{est_min:.0f} minutes")
+        print(f"  Sentence gap: {g.audiobook_gap:.1f}s — Loop: {'on' if g.audiobook_loop else 'off'}")
+        if g.alternate_mode:
+            print("  Bilateral: sentences alternate between L and R speakers")
+        print()
+    elif g.audiobook_mode:
         ab_start = g.audiobook_play_idx
         est_min = (len(g.audiobook_sentences) - ab_start) * g.hrv_cycle_seconds / 60
         print(f"Audiobook: {g.audiobook_book_title}")
