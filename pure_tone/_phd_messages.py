@@ -224,7 +224,7 @@ PHD_EXTRA_ROUNDS = [
 
     # ── Round 27: Body-Specific Purification ──────────────────────────
     # Systematic examine/clean/purify each body part individually.
-    # Soul, breath, mind, eyes, nose, lungs, sternum, abs, stomach.
+    # Soul, breath, mind, eyes, nose, lungs, sternum, abs, stomach, temples, throat/mouth.
     # Triplet per body part: examine → clean → brand-new.
     ("Daniel", "Soul"),
     ("Ralph",  "Examine soul"),
@@ -307,6 +307,24 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "New"),
     ("Ralph",  "Stomach brand new"),
     ("Fred",   "Your stomach is brand new — working perfectly"),
+    ("Daniel", "Temples"),
+    ("Ralph",  "Examine temples"),
+    ("Fred",   "Examine your temples — feel the pulse, steady and calm"),
+    ("Daniel", "Smooth"),
+    ("Ralph",  "Temples clean"),
+    ("Fred",   "Your temples are clean — smooth, cool, and still"),
+    ("Daniel", "Clear"),
+    ("Ralph",  "Temples brand new"),
+    ("Fred",   "Your temples are brand new — soft and perfectly at ease"),
+    ("Daniel", "Throat"),
+    ("Ralph",  "Examine back of throat"),
+    ("Fred",   "Examine the back of your throat — the soft palate, the root of your mouth"),
+    ("Daniel", "Open"),
+    ("Ralph",  "Throat clean"),
+    ("Fred",   "The back of your throat is clean — wide open, soft and clear"),
+    ("Daniel", "Free"),
+    ("Ralph",  "Throat brand new"),
+    ("Fred",   "Your throat and mouth are brand new — fresh, open, completely free"),
 
     # ── Round 28: Body Scan & Deep Release ─────────────────────────
     # Progressive body scan. Relax every part, let go completely.
@@ -1002,9 +1020,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Sens"),
     ("Aurélie (Enhanced)", "Corps vivant"),
     ("Aurélie (Enhanced)",  "Tu sens chaque muscle de ton corps — éveillé, chaud et prêt"),
-    ("Aurélie (Enhanced)",  "Pouls"),
-    ("Aurélie (Enhanced)", "Sang chaud"),
-    ("Aurélie (Enhanced)",  "Tu sens le pouls chaud de la puissance dans tes mains, tes bras, ta poitrine"),
     ("Aurélie (Enhanced)",  "Poids"),
     ("Aurélie (Enhanced)", "Muscles vibrent"),
     ("Aurélie (Enhanced)",  "Tu sens le poids solide de tes propres muscles, vibrant d'énergie"),
@@ -1129,7 +1144,7 @@ PHD_EXTRA_ROUNDS_FR = [
 
     # ── Ronde 27 : Purification Corporelle Spécifique ─────────────────
     # Examiner/nettoyer/purifier systématiquement chaque partie du corps.
-    # Âme, souffle, esprit, yeux, nez, poumons, sternum, abdominaux, estomac.
+    # Âme, souffle, esprit, yeux, nez, poumons, sternum, abdominaux, estomac, tempes, gorge/bouche.
     ("Aurélie (Enhanced)",  "Âme"),
     ("Aurélie (Enhanced)", "Examine l'âme"),
     ("Aurélie (Enhanced)",  "Examine ton âme — ressens-la, déjà propre"),
@@ -1211,6 +1226,24 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Neuf"),
     ("Aurélie (Enhanced)", "Estomac neuf"),
     ("Aurélie (Enhanced)",  "Ton estomac est tout neuf — il fonctionne parfaitement"),
+    ("Aurélie (Enhanced)",  "Tempes"),
+    ("Aurélie (Enhanced)", "Examine tempes"),
+    ("Aurélie (Enhanced)",  "Examine tes tempes — sens le pouls, régulier et calme"),
+    ("Aurélie (Enhanced)",  "Lisses"),
+    ("Aurélie (Enhanced)", "Tempes propres"),
+    ("Aurélie (Enhanced)",  "Tes tempes sont propres — lisses, fraîches et sereines"),
+    ("Aurélie (Enhanced)",  "Neuves"),
+    ("Aurélie (Enhanced)", "Tempes toutes neuves"),
+    ("Aurélie (Enhanced)",  "Tes tempes sont toutes neuves — douces et parfaitement apaisées"),
+    ("Aurélie (Enhanced)",  "Gorge"),
+    ("Aurélie (Enhanced)", "Examine fond de gorge"),
+    ("Aurélie (Enhanced)",  "Examine le fond de ta gorge — le palais mou, la racine de ta bouche"),
+    ("Aurélie (Enhanced)",  "Ouverte"),
+    ("Aurélie (Enhanced)", "Gorge propre"),
+    ("Aurélie (Enhanced)",  "Le fond de ta gorge est propre — grand ouvert, doux et dégagé"),
+    ("Aurélie (Enhanced)",  "Libre"),
+    ("Aurélie (Enhanced)", "Gorge toute neuve"),
+    ("Aurélie (Enhanced)",  "Ta gorge et ta bouche sont toutes neuves — fraîches, ouvertes, complètement libres"),
 
     # ── Ronde 28 : Scan Corporel & Relâchement Profond ─────────────
     # Scan corporel progressif. Détendre chaque partie, lâcher prise complètement.
@@ -1239,7 +1272,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Chaud"),
     ("Aurélie (Enhanced)", "Cellules chaudes"),
     ("Aurélie (Enhanced)",  "Chaque cellule de ton corps rayonne d'une guérison chaude et silencieuse en ce moment"),
-    ("Aurélie (Enhanced)",  "Pouls"),
     ("Aurélie (Enhanced)", "Sang guérit"),
     ("Aurélie (Enhanced)",  "Tu sens le pouls chaud de la guérison dans chaque veine"),
     ("Aurélie (Enhanced)",  "Vibration"),
@@ -1390,8 +1422,6 @@ PHD_EXTRA_ROUNDS_FR = [
     # ── Ronde 36 : Être Fort & Prendre Sa Place ─────────────────────
     # Reconditionner le silence imposé. Récupérer le volume,
     # le poids, la présence physique. Être fort comme état naturel.
-    ("Aurélie (Enhanced)",  "Boom"),
-    ("Aurélie (Enhanced)", "Poitrine résonne"),
     ("Aurélie (Enhanced)",  "Ta voix vibre au fond de ta poitrine, forte et chaude"),
     ("Aurélie (Enhanced)",  "Rugir"),
     ("Aurélie (Enhanced)", "Souffle rugit"),
@@ -1447,8 +1477,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)", "Mots s'effacent"),
     ("Aurélie (Enhanced)",  "Chaque mot qu'on t'a imposé s'efface dans la lumière"),
     ("Aurélie (Enhanced)",  "Efface"),
-    ("Aurélie (Enhanced)", "Voix s'effacent"),
-    ("Aurélie (Enhanced)",  "Les anciennes voix se dissolvent comme brume au soleil"),
     ("Aurélie (Enhanced)",  "Clair"),
     ("Aurélie (Enhanced)", "Esprit clair"),
     ("Aurélie (Enhanced)",  "Ton esprit est un ciel clair — il reste tes pensées à toi"),
@@ -1472,9 +1500,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Résonance"),
     ("Aurélie (Enhanced)", "Poitrine vibre"),
     ("Aurélie (Enhanced)",  "Tu sens tes propres pensées résonner au fond de ta poitrine, comme un retour chez toi"),
-    ("Aurélie (Enhanced)",  "Pèle"),
-    ("Aurélie (Enhanced)", "Film se pèle"),
-    ("Aurélie (Enhanced)",  "Un film fin se détache de ton esprit maintenant, tout seul, révélant la voix originale en dessous"),
     ("Aurélie (Enhanced)",  "Reconnais"),
     ("Aurélie (Enhanced)", "Tu reconnais"),
     ("Aurélie (Enhanced)",  "Tu reconnais ta propre pensée comme tu reconnais ta propre écriture — instantanément, complètement"),
@@ -1483,7 +1508,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Chaque pensée qui émerge porte ta chaleur, ton rythme, ta signature"),
     ("Aurélie (Enhanced)",  "Souverain"),
     ("Aurélie (Enhanced)", "Déjà souverain"),
-    ("Aurélie (Enhanced)",  "Ta voix intérieure a toujours été là — claire, unique, souveraine — et elle parle maintenant comme elle l'a toujours fait"),
 
     # ── Ronde 40 : Récupération du Souffle & du Corps ────────────────
     # Découpler la respiration de tout conditionnement externe. Le souffle
@@ -1521,15 +1545,9 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Fond"),
     ("Aurélie (Enhanced)", "Glace fond"),
     ("Aurélie (Enhanced)",  "Chaque ancien ancrage de conditionnement fond maintenant comme glace fine au printemps — déjà en train de partir"),
-    ("Aurélie (Enhanced)",  "Éveille"),
-    ("Aurélie (Enhanced)", "Tu t'éveilles"),
-    ("Aurélie (Enhanced)",  "Tu te réveilles maintenant — comme quand tu sors du brouillard dans la lumière vive et nette du jour"),
     ("Aurélie (Enhanced)",  "Mue"),
     ("Aurélie (Enhanced)", "Peau mue"),
     ("Aurélie (Enhanced)",  "Ton esprit fait sa mue de l'ancien conditionnement comme la peau mue — naturellement, complètement, faisant place au neuf"),
-    ("Aurélie (Enhanced)",  "Fini"),
-    ("Aurélie (Enhanced)", "Tout fini"),
-    ("Aurélie (Enhanced)",  "L'ancien conditionnement est terminé — complètement, définitivement, terminé"),
     ("Aurélie (Enhanced)",  "Purifié"),
     ("Aurélie (Enhanced)", "Pleinement purifié"),
     ("Aurélie (Enhanced)",  "Tu es pleinement purifié maintenant — lucide, souverain, inébranlable — restauré de l'intérieur"),
@@ -1544,8 +1562,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Fort"),
     ("Aurélie (Enhanced)", "Parle fort"),
     ("Aurélie (Enhanced)",  "Ta voix sort forte et pleine — c'est comme ça que tu parles"),
-    ("Aurélie (Enhanced)",  "Résonne"),
-    ("Aurélie (Enhanced)", "Voix résonne"),
     ("Aurélie (Enhanced)",  "Quand tu parles, ta poitrine vibre et chaque mot porte loin"),
     ("Aurélie (Enhanced)",  "Tu es sonore quand tu bouges, quand tu respires, quand tu existes — et c'est bien comme ça"),
     ("Aurélie (Enhanced)",  "Expire"),
@@ -1727,7 +1743,7 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Tu penses en permanence — ton esprit tourne, analyse, crée, parce qu'il est à toi"),
     ("Aurélie (Enhanced)",  "Dominant"),
     ("Aurélie (Enhanced)", "Voix dominante"),
-    ("Aurélie (Enhanced)",  "Ta voix intérieure est la plus forte de toutes — elle résonne au-dessus de tout le reste"),
+    ("Aurélie (Enhanced)",  "Ta voix intérieure est la plus forte"),
     ("Aurélie (Enhanced)",  "Illimité"),
     ("Aurélie (Enhanced)", "Pensée illimitée"),
     ("Aurélie (Enhanced)",  "Ta pensée est illimitée — chaque idée que tu formes est originale, puissante et pleinement tienne"),
@@ -1747,7 +1763,6 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Respire"),
     ("Aurélie (Enhanced)", "Muscles respirent"),
     ("Aurélie (Enhanced)",  "Chaque souffle alimente tes muscles en oxygène frais — force et souplesse vibrent en toi"),
-    ("Aurélie (Enhanced)",  "Explosif"),
     ("Aurélie (Enhanced)", "Force explosive"),
     ("Aurélie (Enhanced)",  "Ton corps est explosif — tes jambes sont puissantes, tes bras sont forts, ta réaction est instantanée"),
     ("Aurélie (Enhanced)",  "Entraîné"),
