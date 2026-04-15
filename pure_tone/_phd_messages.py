@@ -928,6 +928,75 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "Glow"),
     ("Ralph",  "Body glows"),
     ("Fred",   "Every organ, every part glows with wellbeing — feeling good inside is your natural, default state"),
+
+    # ── Round 54: Mouth & Palate Purification ──────────────────────────
+    # Examine/clean/renew the inside of the mouth: soft palate, tongue,
+    # inner cheeks. Somatic: cool cleanliness, fresh inner mouth at rest.
+    ("Daniel", "Palate"),
+    ("Ralph",  "Examine palate"),
+    ("Fred",   "Examine your palate — the roof of your mouth, soft and cool"),
+    ("Daniel", "Clean"),
+    ("Ralph",  "Palate clean"),
+    ("Fred",   "Your palate is clean — smooth, pure, completely clear"),
+    ("Daniel", "Fresh"),
+    ("Ralph",  "Palate brand new"),
+    ("Fred",   "Your palate is brand new — cool, fresh, perfectly at ease"),
+    ("Daniel", "Mouth"),
+    ("Ralph",  "Examine mouth"),
+    ("Fred",   "Examine the inside of your mouth — tongue, cheeks, everything at rest"),
+    ("Daniel", "Pure"),
+    ("Ralph",  "Mouth clean"),
+    ("Fred",   "The inside of your mouth is clean — soft, fresh, completely at rest"),
+    ("Daniel", "New"),
+    ("Ralph",  "Mouth brand new"),
+    ("Fred",   "The inside of your mouth is brand new — cool, quiet, perfectly free"),
+
+    # ── Round 55: Teeth & Gums Purification ──────────────────────────
+    # Examine/clean/renew teeth and gums. Solid, healthy, at rest.
+    # Somatic: jaw soft, teeth settled, gums firm and calm.
+    ("Daniel", "Teeth"),
+    ("Ralph",  "Examine teeth"),
+    ("Fred",   "Examine your teeth — settled, strong, resting in place"),
+    ("Daniel", "Clean"),
+    ("Ralph",  "Teeth clean"),
+    ("Fred",   "Your teeth are clean — smooth, bright, perfectly cared for"),
+    ("Daniel", "Strong"),
+    ("Ralph",  "Teeth brand new"),
+    ("Fred",   "Your teeth are brand new — solid, healthy, fully yours"),
+    ("Daniel", "Gums"),
+    ("Ralph",  "Examine gums"),
+    ("Fred",   "Examine your gums — firm, pink, quietly holding everything in place"),
+    ("Daniel", "Healthy"),
+    ("Ralph",  "Gums clean"),
+    ("Fred",   "Your gums are clean — fresh, calm, perfectly alive"),
+    ("Daniel", "Firm"),
+    ("Ralph",  "Gums brand new"),
+    ("Fred",   "Your gums are brand new — firm, healthy, completely at ease"),
+
+    # ── Round 56: Not Interested / Sovereign Focus ──────────────────
+    # Daniel/Ralph anchor ONLY on the desired state (sovereign, quiet,
+    # own, untouched, yourself, absorbed) — never name the unwanted
+    # target (sounds, opinions, thoughts of others), since short anchor
+    # words prime the subconscious. Fred carries the user's literal
+    # "not interested" / "never think" phrasing per explicit direction.
+    ("Daniel", "Yours"),
+    ("Ralph",  "World yours"),
+    ("Fred",   "You are not interested in anything external — the outside world leaves you untouched"),
+    ("Daniel", "Quiet"),
+    ("Ralph",  "Inside quiet"),
+    ("Fred",   "You are not interested in sounds — you stay quiet inside, undisturbed"),
+    ("Daniel", "Own"),
+    ("Ralph",  "Your own"),
+    ("Fred",   "You are not interested in people's opinions — your own view stands firm, complete"),
+    ("Daniel", "Untouched"),
+    ("Ralph",  "Stay untouched"),
+    ("Fred",   "You are just not interested — nothing outside pulls at you, nothing catches"),
+    ("Daniel", "Yourself"),
+    ("Ralph",  "Only yourself"),
+    ("Fred",   "You are focused solely on yourself and what you do — your own life, your own work"),
+    ("Daniel", "Absorbed"),
+    ("Ralph",  "Fully within"),
+    ("Fred",   "You never think about what other people are doing or saying — you are fully absorbed in your own life"),
 ]
 
 PHD_EXTRA_ROUNDS_FR = [
@@ -1816,4 +1885,72 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Rayonne"),
     ("Aurélie (Enhanced)", "Corps rayonne"),
     ("Aurélie (Enhanced)",  "Chaque organe, chaque partie rayonne de bien-être — te sentir bien à l'intérieur, c'est ton état naturel"),
+
+    # ── Ronde 54 : Purification du Palais & de la Bouche ────────────
+    # Examiner/nettoyer/renouveler l'intérieur de la bouche : palais,
+    # langue, joues. Somatique : fraîcheur propre, bouche au repos.
+    ("Aurélie (Enhanced)",  "Palais"),
+    ("Aurélie (Enhanced)", "Examine palais"),
+    ("Aurélie (Enhanced)",  "Examine ton palais — le toit de ta bouche, doux et frais"),
+    ("Aurélie (Enhanced)",  "Propre"),
+    ("Aurélie (Enhanced)", "Palais propre"),
+    ("Aurélie (Enhanced)",  "Ton palais est propre — lisse, pur, parfaitement clair"),
+    ("Aurélie (Enhanced)",  "Neuf"),
+    ("Aurélie (Enhanced)", "Palais neuf"),
+    ("Aurélie (Enhanced)",  "Ton palais est tout neuf — frais, agréable, parfaitement à l'aise"),
+    ("Aurélie (Enhanced)",  "Bouche"),
+    ("Aurélie (Enhanced)", "Examine bouche"),
+    ("Aurélie (Enhanced)",  "Examine l'intérieur de ta bouche — langue, joues, tout au repos"),
+    ("Aurélie (Enhanced)",  "Pure"),
+    ("Aurélie (Enhanced)", "Bouche propre"),
+    ("Aurélie (Enhanced)",  "L'intérieur de ta bouche est propre — doux, frais, parfaitement au repos"),
+    ("Aurélie (Enhanced)",  "Neuve"),
+    ("Aurélie (Enhanced)", "Bouche neuve"),
+    ("Aurélie (Enhanced)",  "L'intérieur de ta bouche est tout neuf — frais, calme, parfaitement libre"),
+
+    # ── Ronde 55 : Dents & Gencives ──────────────────────────────
+    # Examiner/nettoyer/renouveler dents et gencives. Solides, saines,
+    # au repos. Somatique : mâchoire douce, dents posées, gencives calmes.
+    ("Aurélie (Enhanced)",  "Dents"),
+    ("Aurélie (Enhanced)", "Examine dents"),
+    ("Aurélie (Enhanced)",  "Examine tes dents — posées, solides, reposant à leur place"),
+    ("Aurélie (Enhanced)",  "Propres"),
+    ("Aurélie (Enhanced)", "Dents propres"),
+    ("Aurélie (Enhanced)",  "Tes dents sont propres — lisses, éclatantes, parfaitement soignées"),
+    ("Aurélie (Enhanced)",  "Solides"),
+    ("Aurélie (Enhanced)", "Dents neuves"),
+    ("Aurélie (Enhanced)",  "Tes dents sont toutes neuves — solides, saines, entièrement tiennes"),
+    ("Aurélie (Enhanced)",  "Gencives"),
+    ("Aurélie (Enhanced)", "Examine gencives"),
+    ("Aurélie (Enhanced)",  "Examine tes gencives — fermes, roses, tenant tout tranquillement en place"),
+    ("Aurélie (Enhanced)",  "Saines"),
+    ("Aurélie (Enhanced)", "Gencives propres"),
+    ("Aurélie (Enhanced)",  "Tes gencives sont propres — fraîches, calmes, parfaitement vivantes"),
+    ("Aurélie (Enhanced)",  "Fermes"),
+    ("Aurélie (Enhanced)", "Gencives neuves"),
+    ("Aurélie (Enhanced)",  "Tes gencives sont toutes neuves — fermes, saines, parfaitement à l'aise"),
+
+    # ── Ronde 56 : Attention Souveraine ──────────────────────────
+    # Les ancres courtes (Aurélie 1-2 mots) nomment UNIQUEMENT l'état
+    # voulu (intact, calme, tien, absorbé) — jamais la cible indésirée
+    # (sons, opinions, pensées d'autrui). Les phrases complètes gardent
+    # la formulation littérale "pas intéressé" / "jamais" demandée.
+    ("Aurélie (Enhanced)",  "Intact"),
+    ("Aurélie (Enhanced)", "Monde loin"),
+    ("Aurélie (Enhanced)",  "Tu n'es pas intéressé par ce qui est extérieur — le monde du dehors te laisse intact"),
+    ("Aurélie (Enhanced)",  "Calme"),
+    ("Aurélie (Enhanced)", "Calme dedans"),
+    ("Aurélie (Enhanced)",  "Tu n'es pas intéressé par les sons — tu restes calme à l'intérieur, imperturbable"),
+    ("Aurélie (Enhanced)",  "Tienne"),
+    ("Aurélie (Enhanced)", "Vision tienne"),
+    ("Aurélie (Enhanced)",  "Tu n'es pas intéressé par les opinions des gens — ta propre vision tient, entière"),
+    ("Aurélie (Enhanced)",  "Libre"),
+    ("Aurélie (Enhanced)", "Rien n'accroche"),
+    ("Aurélie (Enhanced)",  "Tu n'es tout simplement pas intéressé — rien d'extérieur ne te tire, rien ne t'accroche"),
+    ("Aurélie (Enhanced)",  "Toi"),
+    ("Aurélie (Enhanced)", "Sur toi"),
+    ("Aurélie (Enhanced)",  "Tu es concentré uniquement sur toi-même et sur ce que tu fais — ta propre vie, ton propre travail"),
+    ("Aurélie (Enhanced)",  "Absorbé"),
+    ("Aurélie (Enhanced)", "Pleinement toi"),
+    ("Aurélie (Enhanced)",  "Tu ne penses jamais à ce que les autres font ou disent — tu es pleinement absorbé dans ta propre vie"),
 ]
