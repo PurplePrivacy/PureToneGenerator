@@ -997,6 +997,31 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "Absorbed"),
     ("Ralph",  "Fully within"),
     ("Fred",   "You never think about what other people are doing or saying — you are fully absorbed in your own life"),
+
+    # ── Round 57: Breath Edges & Extent ──────────────────────────────
+    # Vipassana-style breath observation: notice the four transition
+    # points (inhale start, inhale end, exhale start, exhale end) and
+    # how far each reaches. Clinical, investigative tone — curious
+    # observation, not control. Suggests the breath as cleansing tide.
+    # Anchors point to the desired observational state.
+    ("Daniel", "Begin"),
+    ("Ralph",  "Inhale begins"),
+    ("Fred",   "Notice the exact moment your inhale begins — the first quiet expansion, soft and clear"),
+    ("Daniel", "Reach"),
+    ("Ralph",  "How far"),
+    ("Fred",   "Observe how far your inhale reaches — curious, interested, letting it show you its full extent"),
+    ("Daniel", "Turn"),
+    ("Ralph",  "Inhale turns"),
+    ("Fred",   "Notice the moment your inhale ends — the quiet turn, the soft pivot into release"),
+    ("Daniel", "Flow"),
+    ("Ralph",  "Exhale flows"),
+    ("Fred",   "Observe your exhale beginning — a smooth outward flow, cleansing as it goes"),
+    ("Daniel", "Complete"),
+    ("Ralph",  "Exhale reaches"),
+    ("Fred",   "Watch how far your exhale reaches — all the way through, to its full natural depth"),
+    ("Daniel", "Tide"),
+    ("Ralph",  "Clean sweep"),
+    ("Fred",   "Each breath sweeps through you — in and out, a cleansing tide restoring your full, complete breath"),
 ]
 
 PHD_EXTRA_ROUNDS_FR = [
@@ -1953,4 +1978,28 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Absorbé"),
     ("Aurélie (Enhanced)", "Pleinement toi"),
     ("Aurélie (Enhanced)",  "Tu ne penses jamais à ce que les autres font ou disent — tu es pleinement absorbé dans ta propre vie"),
+
+    # ── Ronde 57 : Bords & Étendue du Souffle ────────────────────────
+    # Observation vipassana du souffle : remarquer les quatre transitions
+    # (début inspire, fin inspire, début expire, fin expire) et jusqu'où
+    # chacun se rend. Ton clinique, investigatif — observation curieuse,
+    # sans contrôle. Suggère le souffle comme marée purifiante.
+    ("Aurélie (Enhanced)",  "Début"),
+    ("Aurélie (Enhanced)", "Début souffle"),
+    ("Aurélie (Enhanced)",  "Remarque l'instant exact où ton inspiration commence — la première expansion tranquille, douce et claire"),
+    ("Aurélie (Enhanced)",  "Loin"),
+    ("Aurélie (Enhanced)", "Jusqu'où"),
+    ("Aurélie (Enhanced)",  "Observe jusqu'où ton inspiration se rend — curieux, intéressé, la laissant te montrer toute son étendue"),
+    ("Aurélie (Enhanced)",  "Tourne"),
+    ("Aurélie (Enhanced)", "Souffle tourne"),
+    ("Aurélie (Enhanced)",  "Remarque l'instant où ton inspiration se termine — le tournant tranquille, le pivot doux vers le relâchement"),
+    ("Aurélie (Enhanced)",  "Coule"),
+    ("Aurélie (Enhanced)", "Expire coule"),
+    ("Aurélie (Enhanced)",  "Observe ton expiration qui commence — un flux sortant lisse, qui nettoie en passant"),
+    ("Aurélie (Enhanced)",  "Pleine"),
+    ("Aurélie (Enhanced)", "Va au bout"),
+    ("Aurélie (Enhanced)",  "Regarde jusqu'où ton expiration se rend — jusqu'au bout, à toute sa profondeur naturelle"),
+    ("Aurélie (Enhanced)",  "Marée"),
+    ("Aurélie (Enhanced)", "Souffle propre"),
+    ("Aurélie (Enhanced)",  "Chaque respiration te traverse — dedans puis dehors, une marée purifiante qui restaure ton souffle complet"),
 ]
