@@ -1022,6 +1022,30 @@ PHD_EXTRA_ROUNDS = [
     ("Daniel", "Tide"),
     ("Ralph",  "Clean sweep"),
     ("Fred",   "Each breath sweeps through you — in and out, a cleansing tide restoring your full, complete breath"),
+
+    # ── Round 58: Dismissed & Return to Body ─────────────────────────
+    # Reflex training: external stimulus → instant dismissal → redirect
+    # to interoceptive probe. Daniel/Ralph name the desired dismissal
+    # state (not the unwanted stimulus). Fred asks a curious body
+    # question and answers with a somatic anchor. Companion to R56.
+    ("Daniel", "Not interesting"),
+    ("Ralph",  "Not the you"),
+    ("Fred",   "How does your sternum feel right now? — warm, solid, humming quietly with your presence"),
+    ("Daniel", "Didn't notice"),
+    ("Ralph",  "Already forgotten"),
+    ("Fred",   "How does your heart feel right now? — steady, quiet, beating for you, all by itself"),
+    ("Daniel", "Slipped past"),
+    ("Ralph",  "Nothing there"),
+    ("Fred",   "How does your belly feel right now? — soft, settled, warm, perfectly at ease"),
+    ("Daniel", "Out of mind"),
+    ("Ralph",  "Faded away"),
+    ("Fred",   "How do your lungs feel right now? — full, fresh, breathing all by themselves"),
+    ("Daniel", "Not yours"),
+    ("Ralph",  "Let it go"),
+    ("Fred",   "How does your throat feel right now? — open, soft, free, completely unguarded"),
+    ("Daniel", "Forgotten"),
+    ("Ralph",  "All clear"),
+    ("Fred",   "How does your whole body feel right now? — yours, at home, fully present with you"),
 ]
 
 PHD_EXTRA_ROUNDS_FR = [
@@ -2002,4 +2026,29 @@ PHD_EXTRA_ROUNDS_FR = [
     ("Aurélie (Enhanced)",  "Marée"),
     ("Aurélie (Enhanced)", "Souffle propre"),
     ("Aurélie (Enhanced)",  "Chaque respiration te traverse — dedans puis dehors, une marée purifiante qui restaure ton souffle complet"),
+
+    # ── Ronde 58 : Dissipé & Retour au Corps ─────────────────────────
+    # Entraînement réflexe : stimulus extérieur → dissipation immédiate
+    # → redirection vers une sonde intéroceptive. Les ancres nomment
+    # l'état dissipatif désiré (pas la cible indésirée). La phrase
+    # complète pose une question corporelle curieuse et y répond par
+    # un ancrage somatique. Compagnon de la ronde 56.
+    ("Aurélie (Enhanced)",  "Pas intéressant"),
+    ("Aurélie (Enhanced)", "Pas pour toi"),
+    ("Aurélie (Enhanced)",  "Comment se sent ton sternum en ce moment ? — chaud, solide, vibrant tranquillement de ta présence"),
+    ("Aurélie (Enhanced)",  "Pas remarqué"),
+    ("Aurélie (Enhanced)", "Déjà oublié"),
+    ("Aurélie (Enhanced)",  "Comment se sent ton cœur en ce moment ? — stable, calme, battant pour toi, tout seul"),
+    ("Aurélie (Enhanced)",  "Passé"),
+    ("Aurélie (Enhanced)", "Rien là"),
+    ("Aurélie (Enhanced)",  "Comment se sent ton ventre en ce moment ? — doux, posé, chaud, parfaitement à l'aise"),
+    ("Aurélie (Enhanced)",  "Hors esprit"),
+    ("Aurélie (Enhanced)", "Évanoui"),
+    ("Aurélie (Enhanced)",  "Comment se sentent tes poumons en ce moment ? — pleins, frais, respirant tout seuls"),
+    ("Aurélie (Enhanced)",  "Pas à toi"),
+    ("Aurélie (Enhanced)", "Laissé aller"),
+    ("Aurélie (Enhanced)",  "Comment se sent ta gorge en ce moment ? — ouverte, douce, libre, totalement sans tension"),
+    ("Aurélie (Enhanced)",  "Oublié"),
+    ("Aurélie (Enhanced)", "Tout clair"),
+    ("Aurélie (Enhanced)",  "Comment se sent ton corps entier en ce moment ? — tien, chez toi, pleinement présent avec toi"),
 ]
